@@ -33,10 +33,10 @@ import kotlin.concurrent.thread
 object LiquidBounce {
 
     // Client information
-    const val CLIENT_NAME = "LiquidBounce+"
-    const val CLIENT_VERSION = "reborn"
-    const val CLIENT_CREATOR = "CCBlueX,exit-scammed,Randomguy,wxdbie,Et1rn1ty"
-    const val CLIENT_CLOUD = "https://liquidbounceplusreborn.github.io/cloud/"
+    const val CLIENT_NAME = "Miren"
+    const val CLIENT_VERSION = "b0"
+    const val CLIENT_CREATOR = "CCBlueX,inf,pie"
+    const val CLIENT_CLOUD = "https://mirenclient.github.io/"
 
     var isStarting = false
     var mainMenuPrep = false
