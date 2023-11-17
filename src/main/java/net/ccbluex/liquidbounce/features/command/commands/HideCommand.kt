@@ -70,7 +70,7 @@ class HideCommand : Command("hide", emptyArray()) {
                     module.array = !module.array
 
                     // Response to user
-                    chat("Module §a§l${module.name}§3 is now §a§l${if (module.array) "visible" else "invisible"}§3 on the array list.")
+                    chat("Module §a§l${highlightModule(module)}§3 is now §a§l${if (module.array) "visible" else "invisible"}§3 on the array list.")
                     playEdit()
                     return
                 }

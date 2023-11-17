@@ -6,22 +6,23 @@
 package net.ccbluex.liquidbounce.features.module.modules.client;
 
 import net.ccbluex.liquidbounce.LiquidBounce;
-import net.ccbluex.liquidbounce.features.module.modules.render.ColorMixer;
-import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.astolfo.AstolfoClickGui;
-import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.dropdown.DropdownGUI;
-import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.flux.FluxClassic;
 import net.ccbluex.liquidbounce.features.module.Module;
 import net.ccbluex.liquidbounce.features.module.ModuleCategory;
 import net.ccbluex.liquidbounce.features.module.ModuleInfo;
+import net.ccbluex.liquidbounce.features.module.modules.render.ColorMixer;
 import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.*;
+import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.astolfo.AstolfoClickGui;
+import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.dropdown.DropdownGUI;
+import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.flux.FluxClassic;
 import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.novoline.ClickyUI;
 import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.otcV2.OtcClickGUi;
-import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.skeet.SkeetClickGUI;
 import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.zeroday.ClickUI;
 import net.ccbluex.liquidbounce.utils.render.ColorUtils;
 import net.ccbluex.liquidbounce.utils.render.RenderUtils;
-import net.ccbluex.liquidbounce.value.*;
-import org.lwjgl.input.Keyboard;
+import net.ccbluex.liquidbounce.value.BoolValue;
+import net.ccbluex.liquidbounce.value.FloatValue;
+import net.ccbluex.liquidbounce.value.IntegerValue;
+import net.ccbluex.liquidbounce.value.ListValue;
 
 import java.awt.*;
 
@@ -41,8 +42,7 @@ public class ClickGUI extends Module {
                     "Chocolate",
                     "OneTap",
                     "Astolfo",
-                    "DropDown",
-                    "Skeet"},
+                    "DropDown",},
             "LiquidBounce") {
         @Override
         protected void onChanged(final String oldValue, final String newValue) {
@@ -141,18 +141,6 @@ public class ClickGUI extends Module {
                 break;
             case "astolfo":
                 mc.displayGuiScreen(getAstolfoClickGui());
-                break;
-            case "skeet":
-                if (LiquidBounce.INSTANCE.getSkeetClickGUI() == null) {
-                    LiquidBounce.INSTANCE.setSkeetClickGUI(new SkeetClickGUI());
-                }
-
-                mc.displayGuiScreen(LiquidBounce.INSTANCE.getSkeetClickGUI());
-                SkeetClickGUI.alpha = 0.0;
-                SkeetClickGUI.open = true;
-                LiquidBounce.INSTANCE.getSkeetClickGUI().targetAlpha = 255.0;
-                LiquidBounce.INSTANCE.getSkeetClickGUI().closed = false;
-                this.setState(false);
                 break;
             default:
                 updateStyle();

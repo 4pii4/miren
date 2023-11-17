@@ -35,7 +35,7 @@ class ToggleCommand : Command("toggle", arrayOf("t")) {
                 module.toggle()
             }
 
-            chat("${if (module.state) "Enabled" else "Disabled"} module §8${module.name}§3.")
+            chat("${if (module.state) "Enabled" else "Disabled"} module §8${highlightModule(module)}§3.")
             return
         }
 

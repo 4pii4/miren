@@ -25,7 +25,7 @@ import java.util.List;
 public class FileManager extends MinecraftInstance {
 
     public File dir = new File(mc.mcDataDir, LiquidBounce.CLIENT_NAME);
-    public final File oldDir = new File(mc.mcDataDir, LiquidBounce.CLIENT_NAME + "-1.8");
+    public final File oldDir = new File(mc.mcDataDir, "LiquidBounce+");
     public final File fontsDir = new File(dir, "fonts");
     public final File settingsDir = new File(dir, "settings");
     public final File soundsDir = new File(dir, "sounds");
