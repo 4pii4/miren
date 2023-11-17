@@ -36,28 +36,26 @@ class AntiStaff : Module() {
 
     private var staffsInWorld = mutableListOf<String>()
 
-    private var bmcStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/staffs.txt"
-    private var mushStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/mushstaffs.txt"
-    private var hypixelStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/hypixelstaffs.txt"
-    private var gommeHDStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/gommehdstaffs.txt"
-    private var gamsterStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/gamsterstaffs.txt"
-
-
+    private var bmcStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/stafflist/bmc.txt"
+    private var mushStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/stafflist/mush.txt"
+    private var hypixelStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/stafflist/hypixel.txt"
+    private var gommeHDStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/stafflist/gommehd.txt"
+    private var gamsterStaffList: String = "${LiquidBounce.CLIENT_CLOUD}/stafflist/gamsters.txt"
 
     private val notify = BoolValue("Notify", true)
     private val chat = BoolValue("Chat", true)
     private val leave = BoolValue("Leave", true)
 
     private val onBMC: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("blocksmc.com")
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("blocksmc.com", true)
     private val onMushMC: Boolean
-        get() = !mc.isSingleplayer && (ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("jogar.mush.com.br") || ServerUtils.serverData.serverIP.contains("mush.com.br"))
+        get() = !mc.isSingleplayer && (ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("jogar.mush.com.br", true) || ServerUtils.serverData.serverIP.contains("mush.com.br", true))
     private val onHypixel: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("hypixel.net")
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("hypixel.net", true)
     private val onGommeHD: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("GoomeHD.net")
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("GoomeHD.net", true)
     private val onGamster: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("mc.gamster.org")
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("mc.gamster.org", true)
 
 
 
