@@ -32,19 +32,19 @@ abstract class Command(val command: String, val alias: Array<String>) : Minecraf
     /**
      * Print [msg] to chat
      */
-    protected fun chat(msg: String) = ClientUtils.displayChatMessage("§8[§9§l${LiquidBounce.CLIENT_NAME}§8] §f$msg")
+    protected fun chat(msg: String) = ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §f$msg")
 
     /**
      * Print [syntax] of command to chat
      */
     protected fun chatSyntax(syntax: String) =
-        ClientUtils.displayChatMessage("§8[§9§l${LiquidBounce.CLIENT_NAME}§8] §cSyntax: §7${LiquidBounce.commandManager.prefix}$syntax")
+        ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax: §7${LiquidBounce.commandManager.prefix}$syntax")
 
     /**
      * Print [syntaxes] of command to chat
      */
     protected fun chatSyntax(syntaxes: Array<String>) {
-        ClientUtils.displayChatMessage("§8[§9§l${LiquidBounce.CLIENT_NAME}§8] §cSyntax:")
+        ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax:")
 
         for (syntax in syntaxes)
             ClientUtils.displayChatMessage("§8> §f${LiquidBounce.commandManager.prefix}$command ${syntax.lowercase(
@@ -56,7 +56,7 @@ abstract class Command(val command: String, val alias: Array<String>) : Minecraf
      * Print a syntax error to chat
      */
     protected fun chatSyntaxError() =
-        ClientUtils.displayChatMessage("§8[§9§l${LiquidBounce.CLIENT_NAME}§8] §cSyntax error")
+        ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax error")
 
     /**
      * Play edit sound

@@ -8,6 +8,7 @@ package net.ccbluex.liquidbounce.injection.forge.mixins.network;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import net.ccbluex.liquidbounce.LiquidBounce;
+import net.ccbluex.liquidbounce.event.EventState;
 import net.ccbluex.liquidbounce.event.PacketEvent;
 import net.ccbluex.liquidbounce.features.module.modules.client.HUD;
 import net.ccbluex.liquidbounce.features.module.modules.combat.BackTrack;
@@ -39,7 +40,7 @@ public class MixinNetworkManager {
      */
     @Overwrite
     protected void channelRead0(ChannelHandlerContext p_channelRead0_1_, Packet p_channelRead0_2_) throws Exception {
-        final PacketEvent event = new PacketEvent(p_channelRead0_2_);
+        final PacketEvent event = new PacketEvent(p_channelRead0_2_, EventState.RECEIVE);
         BackTrack backTrack = LiquidBounce.moduleManager.getModule(BackTrack.class);
         assert backTrack != null;
         if (backTrack.getState()) {
@@ -65,7 +66,7 @@ public class MixinNetworkManager {
     @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void send(Packet<?> packet, CallbackInfo callback) {
         if (PacketUtils.handleSendPacket(packet)) return;
-        final PacketEvent event = new PacketEvent(packet);
+        final PacketEvent event = new PacketEvent(packet, EventState.SEND);
         BackTrack backTrack = LiquidBounce.moduleManager.getModule(BackTrack.class);
         assert backTrack != null;
         if (backTrack.getState()) {

@@ -6,6 +6,9 @@
 package net.ccbluex.liquidbounce.features.module
 
 import net.ccbluex.liquidbounce.features.command.Command
+import net.ccbluex.liquidbounce.utils.TextColorUtils.gray
+import net.ccbluex.liquidbounce.utils.TextColorUtils.green
+import net.ccbluex.liquidbounce.utils.TextColorUtils.red
 import net.ccbluex.liquidbounce.utils.block.BlockUtils
 import net.ccbluex.liquidbounce.utils.misc.StringUtils
 import net.ccbluex.liquidbounce.value.*
@@ -48,25 +51,15 @@ class ModuleCommand(val module: Module, val values: List<Value<*>> = module.valu
             return
         }
 
-        if (value is BoolValue) {
-            val newValue = !value.get()
-            value.set(newValue)
-
-            chat("§7${module.name} §8${args[1]}§7 was toggled ${if (newValue) "§8on§7" else "§8off§7" + "."}")
-            playEdit()
-        } else {
-            if (args.size < 3) {
-                if (value is IntegerValue || value is FloatValue || value is TextValue)
-                    chatSyntax("$moduleName ${args[1].lowercase(Locale.getDefault())} <value>")
-                else if (value is ListValue)
-                    chatSyntax("$moduleName ${args[1].lowercase(Locale.getDefault())} <${value.values.joinToString(separator = "/")
-                        .lowercase(Locale.getDefault())}>")
-                return
-            }
-
-            try {
-                when (value) {
-                    is BlockValue -> {
+        //TODO: add a way to set font
+        when (value) {
+            is BlockValue -> {
+                when (args.size) {
+                    2 -> {
+                        chat("${highlightModule(module)}.${gray(args[1])}=${BlockUtils.getBlockName(value.get())}(id=${value.get()})")
+                        return
+                    }
+                    3 -> {
                         var id: Int
 
                         try {
@@ -75,37 +68,96 @@ class ModuleCommand(val module: Module, val values: List<Value<*>> = module.valu
                             id = Block.getIdFromBlock(Block.getBlockFromName(args[2]))
 
                             if (id <= 0) {
-                                chat("§7Block §8${args[2]}§7 does not exist!")
+                                chat("Block ${red(args[2])} does not exist!")
                                 return
                             }
                         }
 
                         value.set(id)
-                        chat("§7${module.name} §8${args[1].lowercase(Locale.getDefault())}§7 was set to §8${BlockUtils.getBlockName(id)}§7.")
+                        chat("${highlightModule(module)}.${gray(args[1])}=${BlockUtils.getBlockName(value.get())}(id=${value.get()})")
                         playEdit()
                         return
                     }
-                    is IntegerValue -> value.set(args[2].toInt())
-                    is FloatValue -> value.set(args[2].toFloat())
-                    is ListValue -> {
-                        if (!value.contains(args[2])) {
-                            chatSyntax("$moduleName ${args[1].lowercase(Locale.getDefault())} <${value.values.joinToString(separator = "/")
-                                .lowercase(Locale.getDefault())}>")
+
+                    else -> {
+                        chat(red("Invalid syntax"))
+                        return
+                    }
+                }
+            }
+
+            is BoolValue -> {
+                value.set(!value.get())
+            }
+
+            is TextValue -> {
+                when (args.size) {
+                    2 -> { }
+                    else -> {
+                        value.set(StringUtils.toCompleteString(args, 2))
+                    }
+                }
+            }
+
+            is IntegerValue -> {
+                when (args.size) {
+                    2 -> { }
+                    3 -> {
+                        val number = args[2].toIntOrNull()
+                        if (number == null) {
+                            chat("${args[2]} cannot be converted to a number")
                             return
                         }
-
-                        value.set(args[2])
+                        value.set(number)
                     }
-                    is TextValue -> value.set(StringUtils.toCompleteString(args, 2))
+                    else -> {
+                        chat(red("Invalid syntax"))
+                        return
+                    }
                 }
+            }
 
-                chat("§7${module.name} §8${args[1]}§7 was set to §8${value.get()}§7.")
-                playEdit()
-            } catch (e: NumberFormatException) {
-                chat("§8${args[2]}§7 cannot be converted to number!")
+            is FloatValue -> {
+                when (args.size) {
+                    2 -> { }
+                    3 -> {
+                        val number = args[2].toFloatOrNull()
+                        if (number == null) {
+                            chat("${args[2]} cannot be converted to a number")
+                            return
+                        }
+                        value.set(number)
+                    }
+                    else -> {
+                        chat(red("Invalid syntax"))
+                        return
+                    }
+                }
+            }
+
+            is ListValue -> {
+                when (args.size) {
+                    2 -> { }
+                    3 -> {
+                        val v = args[2]
+                        if (value.values.map { it.lowercase() }.contains(v.lowercase())) {
+                            chat("${red(v)} is not a valid value")
+                            return
+                        }
+                        value.set(v)
+                    }
+                    else -> {
+                        chat(red("Invalid syntax"))
+                        return
+                    }
+                }
             }
         }
+
+        chat("${highlightModule(module)}.${gray(args[1])}=${value.get()}")
+        playEdit()
     }
+
 
     override fun tabComplete(args: Array<String>): List<String> {
         if (args.isEmpty()) return emptyList()

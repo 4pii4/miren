@@ -291,35 +291,35 @@ class NameTags : Module() {
             enableAlpha()
             disableBlend()
             enableTexture2D()
-        }
 
-        if (enchantValue.get() && entity is EntityPlayer) {
-            glPushMatrix()
-            for (index in 0..4) {
-                if (entity.getEquipmentInSlot(index) == null)
-                    continue
+            if (enchantValue.get()) {
+                glPushMatrix()
+                for (index in 0..4) {
+                    if (entity.getEquipmentInSlot(index) == null)
+                        continue
 
-                val offset = -6
-                mc.renderItem.renderItemOverlays(
-                    mc.fontRendererObj,
-                    entity.getEquipmentInSlot(index),
-                    -50 + index * 20,
-                    if (potionValue.get() && foundPotion) -40 else -20
-                )
-                RenderUtils.drawExhiEnchants(
-                    entity.getEquipmentInSlot(index),
-                    -50f + index * 20f,
-                    if (potionValue.get() && foundPotion) -42f + offset else -22f + offset
-                )
+                    val offset = -6
+                    mc.renderItem.renderItemOverlays(
+                        mc.fontRendererObj,
+                        entity.getEquipmentInSlot(index),
+                        -50 + index * 20,
+                        if (potionValue.get() && foundPotion) -40 else -20
+                    )
+                    RenderUtils.drawExhiEnchants(
+                        entity.getEquipmentInSlot(index),
+                        -50f + index * 20f,
+                        if (potionValue.get() && foundPotion) -42f + offset else -22f + offset
+                    )
+                }
+
+                glDisable(GL_LIGHTING)
+                glDisable(GL_DEPTH_TEST)
+                glEnable(GL_LINE_SMOOTH)
+                glEnable(GL_BLEND)
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+                glPopMatrix()
+                RenderHelper.disableStandardItemLighting()
             }
-
-            glDisable(GL_LIGHTING)
-            glDisable(GL_DEPTH_TEST)
-            glEnable(GL_LINE_SMOOTH)
-            glEnable(GL_BLEND)
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-            glPopMatrix()
-            RenderHelper.disableStandardItemLighting()
         }
 
         resetColor()

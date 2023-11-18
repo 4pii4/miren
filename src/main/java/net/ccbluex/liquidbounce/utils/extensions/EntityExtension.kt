@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.*
 import kotlin.math.round
 
+fun Entity.getDistanceToBox(box: AxisAlignedBB) = eyes.distanceTo(getNearestPointBB(eyes, box))
 
 fun EntityPlayer.getEyeVec3(): Vec3 {
     return Vec3(this.posX, this.entityBoundingBox.minY + this.getEyeHeight(), this.posZ)

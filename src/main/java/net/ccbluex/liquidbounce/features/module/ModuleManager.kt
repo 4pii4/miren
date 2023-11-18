@@ -91,7 +91,6 @@ class ModuleManager : Listenable {
             Spammer::class.java,
             Regen::class.java,
             NoFall::class.java,
-            Blink::class.java,
             NameProtect::class.java,
             MidClick::class.java,
             XRay::class.java,
@@ -177,7 +176,6 @@ class ModuleManager : Listenable {
             Parkour::class.java,
             WallClimb::class.java,
             AntiDesync::class.java,
-            FakeLag::class.java,
             PacketFixer::class.java,
             AutoPlay::class.java,
             AutoKit::class.java,
@@ -223,6 +221,8 @@ class ModuleManager : Listenable {
         registerModule(ChestAura)
         registerModule(NewGUI)
         registerModule(TimerRange)
+        registerModule(Blink)
+        registerModule(FakeLag)
 
         ClientUtils.getLogger().info("[ModuleManager] Successfully loaded ${modules.size} modules.")
     }

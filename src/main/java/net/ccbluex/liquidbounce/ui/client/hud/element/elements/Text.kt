@@ -156,10 +156,10 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F,
             "cps", "lcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.LEFT).toString()
             "mcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.MIDDLE).toString()
             "rcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.RIGHT).toString()
-            "portalVersion" -> ProtocolCollection.getProtocolById(ViaMCP.getInstance().version).getName()
+            "portalVersion" -> ProtocolCollection.getProtocolById(ViaMCP.getInstance().version).name
             "watchdogLastMin" -> LiquidBounce.moduleManager.getModule(BanChecker::class.java)!!.watchdogLastMin.toString()
             "staffLastMin" -> LiquidBounce.moduleManager.getModule(BanChecker::class.java)!!.staffLastMin.toString()
-            "wdStatus" -> return if (PacketUtils.isWatchdogActive()) "Inactive" else "Active"
+            "wdStatus" -> return if (PacketUtils.isWatchdogActive) "Inactive" else "Active"
             "sessionTime" -> return SessionUtils.getFormatSessionTime()
             "worldTime" -> return SessionUtils.getFormatWorldTime()
             else -> null // Null = don't replace

@@ -66,8 +66,6 @@ class AntiStaff : Module() {
             gamsterstaffs.addAll(HttpUtils.get(gamsterStaffList).split(","))
             hypixelstaffs.addAll(HttpUtils.get(hypixelStaffList).split(","))
             gommehdstaffs.addAll(HttpUtils.get(gommeHDStaffList).split(","))
-
-            ClientUtils.getLogger().info("[Staff/main] $staffs")
         }
     }
 

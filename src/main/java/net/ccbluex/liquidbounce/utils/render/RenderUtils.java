@@ -2719,12 +2719,9 @@ public final class RenderUtils extends MinecraftInstance {
             }
         }
 
-        try {
-            if (stack.getTagCompound().hasKey("Unbreakable", 1)) {
-                drawExhiOutlined(0 + "", drawExhiOutlined("UB", x, y, -1), y, getMainColor(0, 0));
-                y += offset;
-            }
-        } catch (Exception ignored) { }
+        if (stack.hasTagCompound() && stack.getTagCompound().getTagId("Unbreakable") != 0) {
+            drawExhiOutlined(0 + "", drawExhiOutlined("UB", x, y, -1), y, getMainColor(0, 0));
+        }
 
         GlStateManager.enableDepth();
         RenderHelper.enableGUIStandardItemLighting();

@@ -140,7 +140,7 @@ open class Module : MinecraftInstance(), Listenable {
     /**
      * Print [msg] to chat
      */
-    protected fun chat(msg: String) = ClientUtils.displayChatMessage("§8[§9§l${LiquidBounce.CLIENT_NAME}§8] §r$msg")
+    protected fun chat(msg: String) = ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §r$msg")
 
     /**
      * Called when module toggled

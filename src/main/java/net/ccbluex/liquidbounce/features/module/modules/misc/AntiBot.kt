@@ -304,6 +304,8 @@ class AntiBot : Module() {
                     return true
                 if (helmet.item == null || chestplate.item == null)
                     return true
+                if (helmet.item !is ItemArmor || chestplate.item !is ItemArmor)
+                    return true
 
                 val helmetColor = (helmet.item as ItemArmor).getColor(helmet)
                 val chestplateColor = (chestplate.item as ItemArmor).getColor(chestplate)

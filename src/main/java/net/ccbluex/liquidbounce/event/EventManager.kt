@@ -23,7 +23,7 @@ class EventManager {
                 val eventClass = method.parameterTypes[0] as Class<out Event>
                 val eventTarget = method.getAnnotation(EventTarget::class.java)
 
-                val invokableEventTargets = registry.getOrElse(eventClass, { arrayListOf<EventHook>() })
+                val invokableEventTargets = registry.getOrElse(eventClass) { arrayListOf() }
                 try {
                     invokableEventTargets.add(EventHook(listener, method, eventTarget.priority, eventTarget))
                 } catch (e: Exception) {
@@ -46,7 +46,7 @@ class EventManager {
         for ((key, targets) in registry) {
             targets.removeIf { it.eventClass == listenable }
 
-            registry.put(key, targets)
+            registry[key] = targets
         }
     }
 
@@ -56,7 +56,7 @@ class EventManager {
      * @param event to call
      */
     fun callEvent(event: Event) {
-        val targets = registry.get(event.javaClass) ?: return
+        val targets = registry[event.javaClass] ?: return
 
         targets.filter { it.eventClass.handleEvents() || it.isIgnoreCondition }.forEach {
             try {

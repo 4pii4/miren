@@ -23,6 +23,8 @@ import net.ccbluex.liquidbounce.ui.client.hud.HUD
 import net.ccbluex.liquidbounce.ui.client.hud.HUD.Companion.createDefault
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.*
+import net.ccbluex.liquidbounce.utils.TextColorUtils.darkGray
+import net.ccbluex.liquidbounce.utils.TextColorUtils.red
 import net.ccbluex.liquidbounce.utils.misc.sound.TipSoundManager
 import net.minecraft.util.ResourceLocation
 import kotlin.concurrent.thread
@@ -31,12 +33,13 @@ object LiquidBounce {
 
     // Client information
     const val CLIENT_NAME = "Miren"
+    val CLIENT_NAME_COLORED = "${darkGray("[")}${red(CLIENT_NAME)}${darkGray("]")}"
     const val CLIENT_VERSION = "b0"
     const val CLIENT_CREATOR = "CCBlueX,inf,pie"
     const val CLIENT_CLOUD = "https://mirenclient.github.io/cloud"
+    const val CLIENT_REPO = "mirenclient/Miren"
 
     var isStarting = false
-    var mainMenuPrep = false
 
     var darkMode = false
 
@@ -89,7 +92,7 @@ object LiquidBounce {
         eventManager.registerListener(BungeeCordSpoof())
         eventManager.registerListener(InventoryUtils())
         eventManager.registerListener(InventoryHelper)
-        eventManager.registerListener(PacketUtils())
+        eventManager.registerListener(PacketUtils)
         eventManager.registerListener(SessionUtils())
         eventManager.registerListener(MacroManager)
         eventManager.registerListener(combatManager)
@@ -154,8 +157,7 @@ object LiquidBounce {
             }
         }
 
-        ClientUtils.getLogger()
-            .info("Finished loading $CLIENT_NAME version $CLIENT_VERSION in ${System.currentTimeMillis() - lastTick}ms.")
+        ClientUtils.getLogger().info("Finished loading $CLIENT_NAME version $CLIENT_VERSION in ${System.currentTimeMillis() - lastTick}ms.")
 
         // Set is starting status
         isStarting = false

@@ -12,6 +12,7 @@ import net.ccbluex.liquidbounce.utils.FontUtils;
 import net.ccbluex.liquidbounce.utils.misc.HttpUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.io.*;
@@ -78,6 +79,9 @@ public class Fonts {
     @FontDetails(fontName = "Minecraft Font")
     public static final FontRenderer minecraftFont = Minecraft.getMinecraft().fontRendererObj;
 
+    @FontDetails(fontName = "Astolfo", fontSize = 30)
+    public static FontRenderer astolfoFont;
+
     private static final List<GameFontRenderer> CUSTOM_FONT_RENDERERS = new ArrayList<>();
 
     public static void loadFonts() {
@@ -105,6 +109,7 @@ public class Fonts {
         fontBangers = new GameFontRenderer(getFont("Bangers-Regular.ttf", 45));
         NOTIFICATIONS = new GameFontRenderer(getFont("noti.ttf", 85));
         NOTIFICATIONS2 = new GameFontRenderer(getFont("noti2.ttf", 85));
+        astolfoFont = new FontRenderer(Minecraft.getMinecraft().gameSettings, new ResourceLocation("liquidbounce+/font/astolfo.png"), Minecraft.getMinecraft().renderEngine, false);
 
 
         try {
@@ -156,7 +161,7 @@ public class Fonts {
 
             if (!outputFile.exists() || !sfuiFile.exists() || !prodSansFile.exists() || !prodBoldFile.exists() || !tahomaFile.exists() || !tahomaReFile.exists() || !bangersFile.exists() || !mntsbFile.exists()) {
                 ClientUtils.getLogger().info("Downloading fonts...");
-                HttpUtils.download("https://liquidbounceplusreborn.github.io/cloud/fonts/fonts.zip", outputFile);
+                HttpUtils.download(String.format("%s/fonts/fonts.zip", LiquidBounce.CLIENT_CLOUD), outputFile);
                 ClientUtils.getLogger().info("Extract fonts...");
                 extractZip(outputFile.getPath(), LiquidBounce.fileManager.fontsDir.getPath());
             }

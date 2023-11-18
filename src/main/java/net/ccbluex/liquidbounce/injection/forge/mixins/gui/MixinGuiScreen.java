@@ -10,7 +10,6 @@ import net.ccbluex.liquidbounce.features.module.modules.client.HUD;
 import net.ccbluex.liquidbounce.features.module.modules.render.HoverDetails;
 import net.ccbluex.liquidbounce.ui.client.GuiBackground;
 import net.ccbluex.liquidbounce.utils.render.ParticleUtils;
-import net.ccbluex.liquidbounce.utils.render.shader.shaders.BackgroundShader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
@@ -92,18 +91,18 @@ public abstract class MixinGuiScreen {
 
         if(GuiBackground.Companion.getEnabled()) {
             if (LiquidBounce.INSTANCE.getBackground() == null) {
-                BackgroundShader.BACKGROUND_SHADER.startShader();
-
-                final Tessellator instance = Tessellator.getInstance();
-                final WorldRenderer worldRenderer = instance.getWorldRenderer();
-                worldRenderer.begin(7, DefaultVertexFormats.POSITION);
-                worldRenderer.pos(0, height, 0.0D).endVertex();
-                worldRenderer.pos(width, height, 0.0D).endVertex();
-                worldRenderer.pos(width, 0, 0.0D).endVertex();
-                worldRenderer.pos(0, 0, 0.0D).endVertex();
-                instance.draw();
-
-                BackgroundShader.BACKGROUND_SHADER.stopShader();
+//                BackgroundShader.BACKGROUND_SHADER.startShader();
+//
+//                final Tessellator instance = Tessellator.getInstance();
+//                final WorldRenderer worldRenderer = instance.getWorldRenderer();
+//                worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+//                worldRenderer.pos(0, height, 0.0D).endVertex();
+//                worldRenderer.pos(width, height, 0.0D).endVertex();
+//                worldRenderer.pos(width, 0, 0.0D).endVertex();
+//                worldRenderer.pos(0, 0, 0.0D).endVertex();
+//                instance.draw();
+//
+//                BackgroundShader.BACKGROUND_SHADER.stopShader();
             }else{
                 final ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final int width = scaledResolution.getScaledWidth();

@@ -1,156 +1,230 @@
 /*
- * LiquidBounce+ Hacked Client
+ * LiquidBounce Hacked Client
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
- * https://github.com/WYSI-Foundation/LiquidBouncePlus/
+ * https://github.com/CCBlueX/LiquidBounce/
  */
 package net.ccbluex.liquidbounce.features.module.modules.player
 
-import net.ccbluex.liquidbounce.event.EventTarget
-import net.ccbluex.liquidbounce.event.PacketEvent
-import net.ccbluex.liquidbounce.event.UpdateEvent
-import net.ccbluex.liquidbounce.event.WorldEvent
+import net.ccbluex.liquidbounce.event.*
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
-import net.ccbluex.liquidbounce.utils.ClientUtils
-import net.ccbluex.liquidbounce.utils.MovementUtils
-import net.ccbluex.liquidbounce.utils.PacketUtils
-import net.ccbluex.liquidbounce.utils.misc.RandomUtils
+import net.ccbluex.liquidbounce.utils.PacketUtils.sendPacket
+import net.ccbluex.liquidbounce.utils.extensions.*
+import net.ccbluex.liquidbounce.utils.math.minus
+import net.ccbluex.liquidbounce.utils.render.RenderUtils.glColor
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
 import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
 import net.ccbluex.liquidbounce.value.IntegerValue
-import net.ccbluex.liquidbounce.value.ListValue
-import net.ccbluex.liquidbounce.value.TextValue
-import net.minecraft.network.INetHandler
 import net.minecraft.network.Packet
-import net.minecraft.network.play.INetHandlerPlayClient
-import net.minecraft.network.play.INetHandlerPlayServer
-import java.util.*
+import net.minecraft.network.handshake.client.C00Handshake
+import net.minecraft.network.play.client.*
+import net.minecraft.network.play.server.S06PacketUpdateHealth
+import net.minecraft.network.play.server.S08PacketPlayerPosLook
+import net.minecraft.network.play.server.S12PacketEntityVelocity
+import net.minecraft.network.play.server.S27PacketExplosion
+import net.minecraft.network.status.client.C00PacketServerQuery
+import net.minecraft.network.status.client.C01PacketPing
+import net.minecraft.util.Vec3
+import org.lwjgl.opengl.GL11.*
+import java.awt.Color
 
-@ModuleInfo(name = "FakeLag", spacedName = "Fake Lag", description = "Lagging yourself server-side, and client-side.", category = ModuleCategory.PLAYER)
-class FakeLag : Module() {
+@ModuleInfo(name = "FakeLag", description = "Makes you lag.", category = ModuleCategory.PLAYER)
+object FakeLag : Module() {
+	private val delay by IntegerValue("Delay", 550, 0, 1000)
+	private val recoilTime by IntegerValue("RecoilTime", 750, 0, 2000)
+	private val distanceToPlayers by FloatValue("AllowedDistanceToPlayers", 3.5f, 0.0f, 6.0f)
+	private val trail by BoolValue("Trail", true)
+	private val trailRed by IntegerValue("TrailRed", 255, 0, 255) { trail }
+	private val trailGreen by IntegerValue("TrailGreen", 255, 0, 255) { trail }
+	private val trailBlue by IntegerValue("TrailBlue", 255, 0, 255) { trail }
+	private val trailAlpha by IntegerValue("TrailAlpha", 255, 0, 255) { trail }
 
-	private val fakeLagMode = ListValue("Mode", arrayOf("All", "InBound", "OutBound"), "All")
-	private val fakeLagMoveOnly = BoolValue("MoveOnly", true)
+	private val trailColor
+		get() = Color(trailRed, trailGreen, trailBlue, trailAlpha)
 
-	private val minRand: IntegerValue = object : IntegerValue("MinDelay", 0, 0, 20000, "ms") {
-        override fun onChanged(oldValue: Int, newValue: Int) {
-            val v = maxRand.get()
-            if (v < newValue) set(v)
-        }
-    }
-    private val maxRand: IntegerValue = object : IntegerValue("MaxDelay", 0, 0, 20000, "ms") {
-        override fun onChanged(oldValue: Int, newValue: Int) {
-            val v = minRand.get()
-            if (v > newValue) set(v)
-        }
-    }
-
-	private val fakeLagInclude = BoolValue("Include", false)
-	private val fakeLagExclude = BoolValue("Exclude", false)
-	private val fakeLagIncludeClasses = TextValue("IncludeClass", "c0f,confirmtransaction,packetplayer,c17", { fakeLagInclude.get() })
-	private val fakeLagExcludeClasses = TextValue("ExcludeClass", "c0f,confirmtransaction,packetplayer,c17", { fakeLagExclude.get() })
-
-	// debug
-	private val debugValue = BoolValue("Debug", false)
-
-	// variables
-	private val outBus = LinkedList<Packet<INetHandlerPlayServer>>()
-	private val inBus = LinkedList<Packet<INetHandlerPlayClient>>()
-
-	private val ignoreBus = LinkedList<Packet<out INetHandler>>()
-	
-	private val inTimer = MSTimer()
-	private val outTimer = MSTimer()
-
-	private var inDelay = 0
-	private var outDelay = 0
-
-	fun debug(s: String) {
-		if (debugValue.get())
-			ClientUtils.displayChatMessage("§7[§6§lFakeLag§7]§f $s")
-	}
-
-	override fun onEnable() {
-		inBus.clear()
-		outBus.clear()
-		ignoreBus.clear()
-
-		inTimer.reset()
-		outTimer.reset()
-	}
+	private val packetQueue = LinkedHashMap<Packet<*>, Long>()
+	private val positions = LinkedHashMap<Vec3, Long>()
+	private val resetTimer = MSTimer()
+	private var wasNearPlayer = false
 
 	override fun onDisable() {
-		while (inBus.size > 0)
-			inBus.poll()?.processPacket(mc.netHandler)
+		if (mc.thePlayer == null)
+			return
 
-		while (outBus.size > 0) {
-			val upPacket = outBus.poll() ?: continue
-			PacketUtils.sendPacketNoEvent(upPacket)
-		}
-			
-		inBus.clear()
-		outBus.clear()
-		ignoreBus.clear()
+		blink()
 	}
 
-	@EventTarget(priority = -100)
+	@EventTarget
 	fun onPacket(event: PacketEvent) {
-		mc.thePlayer ?: return
-		mc.theWorld ?: return
 		val packet = event.packet
-		if (ignoreBus.remove(packet)) return
 
-		if ((fakeLagMode.get().equals("outbound", true) || fakeLagMode.get().equals("all", true)) 
-			&& packet::class.java.getSimpleName().startsWith("C", true)
-			&& (!fakeLagInclude.get() || fakeLagIncludeClasses.get().split(",").find { packet::class.java.getSimpleName().contains(it, true) } != null)
-			&& (!fakeLagExclude.get() || fakeLagExcludeClasses.get().split(",").find { packet::class.java.getSimpleName().contains(it, true) } == null)) {
-			debug("outbound, ${packet::class.java.getSimpleName()}")
-			outBus.add(packet as Packet<INetHandlerPlayServer>)
-			ignoreBus.add(packet)
-			event.cancelEvent()
+		if (mc.thePlayer == null || mc.thePlayer.isDead)
+			return
+
+		if (event.isCancelled)
+			return
+
+		if (distanceToPlayers > 0.0 && wasNearPlayer)
+			return
+
+		when (packet) {
+			is C00Handshake, is C00PacketServerQuery, is C01PacketPing -> return
+
+			// Flush on doing action, getting action
+			is S08PacketPlayerPosLook, is C08PacketPlayerBlockPlacement, is C07PacketPlayerDigging, is C12PacketUpdateSign, is C02PacketUseEntity, is C19PacketResourcePackStatus -> {
+				blink()
+				return
+			}
+
+			// Flush on kb
+			is S12PacketEntityVelocity -> {
+				if (mc.thePlayer.entityId == packet.entityID) {
+					blink()
+					return
+				}
+			}
+
+			is S27PacketExplosion -> {
+				if (packet.field_149153_g != 0f || packet.field_149152_f != 0f || packet.field_149159_h != 0f) {
+					blink()
+					return
+				}
+			}
+
+			// Flush on damage
+			is S06PacketUpdateHealth -> {
+				if (packet.health < mc.thePlayer.health) {
+					blink()
+					return
+				}
+			}
 		}
 
-		if ((fakeLagMode.get().equals("inbound", true) || fakeLagMode.get().equals("all", true)) 
-			&& packet::class.java.getSimpleName().startsWith("S", true)
-			&& (!fakeLagInclude.get() || fakeLagIncludeClasses.get().split(",").find { packet::class.java.getSimpleName().contains(it, true) } != null)
-			&& (!fakeLagExclude.get() || fakeLagExcludeClasses.get().split(",").find { packet::class.java.getSimpleName().contains(it, true) } == null)) {
-			debug("inbound, ${packet::class.java.getSimpleName()}")
-			inBus.add(packet as Packet<INetHandlerPlayClient>)
-			ignoreBus.add(packet)
+		if (!resetTimer.hasTimePassed(recoilTime))
+			return
+
+		if (event.eventType == EventState.SEND) {
 			event.cancelEvent()
+			if (packet is C03PacketPlayer && packet.isMoving) {
+				val packetPos = Vec3(packet.x, packet.y, packet.z)
+				synchronized(positions) {
+					positions[packetPos] = System.currentTimeMillis()
+				}
+			}
+			synchronized(packetQueue) {
+				packetQueue[packet] = System.currentTimeMillis()
+			}
 		}
 	}
 
 	@EventTarget
 	fun onWorld(event: WorldEvent) {
-		inBus.clear()
-		outBus.clear()
-		ignoreBus.clear()
-
-		inTimer.reset()
-		outTimer.reset()
+		// Clear packets on disconnect only
+		if (event.worldClient == null)
+			blink(false)
 	}
 
-	@EventTarget(priority = -5)
+	@EventTarget
 	fun onUpdate(event: UpdateEvent) {
-		mc.netHandler ?: return
-		
-		if (!inBus.isEmpty() && ((fakeLagMoveOnly.get() && !MovementUtils.isMoving()) || inTimer.hasTimePassed(inDelay.toLong()))) {
-			while (inBus.size > 0)
-				inBus.poll()?.processPacket(mc.netHandler)
-			inDelay = RandomUtils.nextInt(minRand.get(), maxRand.get())
-			inTimer.reset()
-			debug("poll (in)")
-		}
-		if (!outBus.isEmpty() && ((fakeLagMoveOnly.get() && !MovementUtils.isMoving()) || outTimer.hasTimePassed(outDelay.toLong()))) {
-			while (outBus.size > 0) {
-				val upPacket = outBus.poll() ?: continue
-				PacketUtils.sendPacketNoEvent(upPacket)
+		val thePlayer = mc.thePlayer ?: return
+
+		if (distanceToPlayers > 0) {
+			val playerPos = thePlayer.positionVector
+			val serverPos = positions.keys.firstOrNull() ?: playerPos
+
+			val otherPlayers = mc.theWorld.playerEntities.filter { it != thePlayer }
+
+			val (dx, dy, dz) = serverPos - playerPos
+			val playerBox = thePlayer.hitBox.offset(dx, dy, dz)
+
+			wasNearPlayer = false
+
+			for (otherPlayer in otherPlayers) {
+				if (otherPlayer.getDistanceToBox(playerBox) <= distanceToPlayers.toDouble()) {
+					blink()
+					wasNearPlayer = true
+					return
+				}
 			}
-			outDelay = RandomUtils.nextInt(minRand.get(), maxRand.get())
-			outTimer.reset()
-			debug("poll (out)")
+		}
+
+		if (Blink.blinkingSend() || mc.thePlayer.isDead || thePlayer.isUsingItem) {
+			blink()
+			return
+		}
+
+		if (!resetTimer.hasTimePassed(recoilTime))
+			return
+
+		handlePackets()
+	}
+
+	@EventTarget
+	fun onRender3D(event: Render3DEvent) {
+		if (!trail) return
+		
+		val color = trailColor
+
+		if (Blink.blinkingSend())
+			return
+
+		synchronized(positions.keys) {
+			glPushMatrix()
+			glDisable(GL_TEXTURE_2D)
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+			glEnable(GL_LINE_SMOOTH)
+			glEnable(GL_BLEND)
+			glDisable(GL_DEPTH_TEST)
+			mc.entityRenderer.disableLightmap()
+			glBegin(GL_LINE_STRIP)
+			glColor(color)
+
+			val renderPosX = mc.renderManager.viewerPosX
+			val renderPosY = mc.renderManager.viewerPosY
+			val renderPosZ = mc.renderManager.viewerPosZ
+
+			for (pos in positions.keys)
+				glVertex3d(pos.xCoord - renderPosX, pos.yCoord - renderPosY, pos.zCoord - renderPosZ)
+
+			glColor4d(1.0, 1.0, 1.0, 1.0)
+			glEnd()
+			glEnable(GL_DEPTH_TEST)
+			glDisable(GL_LINE_SMOOTH)
+			glDisable(GL_BLEND)
+			glEnable(GL_TEXTURE_2D)
+			glPopMatrix()
 		}
 	}
+
+	override val tag
+		get() = packetQueue.size.toString()
+
+	private fun blink(handlePackets: Boolean = true) {
+		synchronized(packetQueue) {
+			if (handlePackets) {
+				resetTimer.reset()
+
+				packetQueue.forEach { (packet) -> sendPacket(packet, false) }
+			}
+		}
+		packetQueue.clear()
+		positions.clear()
+	}
+
+	private fun handlePackets() {
+		synchronized(packetQueue) {
+			packetQueue.entries.removeAll { (packet, timestamp) ->
+				if (timestamp <= System.currentTimeMillis() - delay) {
+					sendPacket(packet, false)
+					true
+				} else false
+			}
+		}
+		synchronized(positions) {
+			positions.entries.removeAll { (_, timestamp) -> timestamp <= System.currentTimeMillis() - delay }
+		}
+	}
+
 }

@@ -472,7 +472,7 @@ class BackTrack : Module() {
             storagePackets.removeAt(0).let{
                 val packet = it.packet
                 try {
-                    val packetEvent = PacketEvent(packet)
+                    val packetEvent = PacketEvent(packet, EventState.SEND)
                     if (!packets.contains(packet)) LiquidBounce.eventManager.callEvent(packetEvent)
                     if (!packetEvent.isCancelled) packet.processPacket(netHandler)
                 } catch (_: ThreadQuickExitException) { }
@@ -502,7 +502,7 @@ class BackTrack : Module() {
             if (it.time <= untilNS) {
                 storagePackets.remove(it)
                 try {
-                    val packetEvent = PacketEvent(packet)
+                    val packetEvent = PacketEvent(packet, EventState.SEND)
                     if (!packets.contains(packet)) LiquidBounce.eventManager.callEvent(packetEvent)
                     if (!packetEvent.isCancelled) packet.processPacket(netHandler)
                 } catch (_: ThreadQuickExitException) {}
@@ -553,7 +553,7 @@ class BackTrack : Module() {
         while (storageSendPackets.isNotEmpty()) {
             storageSendPackets.removeAt(0).let {
                 try {
-                    val packetEvent = PacketEvent(it)
+                    val packetEvent = PacketEvent(it, EventState.SEND)
                     if (!packets.contains(it)) LiquidBounce.eventManager.callEvent(packetEvent)
                     if (!packetEvent.isCancelled) PacketUtils.sendPacketNoEvent(it)
                 } catch (e: Exception) {

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import me.liuli.elixir.utils.HttpUtils
+import net.ccbluex.liquidbounce.LiquidBounce
 
 object ChangelogUtils {
     val changes = mutableListOf<Pair<String, String>>()
@@ -12,7 +13,7 @@ object ChangelogUtils {
         changes.clear()
 
         try {
-            val s = HttpUtils.get("https://api.github.com/repos/liquidbounceplusreborn/LiquidbouncePlus-Reborn/actions/runs")
+            val s = HttpUtils.get("https://api.github.com/repos/${LiquidBounce.CLIENT_REPO}/actions/runs")
             val json: JsonObject = JsonParser().parse(s).asJsonObject
             val builds: JsonArray = json.entrySet().find { it.key == "workflow_runs" }!!.value.asJsonArray
             ClientUtils.getLogger().info("Found ${builds.size()} builds")
