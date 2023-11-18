@@ -9,16 +9,15 @@ import java.awt.Color
 
 enum class ModuleCategory(var displayName: String, val color: Int) {
 
-    COMBAT("Combat", Color(219, 120, 163).rgb),
-    PLAYER("Player", Color(224, 197, 242).rgb),
-    MOVEMENT("Movement", Color(91, 153, 204).rgb),
-    RENDER("Render", Color(255, 187, 145).rgb),
+    COMBAT("Combat", Color(0xe84c3c).rgb),
+    PLAYER("Player", Color(0x8c43ac).rgb),
+    MOVEMENT("Movement", Color(0x28ba66).rgb),
+    RENDER("Render", Color(0x3700ce).rgb),
     CLIENT("Client", Color(160, 55, 63).rgb),
-    WORLD("World", Color(196, 224, 249).rgb),
+    WORLD("World", Color(0xcadf6f).rgb),
     EXPLOIT("Exploit", Color(51, 152, 217).rgb),
-    MISC("Misc", Color(50, 137, 90).rgb),
-    SCRIPT("Script", Color(196, 224, 249).rgb),
-    COLOR("Color", Color(3221291007.toInt()).rgb);
+    MISC("Misc", Color(0x105748).rgb),
+    SCRIPT("Script", Color(196, 224, 249).rgb);
 
     @JvmName("getColor1")
     fun getColor(): Int {

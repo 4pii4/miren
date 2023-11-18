@@ -140,7 +140,7 @@ class ModuleCommand(val module: Module, val values: List<Value<*>> = module.valu
                     2 -> { }
                     3 -> {
                         val v = args[2]
-                        if (value.values.map { it.lowercase() }.contains(v.lowercase())) {
+                        if (!value.values.map { it.lowercase() }.contains(v.lowercase())) {
                             chat("${red(v)} is not a valid value")
                             return
                         }

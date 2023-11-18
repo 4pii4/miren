@@ -8,7 +8,6 @@ package net.ccbluex.liquidbounce.features.command.commands
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.features.command.CommandManager
-import net.ccbluex.liquidbounce.ui.client.clickgui.ClickGui
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.misc.MiscUtils
 import org.apache.commons.io.IOUtils
@@ -31,8 +30,6 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
 
                         if (fileName.endsWith(".js")) {
                             LiquidBounce.scriptManager.importScript(file)
-
-                            LiquidBounce.clickGui = ClickGui()
                             LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
 
                             chat("Successfully imported script.")
@@ -65,7 +62,6 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
 
                             scriptFiles.forEach { scriptFile -> LiquidBounce.scriptManager.loadScript(scriptFile) }
 
-                            LiquidBounce.clickGui = ClickGui()
                             LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
                             LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.hudConfig)
 
@@ -98,8 +94,6 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
                         val script = scripts[scriptIndex]
 
                         LiquidBounce.scriptManager.deleteScript(script)
-
-                        LiquidBounce.clickGui = ClickGui()
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.hudConfig)
                         chat("Successfully deleted script.")
@@ -125,7 +119,6 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.modulesConfig)
                         LiquidBounce.isStarting = false
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig)
-                        LiquidBounce.clickGui = ClickGui()
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
                         chat("Successfully reloaded all scripts.")
                     } catch (t: Throwable) {

@@ -93,7 +93,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var4 * -10F, 0.2F, 0.1F, 1.0F);
         GlStateManager.rotate(var4 * -30F, 1.3F, 0.1F, 0.2F);
         GlStateManager.scale(0.4F, 0.4F, 0.4F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void func_178103_d(float qq) {
@@ -112,7 +112,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -20.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var4 * -20.0F, 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(var4 * -80.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void test(float i, float i2) {
@@ -125,7 +125,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -20.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var4 * -20.0F, 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(var5 * -80.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void tap2(final float var2, final float swing) {
@@ -136,7 +136,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.translate(0.1f * var4, -0.0f, -0.21999997f * var4);
         GlStateManager.translate(0.0f, var2 * -0.15f, 0.0f);
         GlStateManager.rotate(var3 * 45.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void avatar(final float equipProgress, final float swingProgress) {
@@ -148,7 +148,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(f * -20.0f, 0.0f, 1.0f, 0.0f);
         GlStateManager.rotate(f2 * -20.0f, 0.0f, 0.0f, 1.0f);
         GlStateManager.rotate(f2 * -40.0f, 1.0f, 0.0f, 0.0f);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void sw0ng() {
@@ -167,7 +167,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -40.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var4 * 0.0F, 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(var4 * 0.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void stab(float var10, float var9) {
@@ -179,7 +179,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var11 * 20.0F, 1.0F, 0.0F, 0.0F);
         GlStateManager.rotate(var12 * 0.0F, 0.0F, 0.0f, 0.0F);
         GlStateManager.rotate(var12 * -10.0F, 1.0F, 0.0F, -4.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void slide(float var10, float var9) {
@@ -191,7 +191,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var11 * 0.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var12 * 0.0F, 0.0F, 0.0f, 1.0F);
         GlStateManager.rotate(var12 * -40.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void slide2(float var10, float var9) {
@@ -203,7 +203,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var11 * 0.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var12 * 0.0F, 0.0F, 0.0f, 1.0F);
         GlStateManager.rotate(var12 * -80.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void jello(float var11, float var12) {
@@ -214,7 +214,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var13 * -35.0F, 0.0F, 0.0F, 0.0F);
         GlStateManager.rotate(var14 * 0.0F, 0.0F, 0.0f, 0.0F);
         GlStateManager.rotate(var14 * 20.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void continuity(float var11, float var10) {
@@ -227,7 +227,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var12 * var14 * 30.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var13 * 0.0F, 0.0F, 0.0f, 1.0F);
         GlStateManager.rotate(var13 * 20.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void poke(final float var5, final float var6) {
@@ -239,7 +239,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.translate(0.1f * var8, -0.0f, -0.21999997f * var8);
         GlStateManager.translate(0.0f, var5 * -0.15f, 0.0f);
         GlStateManager.rotate(var7 * 0.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void Zoom(float p_178096_1_, float p_178096_2_) {
@@ -251,7 +251,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -20.0F, 0.0F, 0.0F, 0.0F);
         GlStateManager.rotate(var4 * -20.0F, 0.0F, 0.0F, 0.0F);
         GlStateManager.rotate(var4 * -20.0F, 0.0F, 0.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void strange(float lul, float lol) {
@@ -263,7 +263,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var26 * var27, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var28 * 15.0F, 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(var27 * 10.0f, 1.0f, 0.0f, 0.0f);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void move(final float test1, final float test2) {
@@ -275,7 +275,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var30 * var29 * -90.0f, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var29 * var31 * 5.0F, 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(var31 * 5.0f, 1.0f, 0.0f, 0.0f);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void ETB(float equipProgress, float swingProgress) {
@@ -287,7 +287,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -34.0F, 0.0F, 1.0F, 0.2F);
         GlStateManager.rotate(var4 * -20.7F, 0.2F, 0.1F, 1.0F);
         GlStateManager.rotate(var4 * -68.6F, 1.3F, 0.1F, 0.2F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void sigmaold(float p_178096_1_, float p_178096_2_) {
@@ -299,7 +299,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -15F, 0.0F, 1.0F, 0.2F);
         GlStateManager.rotate(var4 * -10F, 0.2F, 0.1F, 1.0F);
         GlStateManager.rotate(var4 * -30F, 1.3F, 0.1F, 0.2F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void push1(float idk, float idc) {
@@ -311,7 +311,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -10.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.rotate(var4 * -10.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.rotate(var4 * -10.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void push2(float idk, float idc) {
@@ -323,7 +323,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var3 * -10.0F, 2.0F, 2.0F, 2.0F);
         GlStateManager.rotate(var4 * -10.0F, 2.0F, 2.0F, 0.0F);
         GlStateManager.rotate(var4 * -10.0F, 2.0F, 2.0F, 0.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void up(float idk, float idc) {
@@ -336,7 +336,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var4 * -10.0F, 1.0F, 0.0F, 0.0F);
         GlStateManager.rotate(var3 * -20.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(var4 * -10.0F, 1.0F, 0.0F, 1.0F);
-        GlStateManager.scale(Animations.Scale.get(), Animations.Scale.get(), Animations.Scale.get());
+        GlStateManager.scale(Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale(), Animations.INSTANCE.getScale());
     }
 
     private void func_178103_d() {
@@ -357,35 +357,35 @@ public abstract class MixinItemRenderer {
         float f2 = abstractclientplayer.prevRotationPitch + (abstractclientplayer.rotationPitch - abstractclientplayer.prevRotationPitch) * partialTicks;
         float f3 = abstractclientplayer.prevRotationYaw + (abstractclientplayer.rotationYaw - abstractclientplayer.prevRotationYaw) * partialTicks;
         if (LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
-            GL11.glTranslated(Animations.itemPosX.get().doubleValue(), Animations.itemPosY.get().doubleValue(), Animations.itemPosZ.get().doubleValue());
+            GL11.glTranslated(Animations.INSTANCE.getItemPosX(), Animations.INSTANCE.getItemPosY(), Animations.INSTANCE.getItemPosZ());
         }
         this.rotateArroundXAndY(f2, f3);
         this.setLightMapFromPlayer(abstractclientplayer);
         this.rotateWithPlayerRotations((EntityPlayerSP) abstractclientplayer, partialTicks);
-        GlStateManager.scale(1, 1, Animations.itemDistance.getValue());
+        GlStateManager.scale(1, 1, Animations.INSTANCE.getItemDistance());
         GlStateManager.enableRescaleNormal();
         GlStateManager.pushMatrix();
 
         if (LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
-            GL11.glTranslated(Animations.itemPosX.get().doubleValue(), Animations.itemPosY.get().doubleValue(), Animations.itemPosZ.get().doubleValue());
+            GL11.glTranslated(Animations.INSTANCE.getItemPosX(), Animations.INSTANCE.getItemPosY(), Animations.INSTANCE.getItemPosZ());
         }
 
         if (this.itemToRender != null) {
-            if (Animations.oldRod.get() && itemToRender.getItem() instanceof ItemCarrotOnAStick && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
+            if (Animations.INSTANCE.getOldRod() && itemToRender.getItem() instanceof ItemCarrotOnAStick && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
                 GlStateManager.translate(0.08F, -0.027F, -0.33F);
                 GlStateManager.scale(0.93F, 1.0F, 1.0F);
             }
-            if (Animations.oldRod.get() && itemToRender.getItem() instanceof ItemFishingRod && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
+            if (Animations.INSTANCE.getOldRod() && itemToRender.getItem() instanceof ItemFishingRod && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
                 GlStateManager.translate(0.08F, -0.027F, -0.33F);
                 GlStateManager.scale(0.93F, 1.0F, 1.0F);
             }
-            if (Animations.oldSwing.get() && f1 != 0.0F && (!mc.thePlayer.isBlocking()) && !mc.thePlayer.isEating() && !mc.thePlayer.isUsingItem() && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
+            if (Animations.INSTANCE.getOldSwing() && f1 != 0.0F && (!mc.thePlayer.isBlocking()) && !mc.thePlayer.isEating() && !mc.thePlayer.isUsingItem() && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
                 GlStateManager.scale(0.85F, 0.85F, 0.85F);
                 GlStateManager.translate(-0.06F, 0.003F, 0.05F);
             }
             final KillAura killAura = LiquidBounce.moduleManager.getModule(KillAura.class);
 
-            boolean canBlockEverything = LiquidBounce.moduleManager.getModule(Animations.class).getState() && Animations.blockEverything.get() && killAura.getTarget() != null 
+            boolean canBlockEverything = LiquidBounce.moduleManager.getModule(Animations.class).getState() && Animations.INSTANCE.getBlockEverything() && killAura.getTarget() != null 
                             && (itemToRender.getItem() instanceof ItemBucketMilk || itemToRender.getItem() instanceof ItemFood 
                                 || itemToRender.getItem() instanceof ItemPotion || itemToRender.getItem() instanceof ItemAxe || itemToRender.getItem().equals(Items.stick));
 
@@ -394,7 +394,7 @@ public abstract class MixinItemRenderer {
             } else if (abstractclientplayer.getItemInUseCount() > 0
                     || (itemToRender.getItem() instanceof ItemSword && killAura.getBlockingStatus())
                         || (itemToRender.getItem() instanceof ItemSword && LiquidBounce.moduleManager.getModule(Animations.class).getState() 
-                            && Animations.fakeBlock.get() && killAura.getTarget() != null) || canBlockEverything) {
+                            && Animations.INSTANCE.getFakeBlock() && killAura.getTarget() != null) || canBlockEverything) {
 
                 EnumAction enumaction = (killAura.getBlockingStatus() || canBlockEverything) ? EnumAction.BLOCK : this.itemToRender.getItemUseAction();
 
@@ -409,8 +409,8 @@ public abstract class MixinItemRenderer {
                         break;
                     case BLOCK:
                         if (LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
-                            GL11.glTranslated(Animations.blockPosX.get().doubleValue(), Animations.blockPosY.get().doubleValue(), Animations.blockPosZ.get().doubleValue());
-                            final String z = Animations.Sword.get();
+                            GL11.glTranslated(Animations.INSTANCE.getBlockPosX(), Animations.INSTANCE.getBlockPosY(), Animations.INSTANCE.getBlockPosZ());
+                            final String z = Animations.INSTANCE.getSword();
                             switch (z) {
                                 case "Normal": {
                                     this.transformFirstPersonItem(f + 0.1F, f1);
@@ -456,7 +456,7 @@ public abstract class MixinItemRenderer {
                                     break;
                                 }
                                 case "Minecraft": {
-                                    this.func_178096_b(f, Animations.mcSwordPos.get());
+                                    this.func_178096_b(f, Animations.INSTANCE.getMcSwordPos());
                                     this.func_178103_d();
                                     break;
                                 }
@@ -672,7 +672,7 @@ public abstract class MixinItemRenderer {
                         }
                         break;
                     case BOW:
-                        if (Animations.oldBow.getValue() && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
+                        if (Animations.INSTANCE.getOldBow() && LiquidBounce.moduleManager.getModule(Animations.class).getState()) {
                             this.transformFirstPersonItem(f, f1);
                             this.doBowTransformations(partialTicks, this.mc.thePlayer);
                             GlStateManager.translate(0.0F, 0.1F, -0.15F);
@@ -683,7 +683,7 @@ public abstract class MixinItemRenderer {
 
                 }
             } else {
-                if (!Animations.swing.get())
+                if (!Animations.INSTANCE.getSwing())
                     this.doItemUsedTransformations(f1);
                 this.transformFirstPersonItem(f, f1);
 
@@ -698,7 +698,7 @@ public abstract class MixinItemRenderer {
         RenderHelper.disableStandardItemLighting();
 
         if (LiquidBounce.moduleManager.getModule(Animations.class).getState())
-            GL11.glTranslated(-Animations.itemPosX.get().doubleValue(), -Animations.itemPosY.get().doubleValue(), -Animations.itemPosZ.get().doubleValue());
+            GL11.glTranslated(-Animations.INSTANCE.getItemPosX(), -Animations.INSTANCE.getItemPosY(), -Animations.INSTANCE.getItemPosZ());
     }
 
     @Inject(method = "renderFireInFirstPerson", at = @At("HEAD"), cancellable = true)

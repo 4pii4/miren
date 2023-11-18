@@ -3,70 +3,65 @@
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/WYSI-Foundation/LiquidBouncePlus/
  */
-package net.ccbluex.liquidbounce.features.module.modules.client;
+package net.ccbluex.liquidbounce.features.module.modules.client
 
-import net.ccbluex.liquidbounce.features.module.Module;
-import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.module.ModuleInfo;
-import net.ccbluex.liquidbounce.value.BoolValue;
-import net.ccbluex.liquidbounce.value.FloatValue;
-import net.ccbluex.liquidbounce.value.IntegerValue;
-import net.ccbluex.liquidbounce.value.ListValue;
+import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
 
 @ModuleInfo(name = "Animations", description = "Render items Animations", category = ModuleCategory.CLIENT)
-public class Animations extends Module {
-
-    // some ListValue
-    public static final ListValue Sword = new ListValue("Style", new String[]{
-            "Normal", "SlideDown1", "SlideDown2" , "Slide", "Slide1", "Minecraft", "Remix", "Exhibition",
-            "Avatar", "Swang", "Tap1", "Tap2", "Poke", "Push1", "Push2" , "Up" , "Shield", "Akrien", "VisionFX", "Swong","Swank",
-            "SigmaOld", "ETB", "Rotate360", "SmoothFloat", "Strange" , "Reverse", "Zoom", "Move", "Stab", "Jello", "1.7", "Flux", "Stella", "Tifality","OldExhibition","Smooth"
-        }, "Minecraft");
+object Animations : Module() {
+    val sword by ListValue(
+        "Style", arrayOf(
+            "Normal", "SlideDown1", "SlideDown2", "Slide", "Slide1", "Minecraft", "Remix", "Exhibition",
+            "Avatar", "Swang", "Tap1", "Tap2", "Poke", "Push1", "Push2", "Up", "Shield", "Akrien", "VisionFX", "Swong", "Swank",
+            "SigmaOld", "ETB", "Rotate360", "SmoothFloat", "Strange", "Reverse", "Zoom", "Move", "Stab", "Jello", "1.7", "Flux", "Stella", "Tifality", "OldExhibition", "Smooth"
+        ), "Minecraft"
+    )
 
     // item general scale
-    public static final FloatValue Scale = new FloatValue("Scale", 0.4f, 0f, 4f);
+    val Scale by FloatValue("Scale", 0.4f, 0f, 4f)
 
     // normal item position
-    public static final FloatValue itemPosX = new FloatValue("ItemX", 0f, -1f, 1f);
-    public static final FloatValue itemPosY = new FloatValue("ItemY", 0f, -1f, 1f);
-    public static final FloatValue itemPosZ = new FloatValue("ItemZ", 0f, -1f, 1f);
-    public static final FloatValue itemDistance = new FloatValue("ItemDistance", 1, 1, 5f);
+    val itemPosX by FloatValue("ItemX", 0f, -1f, 1f)
+    val itemPosY by FloatValue("ItemY", 0f, -1f, 1f)
+    val itemPosZ by FloatValue("ItemZ", 0f, -1f, 1f)
+    val itemDistance by FloatValue("ItemDistance", 1f, 1f, 5f)
 
     // change Position Blocking Sword
-    public static final FloatValue blockPosX = new FloatValue("BlockingX", 0f, -1f, 1f);
-    public static final FloatValue blockPosY = new FloatValue("BlockingY", 0f, -1f, 1f);
-    public static final FloatValue blockPosZ = new FloatValue("BlockingZ", 0f, -1f, 1f);
+    val blockPosX by FloatValue("BlockingX", 0f, -1f, 1f)
+    val blockPosY by FloatValue("BlockingY", 0f, -1f, 1f)
+    val blockPosZ by FloatValue("BlockingZ", 0f, -1f, 1f)
 
     // modify item swing and rotate
-    public static final IntegerValue SpeedSwing = new IntegerValue("Swing-Speed", 4, 0, 20);
+    val SpeedSwing by IntegerValue("Swing-Speed", 4, 0, 20)
 
     // custom animation sword
-    public static final FloatValue mcSwordPos =  new FloatValue("MCPosOffset", 0.45f, 0, 0.5f, () -> Sword.get().equalsIgnoreCase("minecraft"));
+    val mcSwordPos by FloatValue("MCPosOffset", 0.45f, 0f, 0.5f) { sword.equals("minecraft", ignoreCase = true) }
 
     // fake blocking bruh
-    public static final BoolValue fakeBlock = new BoolValue("Fake-Block", false);
+    val fakeBlock by BoolValue("Fake-Block", false)
 
     // block not everything
-    public static final BoolValue blockEverything = new BoolValue("Block-Everything", false);
-
-    public static final BoolValue swing = new BoolValue("FluxSwing", false);
+    val blockEverything by BoolValue("Block-Everything", false)
+    val swing by BoolValue("FluxSwing", false)
 
     // gui animations
-    public static final ListValue guiAnimations = new ListValue("Container-Animation", new String[]{"None", "Zoom", "Slide", "Smooth"}, "None");
-    public static final ListValue vSlideValue = new ListValue("Slide-Vertical", new String[]{"None", "Upward", "Downward"}, "Downward", () -> guiAnimations.get().equalsIgnoreCase("slide"));
-    public static final ListValue hSlideValue = new ListValue("Slide-Horizontal", new String[]{"None", "Right", "Left"}, "Right", () -> guiAnimations.get().equalsIgnoreCase("slide"));
-    public static final IntegerValue animTimeValue = new IntegerValue("Container-AnimTime", 750, 0, 3000, () -> !guiAnimations.get().equalsIgnoreCase("none"));
-    public static final ListValue tabAnimations = new ListValue("Tab-Animation", new String[]{"None", "Zoom", "Slide"}, "Zoom");
+    val guiAnimations by ListValue("Container-Animation", arrayOf("None", "Zoom", "Slide", "Smooth"), "None")
+    val vSlideValue by ListValue("Slide-Vertical", arrayOf("None", "Upward", "Downward"), "Downward") { guiAnimations.equals("slide", ignoreCase = true) }
+    val hSlideValue by ListValue("Slide-Horizontal", arrayOf("None", "Right", "Left"), "Right") { guiAnimations.equals("slide", ignoreCase = true) }
+    val animTimeValue by IntegerValue("Container-AnimTime", 750, 0, 3000) { !guiAnimations.equals("none", ignoreCase = true) }
+    val tabAnimations by ListValue("Tab-Animation", arrayOf("None", "Zoom", "Slide"), "Zoom")
 
     // block crack
-    public static final BoolValue noBlockParticles = new BoolValue("NoBlockParticles", false);
+    val noBlockParticles by BoolValue("NoBlockParticles", false)
 
     //1.7
-
-    public static final BoolValue oldBow = new BoolValue("1.7Bow", false);
-
-    public static final BoolValue oldRod = new BoolValue("1.7Rod", false);
-
-    public static final BoolValue oldSwing = new BoolValue("1.7Swing", false);
-
+    val oldBow by BoolValue("1.7Bow", false)
+    val oldRod by BoolValue("1.7Rod", false)
+    val oldSwing by BoolValue("1.7Swing", false)
 }

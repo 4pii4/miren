@@ -7,7 +7,6 @@ package net.ccbluex.liquidbounce.ui.client
 
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.command.CommandManager
-import net.ccbluex.liquidbounce.ui.client.clickgui.ClickGui
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.misc.MiscUtils
@@ -61,7 +60,6 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
                 if (fileName.endsWith(".js")) {
                     LiquidBounce.scriptManager.importScript(file)
 
-                    LiquidBounce.clickGui = ClickGui()
                     LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
                     return
                 } else if (fileName.endsWith(".zip")) {
@@ -92,7 +90,6 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
 
                     scriptFiles.forEach { scriptFile -> LiquidBounce.scriptManager.loadScript(scriptFile) }
 
-                    LiquidBounce.clickGui = ClickGui()
                     LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
                     LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.hudConfig)
                     return
@@ -110,7 +107,6 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
 
                     LiquidBounce.scriptManager.deleteScript(script)
 
-                    LiquidBounce.clickGui = ClickGui()
                     LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
                     LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.hudConfig)
                 }
@@ -131,7 +127,6 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
                 LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.modulesConfig)
                 LiquidBounce.isStarting = false
                 LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig)
-                LiquidBounce.clickGui = ClickGui()
                 LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
             } catch (t: Throwable) {
                 ClientUtils.getLogger().error("Something went wrong while reloading all scripts.", t)

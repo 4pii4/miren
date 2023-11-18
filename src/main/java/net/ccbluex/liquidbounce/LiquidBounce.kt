@@ -18,7 +18,6 @@ import net.ccbluex.liquidbounce.file.FileManager
 import net.ccbluex.liquidbounce.script.ScriptManager
 import net.ccbluex.liquidbounce.script.remapper.Remapper.loadSrg
 import net.ccbluex.liquidbounce.ui.client.altmanager.GuiAltManager
-import net.ccbluex.liquidbounce.ui.client.clickgui.ClickGui
 import net.ccbluex.liquidbounce.ui.client.hud.HUD
 import net.ccbluex.liquidbounce.ui.client.hud.HUD.Companion.createDefault
 import net.ccbluex.liquidbounce.ui.font.Fonts
@@ -55,8 +54,6 @@ object LiquidBounce {
 
     // HUD & ClickGUI
     lateinit var hud: HUD
-
-    lateinit var clickGui: ClickGui
 
     // Menu Background
     var background: ResourceLocation? = null
@@ -135,8 +132,6 @@ object LiquidBounce {
         fileManager.loadConfigs(fileManager.modulesConfig, fileManager.valuesConfig, fileManager.accountsConfig,
             fileManager.friendsConfig, fileManager.xrayConfig)
 
-        // ClickGUI
-        clickGui = ClickGui()
         fileManager.loadConfig(fileManager.clickGuiConfig)
 
         // Set HUD

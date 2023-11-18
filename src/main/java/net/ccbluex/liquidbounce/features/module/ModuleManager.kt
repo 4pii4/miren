@@ -60,7 +60,6 @@ class ModuleManager : Listenable {
             Jesus::class.java,
             Strafe::class.java,
             Sprint::class.java,
-            ClickGUI::class.java,
             Teams::class.java,
             LegitSpeed::class.java,
             NoRotate::class.java,
@@ -107,7 +106,6 @@ class ModuleManager : Listenable {
             Clip::class.java,
             Phase::class.java,
             ServerCrasher::class.java,
-            Animations::class.java,
             ReverseStep::class.java,
             TNTBlock::class.java,
             InvManager::class.java,
@@ -219,10 +217,12 @@ class ModuleManager : Listenable {
 
         registerModule(Breaker)
         registerModule(ChestAura)
-        registerModule(NewGUI)
         registerModule(TimerRange)
         registerModule(Blink)
         registerModule(FakeLag)
+        registerModule(Animations)
+        registerModule(ClickGUI)
+        registerModule(RenderConfig)
 
         ClientUtils.getLogger().info("[ModuleManager] Successfully loaded ${modules.size} modules.")
     }

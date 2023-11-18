@@ -57,7 +57,7 @@ public abstract class MixinEffectRenderer {
         }, at = @At("HEAD"), cancellable = true
     )
     private void removeBlockBreakingParticles(CallbackInfo ci) {
-        if (Animations.noBlockParticles.get())
+        if (Animations.INSTANCE.getNoBlockParticles())
             ci.cancel();
     }
 
@@ -67,7 +67,7 @@ public abstract class MixinEffectRenderer {
         at = @At("HEAD"), cancellable = true, remap = false
     )
     private void removeBlockBreakingParticles_Forge(CallbackInfo ci) {
-        if (Animations.noBlockParticles.get())
+        if (Animations.INSTANCE.getNoBlockParticles())
             ci.cancel();
     }
 }

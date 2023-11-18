@@ -47,19 +47,19 @@ import kotlin.math.sqrt
 
 @ModuleInfo(name = "NoFall", spacedName = "No Fall", description = "Prevents you from taking fall damage.", category = ModuleCategory.PLAYER)
 class NoFall : Module() {
-    val typeValue = ListValue("Type", arrayOf("Edit", "Packet", "MLG", "AAC", "Spartan", "CubeCraft", "Hypixel", "Phase", "Verus", "Medusa", "Motion", "Matrix", "Vulcan"), "Edit")
+    val typeValue by ListValue("Type", arrayOf("Edit", "Packet", "MLG", "AAC", "Spartan", "CubeCraft", "Hypixel", "Phase", "Verus", "Medusa", "Motion", "Matrix", "Vulcan"), "Edit")
 
-    val editMode = ListValue("Edit-Mode", arrayOf("Always", "Default", "Smart", "NoGround", "Damage"), "Always", { typeValue.get().equals("edit", true) })
-    private val packetMode = ListValue("Packet-Mode", arrayOf("Default", "Smart"), "Default", { typeValue.get().equals("packet", true) })
-    private val aacMode = ListValue("AAC-Mode", arrayOf("Default", "LAAC", "3.3.11", "3.3.15", "4.x", "4.4.x", "Loyisa4.4.2", "5.0.4", "5.0.14"), "Default", { typeValue.get().equals("aac", true) })
-    private val hypixelMode = ListValue("Hypixel-Mode", arrayOf("Default", "Packet", "New"), "Default", { typeValue.get().equals("hypixel", true) })
-    private val matrixMode = ListValue("Matrix-Mode", arrayOf("Old", "6.2.x", "6.6.3"), "Old", { typeValue.get().equals("matrix", true) })
+    val editMode by ListValue("Edit-Mode", arrayOf("Always", "Default", "Smart", "NoGround", "Damage"), "Always") { typeValue.equals("edit", true) }
+    private val packetMode by ListValue("Packet-Mode", arrayOf("Default", "Smart"), "Default") { typeValue.equals("packet", true) }
+    private val aacMode by ListValue("AAC-Mode", arrayOf("Default", "LAAC", "3.3.11", "3.3.15", "4.x", "4.4.x", "Loyisa4.4.2", "5.0.4", "5.0.14"), "Default") { typeValue.equals("aac", true) }
+    private val hypixelMode by ListValue("Hypixel-Mode", arrayOf("Default", "Packet", "New"), "Default") { typeValue.equals("hypixel", true) }
+    private val matrixMode by ListValue("Matrix-Mode", arrayOf("Old", "6.2.x", "6.6.3"), "Old") { typeValue.equals("matrix", true) }
 
-    private val phaseOffsetValue = IntegerValue("PhaseOffset", 1, 0, 5, { typeValue.get().equals("phase", true) })
-    private val minFallDistanceValue = FloatValue("MinMLGHeight", 5F, 2F, 50F, "m", { typeValue.get().equals("mlg", true) })
-    private val flySpeedValue = FloatValue("MotionSpeed", -0.01F, -5F, 5F, { typeValue.get().equals("motion", true) })
+    private val phaseOffsetValue by IntegerValue("PhaseOffset", 1, 0, 5) { typeValue.equals("phase", true) }
+    private val minFallDistanceValue by FloatValue("MinMLGHeight", 5F, 2F, 50F, "m") { typeValue.equals("mlg", true) }
+    private val flySpeedValue by FloatValue("MotionSpeed", -0.01F, -5F, 5F) { typeValue.equals("motion", true) }
 
-    private val voidCheckValue = BoolValue("Void-Check", true)
+    private val voidCheckValue by BoolValue("Void-Check", true)
 
     private val aac4FlagCooldown = MSTimer()
     private val spartanTimer = TickTimer()
@@ -164,7 +164,7 @@ class NoFall : Module() {
             || mc.thePlayer.isSpectator || mc.thePlayer.capabilities.allowFlying || mc.thePlayer.capabilities.disableDamage)
             return
 
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue.get() && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
 
         if (BlockUtils.collideBlock(mc.thePlayer.entityBoundingBox) { it is BlockLiquid } || BlockUtils.collideBlock(AxisAlignedBB(mc.thePlayer.entityBoundingBox.maxX, mc.thePlayer.entityBoundingBox.maxY, mc.thePlayer.entityBoundingBox.maxZ, mc.thePlayer.entityBoundingBox.minX, mc.thePlayer.entityBoundingBox.minY - 0.01, mc.thePlayer.entityBoundingBox.minZ)) { it is BlockLiquid })
             return
@@ -174,8 +174,8 @@ class NoFall : Module() {
                 mc.timer.timerSpeed = 1F
         }
 
-        when (typeValue.get().lowercase(Locale.getDefault())) {
-            "packet" -> when (packetMode.get().lowercase(Locale.getDefault())) {
+        when (typeValue.lowercase(Locale.getDefault())) {
+            "packet" -> when (packetMode.lowercase(Locale.getDefault())) {
                 "default" -> {
                     if (mc.thePlayer.fallDistance > 2F)
                         mc.netHandler.addToSendQueue(C03PacketPlayer(true))
@@ -211,7 +211,7 @@ class NoFall : Module() {
                     needSpoof = true
                 }
             }
-            "matrix" -> when (matrixMode.get().lowercase(Locale.getDefault())) {
+            "matrix" -> when (matrixMode.lowercase(Locale.getDefault())) {
                 "old" -> {
                     if (mc.thePlayer.fallDistance > 3)
                         isDmgFalling = true
@@ -253,7 +253,7 @@ class NoFall : Module() {
                     }
                 }
             }
-            "aac" -> when (aacMode.get().lowercase(Locale.getDefault())) {
+            "aac" -> when (aacMode.lowercase(Locale.getDefault())) {
                 "default" -> {
                     if (mc.thePlayer.fallDistance > 2f) {
                         mc.netHandler.addToSendQueue(C03PacketPlayer(true))
@@ -287,7 +287,7 @@ class NoFall : Module() {
                     if (mc.thePlayer.fallDistance > 3)
                         isDmgFalling = true
 
-                    if (aacMode.get().equals("loyisa4.4.2", true)) {
+                    if (aacMode.equals("loyisa4.4.2", true)) {
                         if (aac4FlagCount >= 3 || aac4FlagCooldown.hasTimePassed(1500L)) {
                             return
                         }
@@ -333,10 +333,10 @@ class NoFall : Module() {
                 }
             }
             "motion" -> if (mc.thePlayer.fallDistance > 3F) {
-                mc.thePlayer.motionY = flySpeedValue.get().toDouble()
+                mc.thePlayer.motionY = flySpeedValue.toDouble()
             }
             "phase" -> {
-                if (mc.thePlayer.fallDistance > 3 + phaseOffsetValue.get()) {
+                if (mc.thePlayer.fallDistance > 3 + phaseOffsetValue) {
                     val fallPos = NewFallingPlayer(mc.thePlayer)
                         .findCollision(5) ?: return
                     if (fallPos.y - mc.thePlayer.motionY / 20.0 < mc.thePlayer.posY) {
@@ -353,7 +353,7 @@ class NoFall : Module() {
                     }
                 }
             }
-            "edit" -> if (editMode.get().equals("smart", true)) {
+            "edit" -> if (editMode.equals("smart", true)) {
                 if (mc.thePlayer.fallDistance.toInt() / 3 > lastFallDistRounded) {
                     lastFallDistRounded = mc.thePlayer.fallDistance.toInt() / 3
                     packetModify = true
@@ -361,7 +361,7 @@ class NoFall : Module() {
                 if (mc.thePlayer.onGround)
                     lastFallDistRounded = 0
             }
-            "hypixel" -> if (hypixelMode.get().equals("packet", true)) {
+            "hypixel" -> if (hypixelMode.equals("packet", true)) {
                 val offset = 2.5
                 if (!mc.thePlayer.onGround && mc.thePlayer.fallDistance - matrixFallTicks * offset >= 0.0) {
                     mc.netHandler.addToSendQueue(C03PacketPlayer(true))
@@ -392,9 +392,9 @@ class NoFall : Module() {
 
     @EventTarget
     fun onMotion(event: MotionEvent) {
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue.get() && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
 
-        if (typeValue.get().equals("aac", true) && aacMode.get().equals("4.x", true) && event.eventState == EventState.PRE) {
+        if (typeValue.equals("aac", true) && aacMode.equals("4.x", true) && event.eventState == EventState.PRE) {
             if (!inVoid()) {
                 if (aac4Fakelag) {
                     aac4Fakelag = false
@@ -426,7 +426,7 @@ class NoFall : Module() {
             }
             if (!aac4Fakelag)
                 aac4Fakelag = true
-        } else if (typeValue.get().equals("mlg", true)) {
+        } else if (typeValue.equals("mlg", true)) {
             if (event.eventState == EventState.PRE) {
                 currentMlgRotation = null
                 mlgTimer.update()
@@ -434,10 +434,10 @@ class NoFall : Module() {
                 if (!mlgTimer.hasTimePassed(10))
                     return
 
-                if (mc.thePlayer.fallDistance > minFallDistanceValue.get()) {
-                    val NewFallingPlayer = NewFallingPlayer(mc.thePlayer)
+                if (mc.thePlayer.fallDistance > minFallDistanceValue) {
+                    val newFallingPlayer = NewFallingPlayer(mc.thePlayer)
                     val maxDist = mc.playerController.blockReachDistance + 1.5
-                    val collision = NewFallingPlayer.findCollision(ceil(1.0 / mc.thePlayer.motionY * -maxDist).toInt()) ?: return
+                    val collision = newFallingPlayer.findCollision(ceil(1.0 / mc.thePlayer.motionY * -maxDist).toInt()) ?: return
                     var ok = Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.eyeHeight, mc.thePlayer.posZ).distanceTo(Vec3(collision).addVector(0.5, 0.5, 0.5)) < mc.playerController.blockReachDistance + sqrt(0.75)
 
                     if (mc.thePlayer.motionY < collision.y + 1 - mc.thePlayer.posY)
@@ -490,14 +490,14 @@ class NoFall : Module() {
     fun onPacket(event: PacketEvent) {
         mc.thePlayer ?: return
 
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue.get() && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
 
         val packet = event.packet
-        if (packet is S12PacketEntityVelocity && typeValue.get().equals("aac", true) && aacMode.get().equals("4.4.x", true) && mc.thePlayer.fallDistance > 1.8)
+        if (packet is S12PacketEntityVelocity && typeValue.equals("aac", true) && aacMode.equals("4.4.x", true) && mc.thePlayer.fallDistance > 1.8)
             packet.motionY = (packet.motionY * -0.1).toInt()
 
         if (packet is S08PacketPlayerPosLook) {
-            if (typeValue.get().equals("aac", true) && aacMode.get().equals("loyisa4.4.2", true)) {
+            if (typeValue.equals("aac", true) && aacMode.equals("loyisa4.4.2", true)) {
                 aac4FlagCount++
                 if(matrixFlagWait > 0) {
                     aac4FlagCooldown.reset()
@@ -505,7 +505,7 @@ class NoFall : Module() {
                     event.cancelEvent()
                 }
             }
-            if (typeValue.get().equals("matrix", true) && matrixMode.get().equals("old", true) && matrixFlagWait > 0) {
+            if (typeValue.equals("matrix", true) && matrixMode.equals("old", true) && matrixFlagWait > 0) {
                 matrixFlagWait = 0
                 mc.timer.timerSpeed = 1.0F
                 event.cancelEvent()
@@ -527,8 +527,8 @@ class NoFall : Module() {
                 mc.thePlayer.setPosition(mc.thePlayer.posX, packet.y, mc.thePlayer.posZ)
             }
 
-            if (typeValue.get().equals("edit", true)) {
-                val edits = editMode.get()
+            if (typeValue.equals("edit", true)) {
+                val edits = editMode
 
                 if (edits.equals("always", true)
                     || (edits.equals("default", true) && mc.thePlayer.fallDistance > 2.5F)
@@ -542,14 +542,14 @@ class NoFall : Module() {
                     packet.onGround = false
             }
 
-            if (typeValue.get().equals("medusa", true) && mc.thePlayer.fallDistance > 2.3F) {
+            if (typeValue.equals("medusa", true) && mc.thePlayer.fallDistance > 2.3F) {
                 event.cancelEvent()
                 PacketUtils.sendPacketNoEvent(C03PacketPlayer(true))
                 mc.thePlayer.fallDistance = 0F
             }
 
-            if (typeValue.get().equals("hypixel", true)) {
-                when (hypixelMode.get().lowercase(Locale.getDefault())) {
+            if (typeValue.equals("hypixel", true)) {
+                when (hypixelMode.lowercase(Locale.getDefault())) {
                     "default" -> if (mc.thePlayer.fallDistance > 1.5) {
                         packet.onGround = mc.thePlayer.ticksExisted % 2 == 0
                     }
@@ -560,13 +560,13 @@ class NoFall : Module() {
                 }
             }
 
-            if (typeValue.get().equals("verus", true) && needSpoof) {
+            if (typeValue.equals("verus", true) && needSpoof) {
                 packet.onGround = true
                 needSpoof = false
             }
 
-            if (typeValue.get().equals("aac", true)) {
-                when (aacMode.get().lowercase(Locale.getDefault())) {
+            if (typeValue.equals("aac", true)) {
+                when (aacMode.lowercase(Locale.getDefault())) {
                     "4.x" -> if (aac4Fakelag) {
                         event.cancelEvent()
                         if (packetModify) {
@@ -591,13 +591,13 @@ class NoFall : Module() {
                 }
             }
 
-            if (typeValue.get().equals("matrix", true) && matrixMode.get().equals("6.2.x", true) && matrixCanSpoof) {
+            if (typeValue.equals("matrix", true) && matrixMode.equals("6.2.x", true) && matrixCanSpoof) {
                 packet.onGround = true
                 matrixCanSpoof = false
             }
 
-            if (isDmgFalling && ((typeValue.get().equals("matrix", true) && matrixMode.get().equals("old", true))
-                        || (typeValue.get().equals("aac", true) && aacMode.get().equals("loyisa4.4.2", true)))) {
+            if (isDmgFalling && ((typeValue.equals("matrix", true) && matrixMode.equals("old", true))
+                        || (typeValue.equals("aac", true) && aacMode.equals("loyisa4.4.2", true)))) {
                 if (packet.onGround && mc.thePlayer.onGround) {
                     matrixFlagWait = 2
                     isDmgFalling = false
@@ -614,12 +614,12 @@ class NoFall : Module() {
 
     @EventTarget
     fun onMove(event: MoveEvent) {
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue.get() && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
 
         if (BlockUtils.collideBlock(mc.thePlayer.entityBoundingBox) { it is BlockLiquid } || BlockUtils.collideBlock(AxisAlignedBB(mc.thePlayer.entityBoundingBox.maxX, mc.thePlayer.entityBoundingBox.maxY, mc.thePlayer.entityBoundingBox.maxZ, mc.thePlayer.entityBoundingBox.minX, mc.thePlayer.entityBoundingBox.minY - 0.01, mc.thePlayer.entityBoundingBox.minZ)) { it is BlockLiquid })
             return
 
-        if (typeValue.get().equals("aac", true) && aacMode.get().equals("laac", true)) {
+        if (typeValue.equals("aac", true) && aacMode.equals("laac", true)) {
             if (!jumped && !mc.thePlayer.onGround && !mc.thePlayer.isOnLadder && !mc.thePlayer.isInWater && !mc.thePlayer.isInWeb && mc.thePlayer.motionY < 0.0) {
                 event.x = 0.0
                 event.z = 0.0
@@ -644,7 +644,7 @@ class NoFall : Module() {
                 off.toDouble(),
                 mc.thePlayer.posZ
             )
-            if (!mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, bb).isEmpty()) {
+            if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, bb).isNotEmpty()) {
                 return true
             }
             off += 2
@@ -664,7 +664,7 @@ class NoFall : Module() {
                 mc.thePlayer.posY - off,
                 mc.thePlayer.posZ
             )
-            if (!mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, bb).isEmpty())
+            if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, bb).isNotEmpty())
                 return true
 
             off += plus.toInt()
@@ -673,5 +673,5 @@ class NoFall : Module() {
     }
 
     override val tag: String
-        get() = typeValue.get()
+        get() = typeValue
 }

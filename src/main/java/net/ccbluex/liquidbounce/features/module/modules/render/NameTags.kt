@@ -76,11 +76,11 @@ class NameTags : Module() {
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-        for (entity in mc.theWorld.loadedEntityList) {
+        for (entity in RenderConfig.entities()) {
             if (!EntityUtils.isSelected(entity, false) && (!localValue.get() || entity != mc.thePlayer || (nfpValue.get() && mc.gameSettings.thirdPersonView == 0)))
                 continue
 
-            renderNameTags3D(entity as EntityLivingBase)
+            renderNameTags3D(entity)
         }
 
         glPopMatrix()

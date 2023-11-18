@@ -17,7 +17,7 @@ import net.ccbluex.liquidbounce.file.FileManager;
 import net.ccbluex.liquidbounce.ui.client.GuiBackground;
 import net.ccbluex.liquidbounce.ui.client.altmanager.GuiAltManager;
 import net.ccbluex.liquidbounce.ui.client.altmanager.menus.altgenerator.GuiTheAltening;
-import net.ccbluex.liquidbounce.ui.client.clickgui.newVer.NewUi;
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi;
 import net.ccbluex.liquidbounce.utils.EntityUtils;
 import net.ccbluex.liquidbounce.value.Value;
 

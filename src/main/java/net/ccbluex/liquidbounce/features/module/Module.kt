@@ -8,7 +8,6 @@ package net.ccbluex.liquidbounce.features.module
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.event.Listenable
 import net.ccbluex.liquidbounce.features.module.modules.client.AutoDisable.DisableEvent
-import net.ccbluex.liquidbounce.ui.client.clickgui.style.styles.flux.AnimationHelper
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type
 import net.ccbluex.liquidbounce.utils.ClientUtils
@@ -20,18 +19,6 @@ import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 
 open class Module : MinecraftInstance(), Listenable {
-
-    val valueTranslate = Translate(0F, 0F)
-    val moduleTranslate = Translate(0F, 0F)
-
-    @JvmField
-    var showSettings = false
-
-    @JvmField
-    var yPos1 = 30F
-
-    val animationHelper: AnimationHelper
-
     // Module information
     // TODO: Remove ModuleInfo and change to constructor (#Kotlin)
     var name: String
@@ -77,7 +64,6 @@ open class Module : MinecraftInstance(), Listenable {
         canEnable = moduleInfo.canEnable
         onlyEnable = moduleInfo.onlyEnable
         forceNoSound = moduleInfo.forceNoSound
-        animationHelper = AnimationHelper(this)
     }
 
     // Current state of module

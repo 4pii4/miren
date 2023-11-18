@@ -57,6 +57,10 @@ public abstract class MixinGuiIngameForge extends MixinGuiInGame {
         GlStateManager.disableAlpha();
     }
     
+    /**
+     * @author ccbluex
+     * @reason tab animation
+     */
     @Overwrite(remap = false)
     protected void renderPlayerList(int width, int height) {
         final Minecraft mc = Minecraft.getMinecraft();
@@ -65,13 +69,13 @@ public abstract class MixinGuiIngameForge extends MixinGuiInGame {
 
         if (!mc.isIntegratedServerRunning() || handler.getPlayerInfoMap().size() > 1 || scoreobjective != null)
         {
-            xScale = AnimationUtils.animate((mc.gameSettings.keyBindPlayerList.isKeyDown() ? 100F : 0F), xScale, Animations.tabAnimations.get().equalsIgnoreCase("none") ? 1F : 0.0125F * RenderUtils.deltaTime);
+            xScale = AnimationUtils.animate((mc.gameSettings.keyBindPlayerList.isKeyDown() ? 100F : 0F), xScale, Animations.INSTANCE.getTabAnimations().equalsIgnoreCase("none") ? 1F : 0.0125F * RenderUtils.deltaTime);
             float rescaled = xScale / 100F;
             boolean displayable = rescaled > 0F;
             this.overlayPlayerList.updatePlayerList(displayable);
             if (!displayable || pre(PLAYER_LIST)) return;
             GlStateManager.pushMatrix();
-            switch (Animations.tabAnimations.get().toLowerCase()) {
+            switch (Animations.INSTANCE.getTabAnimations().toLowerCase()) {
                 case "zoom":
                     GlStateManager.translate(width / 2F * (1F - rescaled), 0F, 0F);
                     GlStateManager.scale(rescaled, rescaled, rescaled);

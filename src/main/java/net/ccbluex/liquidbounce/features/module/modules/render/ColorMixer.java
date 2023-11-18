@@ -17,7 +17,7 @@ import net.ccbluex.liquidbounce.value.IntegerValue;
 import java.awt.*;
 import java.lang.reflect.Field;
 
-@ModuleInfo(name = "ColorMixer", description = "Mix two colors together.", category = ModuleCategory.COLOR, canEnable = false)
+@ModuleInfo(name = "ColorMixer", description = "Mix two colors together.", category = ModuleCategory.RENDER, canEnable = false)
 public class ColorMixer extends Module {
 
     private static float[] lastFraction = new float[]{};
