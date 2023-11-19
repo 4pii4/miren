@@ -69,15 +69,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase {
         final Minecraft mc = Minecraft.getMinecraft();
         final LongJump longJump = LiquidBounce.moduleManager.getModule(LongJump.class);
         final BowJump bowJump = LiquidBounce.moduleManager.getModule(BowJump.class);
-        if(LiquidBounce.moduleManager.get(LongJump.class).getState() && longJump.fakeValue.get()){
+        if(LiquidBounce.moduleManager.get(LongJump.class).getState() && longJump.getFakeValue().get()){
             float f2 = 1.62F;
-            final double y = longJump.rendery;
+            final double y = longJump.getRendery();
             f2 = (float) (1.62F - (mc.thePlayer.lastTickPosY + (((mc.thePlayer.posY - mc.thePlayer.lastTickPosY) * mc.timer.renderPartialTicks)) - y));
             return f2;
         }
-        if(LiquidBounce.moduleManager.get(BowJump.class).getState() && bowJump.fakeValue.get()){
+        if(LiquidBounce.moduleManager.get(BowJump.class).getState() && bowJump.getFakeValue().get()){
             float f2 = 1.62F;
-            final double y = bowJump.rendery;
+            final double y = bowJump.getRendery();
             f2 = (float) (1.62F - (mc.thePlayer.lastTickPosY + (((mc.thePlayer.posY - mc.thePlayer.lastTickPosY) * mc.timer.renderPartialTicks)) - y));
             return f2;
         }

@@ -119,7 +119,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
         }
 
         assert chams != null;
-        if (chams.getState() && chams.getTargetsValue().get() && chams.getLegacyMode().get() && ((chams.getLocalPlayerValue().get() && entity == Minecraft.getMinecraft().thePlayer) || EntityUtils.isSelected(entity, false))) {
+        if (chams.getState() && chams.getTargetsValue().get() && chams.getLegacyMode().get() && ((chams.getLocalPlayerValue().get() && entity == Minecraft.getMinecraft().thePlayer) && RenderConfig.INSTANCE.shouldRender(entity))) {
             GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
             GL11.glPolygonOffset(1.0F, -1000000F);
         }
@@ -134,7 +134,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
         assert chams != null;
         if (chams.getState() && chams.getTargetsValue().get() && chams.getLegacyMode().get() && ((chams.getLocalPlayerValue().get() && entity == Minecraft.getMinecraft().thePlayer) || EntityUtils.isSelected(entity, false))) {
             assert noRender != null;
-            if (!(noRender.getState() && noRender.shouldStopRender(entity))) {
+            if (!(noRender.getState() && noRender.shouldStopRender(entity) || !RenderConfig.INSTANCE.shouldRender(entity))) {
                 GL11.glPolygonOffset(1.0F, 1000000F);
                 GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
             }
@@ -423,7 +423,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
 
             final ESP esp = LiquidBounce.moduleManager.getModule(ESP.class);
             assert esp != null;
-            if(esp.getState() && EntityUtils.isSelected(entitylivingbaseIn, false)) {
+            if(esp.getState() && EntityUtils.isSelected(entitylivingbaseIn, false) && RenderConfig.INSTANCE.shouldRender(entitylivingbaseIn)) {
                 Minecraft mc = Minecraft.getMinecraft();
                 boolean fancyGraphics = mc.gameSettings.fancyGraphics;
                 mc.gameSettings.fancyGraphics = false;
@@ -431,7 +431,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
                 float gamma = mc.gameSettings.gammaSetting;
                 mc.gameSettings.gammaSetting = 100000F;
 
-                switch(esp.modeValue.get().toLowerCase()) {
+                switch(esp.getModeValue().get().toLowerCase()) {
                     case "wireframe":
                         glPushMatrix();
                         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -443,7 +443,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
                         GL11.glEnable(GL11.GL_BLEND);
                         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
                         RenderUtils.glColor(esp.getColor(entitylivingbaseIn));
-                        GL11.glLineWidth(esp.wireframeWidth.get());
+                        GL11.glLineWidth(esp.getWireframeWidth().get());
                         this.mainModel.render(entitylivingbaseIn, p_77036_2_, p_77036_3_, p_77036_4_, p_77036_5_, p_77036_6_, scaleFactor);
                         GL11.glPopAttrib();
                         GL11.glPopMatrix();
@@ -454,7 +454,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
 
                         final Color color = esp.getColor(entitylivingbaseIn);
                         OutlineUtils.setColor(color);
-                        OutlineUtils.renderOne(esp.outlineWidth.get());
+                        OutlineUtils.renderOne(esp.getOutlineWidth().get());
                         this.mainModel.render(entitylivingbaseIn, p_77036_2_, p_77036_3_, p_77036_4_, p_77036_5_, p_77036_6_, scaleFactor);
                         OutlineUtils.setColor(color);
                         OutlineUtils.renderTwo();
@@ -510,7 +510,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
             chamsColor = ColorUtils.reAlpha(chamsColor, chams.getAlphaValue().get());
             chamsBehindColor = ColorUtils.reAlpha(chamsBehindColor, chams.getBehindAlphaValue().get());
 
-            if (chamsFlag) {
+            if (chamsFlag  && RenderConfig.INSTANCE.shouldRender(entitylivingbaseIn)) {
                 Color chamsColor2 = new Color(0x00000000);
 
                 switch (chams.getBehindColorModeValue().get()) {
@@ -544,7 +544,7 @@ public abstract class MixinRendererLivingEntity extends MixinRender {
 
             this.mainModel.render(entitylivingbaseIn, p_77036_2_, p_77036_3_, p_77036_4_, p_77036_5_, p_77036_6_, scaleFactor);
 
-            if (chamsFlag) {
+            if (chamsFlag  && RenderConfig.INSTANCE.shouldRender(entitylivingbaseIn)) {
                 GL11.glEnable(depth);
                 GL11.glDepthMask(true);
 

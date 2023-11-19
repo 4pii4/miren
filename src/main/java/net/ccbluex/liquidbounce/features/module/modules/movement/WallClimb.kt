@@ -3,165 +3,118 @@
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/WYSI-Foundation/LiquidBouncePlus/
  */
-package net.ccbluex.liquidbounce.features.module.modules.movement;
+package net.ccbluex.liquidbounce.features.module.modules.movement
 
-import net.ccbluex.liquidbounce.event.*;
-import net.ccbluex.liquidbounce.features.module.Module;
-import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.module.ModuleInfo;
-import net.ccbluex.liquidbounce.utils.MovementUtils;
-import net.ccbluex.liquidbounce.utils.block.BlockUtils;
-import net.ccbluex.liquidbounce.value.FloatValue;
-import net.ccbluex.liquidbounce.value.ListValue;
-import net.minecraft.block.BlockAir;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
+import net.ccbluex.liquidbounce.event.*
+import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.utils.MovementUtils
+import net.ccbluex.liquidbounce.utils.block.BlockUtils.collideBlockIntersects
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.ListValue
+import net.minecraft.block.Block
+import net.minecraft.block.BlockAir
+import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.util.AxisAlignedBB
+import net.minecraft.util.MathHelper
+import java.util.*
 
 @ModuleInfo(name = "WallClimb", spacedName = "Wall Climb", description = "Allows you to climb up walls like a spider.", category = ModuleCategory.MOVEMENT)
-public class WallClimb extends Module {
-
-    private final ListValue modeValue = new ListValue("Mode", new String[] {"Simple", "CheckerClimb", "Clip", "AAC3.3.12", "AACGlide", "Verus"}, "Simple");
-    private final ListValue clipMode = new ListValue("ClipMode", new String[] {"Jump", "Fast"}, "Fast", () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final FloatValue checkerClimbMotionValue = new FloatValue("CheckerClimbMotion", 0F, 0F, 1F, () -> modeValue.get().equalsIgnoreCase("checkerclimb"));
-    private final FloatValue verusClimbSpeed = new FloatValue("VerusClimbSpeed", 0F, 0F, 1F, () -> modeValue.get().equalsIgnoreCase("verus"));
-
-    private boolean glitch, canClimb;
-    private int waited;
-
-    @Override
-    public void onEnable() {
-        glitch = false;
-        canClimb = false;
-        waited = 0;
+class WallClimb : Module() {
+    private val modeValue = ListValue("Mode", arrayOf("Simple", "CheckerClimb", "Clip", "AAC3.3.12", "AACGlide", "Verus"), "Simple")
+    private val clipMode = ListValue("ClipMode", arrayOf("Jump", "Fast"), "Fast") { modeValue.get().equals("clip", ignoreCase = true) }
+    private val checkerClimbMotionValue = FloatValue("CheckerClimbMotion", 0f, 0f, 1f) { modeValue.get().equals("checkerclimb", ignoreCase = true) }
+    private val verusClimbSpeed = FloatValue("VerusClimbSpeed", 0f, 0f, 1f) { modeValue.get().equals("verus", ignoreCase = true) }
+    private var glitch = false
+    private var canClimb = false
+    private var waited = 0
+    override fun onEnable() {
+        glitch = false
+        canClimb = false
+        waited = 0
     }
 
     @EventTarget
-    public void onMove(MoveEvent event) {
-        if(!mc.thePlayer.isCollidedHorizontally || mc.thePlayer.isOnLadder() || mc.thePlayer.isInWater() || mc.thePlayer.isInLava())
-            return;
-
-        if("simple".equalsIgnoreCase(modeValue.get())) {
-            event.setY(0.2D);
-            mc.thePlayer.motionY = 0D;
+    fun onMove(event: MoveEvent) {
+        if (!mc.thePlayer.isCollidedHorizontally || mc.thePlayer.isOnLadder || mc.thePlayer.isInWater || mc.thePlayer.isInLava) return
+        if ("simple".equals(modeValue.get(), ignoreCase = true)) {
+            event.y = 0.2
+            mc.thePlayer.motionY = 0.0
         }
     }
 
     @EventTarget
-    public void onJump(JumpEvent event) {
-        if (modeValue.get().equalsIgnoreCase("verus") && canClimb)
-            event.cancelEvent();
+    fun onJump(event: JumpEvent) {
+        if (modeValue.get().equals("verus", ignoreCase = true) && canClimb) event.cancelEvent()
     }
 
     @EventTarget
-    public void onUpdate(MotionEvent event) {
-        if(event.getEventState() != EventState.POST)
-            return;
-
-        switch(modeValue.get().toLowerCase()) {
-            case "clip":
-                if(mc.thePlayer.motionY < 0)
-                    glitch = true;
-
-                if(mc.thePlayer.isCollidedHorizontally) {
-                    switch(clipMode.get().toLowerCase()) {
-                        case "jump":
-                            if(mc.thePlayer.onGround)
-                                mc.thePlayer.jump();
-                            break;
-                        case "fast":
-                            if(mc.thePlayer.onGround)
-                                mc.thePlayer.motionY = .42;
-                            else if(mc.thePlayer.motionY < 0)
-                                mc.thePlayer.motionY = -0.3;
-                            break;
+    fun onUpdate(event: MotionEvent) {
+        if (event.eventState !== EventState.POST) return
+        when (modeValue.get().lowercase(Locale.getDefault())) {
+            "clip" -> {
+                if (mc.thePlayer.motionY < 0) glitch = true
+                if (mc.thePlayer.isCollidedHorizontally) {
+                    when (clipMode.get().lowercase(Locale.getDefault())) {
+                        "jump" -> if (mc.thePlayer.onGround) mc.thePlayer.jump()
+                        "fast" -> if (mc.thePlayer.onGround) mc.thePlayer.motionY = .42 else if (mc.thePlayer.motionY < 0) mc.thePlayer.motionY = -0.3
                     }
                 }
-                break;
-            case "checkerclimb":
-                final boolean isInsideBlock = BlockUtils.collideBlockIntersects(mc.thePlayer.getEntityBoundingBox(), block -> !(block instanceof BlockAir));
-                final float motion = checkerClimbMotionValue.get();
-
-                if(isInsideBlock && motion != 0F)
-                    mc.thePlayer.motionY = motion;
-                break;
-            case "aac3.3.12":
-                if(mc.thePlayer.isCollidedHorizontally && !mc.thePlayer.isOnLadder()) {
-                    waited++;
-
-                    if(waited == 1)
-                        mc.thePlayer.motionY = 0.43;
-
-                    if(waited == 12)
-                        mc.thePlayer.motionY = 0.43;
-
-                    if(waited == 23)
-                        mc.thePlayer.motionY = 0.43;
-
-                    if(waited == 29)
-                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.5, mc.thePlayer.posZ);
-
-                    if(waited >= 30)
-                        waited = 0;
-                }else if(mc.thePlayer.onGround)
-                    waited = 0;
-                break;
-            case "aacglide":
-                if(!mc.thePlayer.isCollidedHorizontally || mc.thePlayer.isOnLadder())
-                    return;
-
-                mc.thePlayer.motionY = -0.189;
-                break;
-            case "verus":
-                if (!mc.thePlayer.isCollidedHorizontally || mc.thePlayer.isInWater() || mc.thePlayer.isInLava() || mc.thePlayer.isOnLadder() || mc.thePlayer.isInWeb || mc.thePlayer.isOnLadder()) {
-                    canClimb = false;
-                } else {
-                    canClimb = true; 
-                    mc.thePlayer.motionY = verusClimbSpeed.get(); 
-                    mc.thePlayer.onGround = true;
-                }
-                break;
-        }
-    }
-
-    @EventTarget
-    public void onPacket(final PacketEvent event) {
-        final Packet<?> packet = event.getPacket();
-
-        if(packet instanceof C03PacketPlayer) {
-            final C03PacketPlayer packetPlayer = (C03PacketPlayer) packet;
-
-            if(glitch) {
-                final float yaw = (float) MovementUtils.getDirection();
-
-                packetPlayer.x = packetPlayer.x - MathHelper.sin(yaw) * 0.00000001D;
-                packetPlayer.z = packetPlayer.z + MathHelper.cos(yaw) * 0.00000001D;
-
-                glitch = false;
             }
 
-            if (canClimb)
-                packetPlayer.onGround = true;
+            "checkerclimb" -> {
+                val isInsideBlock = collideBlockIntersects(mc.thePlayer.entityBoundingBox) { block: Block? -> block !is BlockAir }
+                val motion = checkerClimbMotionValue.get()
+                if (isInsideBlock && motion != 0f) mc.thePlayer.motionY = motion.toDouble()
+            }
+
+            "aac3.3.12" -> if (mc.thePlayer.isCollidedHorizontally && !mc.thePlayer.isOnLadder) {
+                waited++
+                if (waited == 1) mc.thePlayer.motionY = 0.43
+                if (waited == 12) mc.thePlayer.motionY = 0.43
+                if (waited == 23) mc.thePlayer.motionY = 0.43
+                if (waited == 29) mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.5, mc.thePlayer.posZ)
+                if (waited >= 30) waited = 0
+            } else if (mc.thePlayer.onGround) waited = 0
+
+            "aacglide" -> {
+                if (!mc.thePlayer.isCollidedHorizontally || mc.thePlayer.isOnLadder) return
+                mc.thePlayer.motionY = -0.189
+            }
+
+            "verus" -> if (!mc.thePlayer.isCollidedHorizontally || mc.thePlayer.isInWater || mc.thePlayer.isInLava || mc.thePlayer.isOnLadder || mc.thePlayer.isInWeb || mc.thePlayer.isOnLadder) {
+                canClimb = false
+            } else {
+                canClimb = true
+                mc.thePlayer.motionY = verusClimbSpeed.get().toDouble()
+                mc.thePlayer.onGround = true
+            }
         }
     }
 
     @EventTarget
-    public void onBlockBB(final BlockBBEvent event) {
-        if(mc.thePlayer == null)
-            return;
+    fun onPacket(event: PacketEvent) {
+        val packet = event.packet
+        if (packet is C03PacketPlayer) {
+            val packetPlayer = packet
+            if (glitch) {
+                val yaw = MovementUtils.getDirection().toFloat()
+                packetPlayer.x = packetPlayer.x - MathHelper.sin(yaw) * 0.00000001
+                packetPlayer.z = packetPlayer.z + MathHelper.cos(yaw) * 0.00000001
+                glitch = false
+            }
+            if (canClimb) packetPlayer.onGround = true
+        }
+    }
 
-        final String mode = modeValue.get();
-
-        switch(mode.toLowerCase()) {
-            case "checkerclimb":
-                if(event.getY() > mc.thePlayer.posY)
-                    event.setBoundingBox(null);
-                break;
-            case "clip":
-                if(event.getBlock() != null && mc.thePlayer != null && event.getBlock() instanceof BlockAir && event.getY() < mc.thePlayer.posY && mc.thePlayer.isCollidedHorizontally && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava())
-                    event.setBoundingBox(new AxisAlignedBB(0, 0, 0, 1, 1, 1).offset(mc.thePlayer.posX, (int) mc.thePlayer.posY - 1, mc.thePlayer.posZ));
-                break;
+    @EventTarget
+    fun onBlockBB(event: BlockBBEvent) {
+        if (mc.thePlayer == null) return
+        val mode = modeValue.get()
+        when (mode.lowercase(Locale.getDefault())) {
+            "checkerclimb" -> if (event.y > mc.thePlayer.posY) event.boundingBox = null
+            "clip" -> if (event.block != null && mc.thePlayer != null && event.block is BlockAir && event.y < mc.thePlayer.posY && mc.thePlayer.isCollidedHorizontally && !mc.thePlayer.isOnLadder && !mc.thePlayer.isInWater && !mc.thePlayer.isInLava) event.boundingBox = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0).offset(mc.thePlayer.posX, (mc.thePlayer.posY.toInt() - 1).toDouble(), mc.thePlayer.posZ)
         }
     }
 }

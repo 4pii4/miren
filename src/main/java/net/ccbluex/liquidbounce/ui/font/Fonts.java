@@ -111,7 +111,6 @@ public class Fonts {
         NOTIFICATIONS2 = new GameFontRenderer(getFont("noti2.ttf", 85));
         astolfoFont = new FontRenderer(Minecraft.getMinecraft().gameSettings, new ResourceLocation("liquidbounce+/font/astolfo.png"), Minecraft.getMinecraft().renderEngine, false);
 
-
         try {
             CUSTOM_FONT_RENDERERS.clear();
 

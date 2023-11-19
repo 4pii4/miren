@@ -25,6 +25,7 @@ import net.ccbluex.liquidbounce.utils.*
 import net.ccbluex.liquidbounce.utils.TextColorUtils.darkGray
 import net.ccbluex.liquidbounce.utils.TextColorUtils.red
 import net.ccbluex.liquidbounce.utils.misc.sound.TipSoundManager
+import net.minecraft.potion.Potion
 import net.minecraft.util.ResourceLocation
 import kotlin.concurrent.thread
 

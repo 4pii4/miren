@@ -10,7 +10,6 @@ import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type
-import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.EntityUtils
 import net.ccbluex.liquidbounce.utils.ServerUtils
 import net.ccbluex.liquidbounce.utils.misc.HttpUtils
@@ -27,7 +26,7 @@ import kotlin.concurrent.thread
     category = ModuleCategory.MISC
 )
 class AntiStaff : Module() {
-    private var staffs = mutableListOf<String>()
+    private var bmcStaffs = mutableListOf<String>()
     private var mushmcstaffs = mutableListOf<String>()
     private var hypixelstaffs = mutableListOf<String>()
     private var gommehdstaffs = mutableListOf<String>()
@@ -57,16 +56,24 @@ class AntiStaff : Module() {
     private val onGamster: Boolean
         get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("mc.gamster.org", true)
 
-
-
-    override fun onInitialize() {
+    fun init() {
         thread {
-            staffs.addAll(HttpUtils.get(bmcStaffList).split(","))
+            bmcStaffs.clear()
+            mushmcstaffs.clear()
+            gamsterstaffs.clear()
+            hypixelstaffs.clear()
+            gommehdstaffs.clear()
+
+            bmcStaffs.addAll(HttpUtils.get(bmcStaffList).split(","))
             mushmcstaffs.addAll(HttpUtils.get(mushStaffList).split(","))
             gamsterstaffs.addAll(HttpUtils.get(gamsterStaffList).split(","))
             hypixelstaffs.addAll(HttpUtils.get(hypixelStaffList).split(","))
             gommehdstaffs.addAll(HttpUtils.get(gommeHDStaffList).split(","))
         }
+    }
+
+    override fun onInitialize() {
+        init()
     }
 
     override fun onEnable() {
@@ -101,7 +108,7 @@ class AntiStaff : Module() {
 
     private fun isStaff(entity: Entity): Boolean {
         if (onBMC) {
-            return entity.name in staffs || entity.displayName.unformattedText in staffs
+            return entity.name in bmcStaffs || entity.displayName.unformattedText in bmcStaffs
         } else if (onMushMC) {
             return entity.name in mushmcstaffs || entity.displayName.unformattedText in mushmcstaffs
         } else if (onHypixel) {
@@ -210,12 +217,12 @@ class AntiStaff : Module() {
 
         mc.netHandler.playerInfoMap.forEach {
             val networkName = ColorUtils.stripColor(EntityUtils.getName(it))!!.split(" ")[0]
-            if (networkName in staffs)
+            if (networkName in bmcStaffs)
                 warn(networkName)
         }
 
         mc.theWorld.loadedEntityList.forEach {
-            if (it.name in staffs)
+            if (it.name in bmcStaffs)
                 warn(it.name)
         }
     }

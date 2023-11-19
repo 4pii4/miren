@@ -142,7 +142,7 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
             LiquidBounce.eventManager.callEvent(event);
 
             final Sneak sneak = LiquidBounce.moduleManager.getModule(Sneak.class);
-            final boolean fakeSprint = LiquidBounce.moduleManager.getModule(AntiHunger.class).getState() || (sneak.getState() && (!MovementUtils.isMoving() || !sneak.stopMoveValue.get()) && sneak.modeValue.get().equalsIgnoreCase("MineSecure"));
+            final boolean fakeSprint = LiquidBounce.moduleManager.getModule(AntiHunger.class).getState() || (sneak.getState() && (!MovementUtils.isMoving() || !sneak.getStopMoveValue().get()) && sneak.getModeValue().get().equalsIgnoreCase("MineSecure"));
 
             ActionEvent actionEvent = new ActionEvent(this.isSprinting() && !fakeSprint, this.isSneaking());
 
@@ -158,7 +158,7 @@ public abstract class MixinEntityPlayerSP extends MixinAbstractClientPlayer {
                 this.serverSprintState = sprinting;
             }
 
-            if (sneaking != this.serverSneakState && (!sneak.getState() || sneak.modeValue.get().equalsIgnoreCase("Legit"))) {
+            if (sneaking != this.serverSneakState && (!sneak.getState() || sneak.getModeValue().get().equalsIgnoreCase("Legit"))) {
                 if (sneaking)
                     this.sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityPlayerSP) (Object) this, C0BPacketEntityAction.Action.START_SNEAKING));
                 else

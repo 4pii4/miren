@@ -11,6 +11,8 @@ import net.ccbluex.liquidbounce.ui.client.hud.element.ElementInfo
 import net.ccbluex.liquidbounce.ui.client.hud.element.Side
 import net.ccbluex.liquidbounce.ui.font.AWTFontRenderer.Companion.assumeNonVolatile
 import net.ccbluex.liquidbounce.ui.font.Fonts
+import net.ccbluex.liquidbounce.utils.PotionUtils
+import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.value.BoolValue
 import net.ccbluex.liquidbounce.value.FontValue
 import net.minecraft.client.resources.I18n
@@ -75,9 +77,16 @@ class Effects(x: Double = 2.0, y: Double = 10.0, scale: Float = 1F,
                     width = stringWidth
             }
 
+            val potionIcon = PotionUtils.getPotionIcon(potion)
+
             when (side.horizontal) {
-                Side.Horizontal.RIGHT -> fontRenderer.drawString(name, -stringWidth, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toFloat() else 0F, potion.liquidColor, shadow.get())
-                Side.Horizontal.LEFT, Side.Horizontal.MIDDLE -> fontRenderer.drawString(name, 0F, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toFloat() else 0F, potion.liquidColor, shadow.get())
+                Side.Horizontal.RIGHT -> {
+                    fontRenderer.drawString(name, -stringWidth, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toFloat() else 0F, potion.liquidColor, shadow.get())
+                    RenderUtils.drawImage(potionIcon, -stringWidth - 16.0, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toDouble() else 0.0, 8.0, 8.0)
+                }
+                Side.Horizontal.LEFT, Side.Horizontal.MIDDLE -> {
+                    fontRenderer.drawString(name, 0F, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toFloat() else 0F, potion.liquidColor, shadow.get())
+                }
             }
 
             if (side.vertical == Side.Vertical.UP)

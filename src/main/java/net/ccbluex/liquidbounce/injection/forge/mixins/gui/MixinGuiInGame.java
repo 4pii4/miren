@@ -48,7 +48,7 @@ public abstract class MixinGuiInGame extends MixinGui {
     @Inject(method = "showCrosshair", at = @At("HEAD"), cancellable = true) 
     private void injectCrosshair(CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
         final Crosshair crossHair = LiquidBounce.moduleManager.getModule(Crosshair.class);
-        if (crossHair.getState() && crossHair.noVanillaCH.get())
+        if (crossHair.getState() && crossHair.getNoVanillaCH().get())
             callbackInfoReturnable.setReturnValue(false);
     }
 

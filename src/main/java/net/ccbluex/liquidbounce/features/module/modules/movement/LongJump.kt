@@ -3,513 +3,452 @@
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/WYSI-Foundation/LiquidBouncePlus/
  */
-package net.ccbluex.liquidbounce.features.module.modules.movement;
+package net.ccbluex.liquidbounce.features.module.modules.movement
 
-import net.ccbluex.liquidbounce.LiquidBounce;
-import net.ccbluex.liquidbounce.event.*;
-import net.ccbluex.liquidbounce.features.module.Module;
-import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.module.ModuleInfo;
-import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification;
-import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type;
-import net.ccbluex.liquidbounce.utils.ClientUtils;
-import net.ccbluex.liquidbounce.utils.MovementUtils;
-import net.ccbluex.liquidbounce.utils.PacketUtils;
-import net.ccbluex.liquidbounce.utils.PosLookInstance;
-import net.ccbluex.liquidbounce.utils.timer.MSTimer;
-import net.ccbluex.liquidbounce.value.BoolValue;
-import net.ccbluex.liquidbounce.value.FloatValue;
-import net.ccbluex.liquidbounce.value.IntegerValue;
-import net.ccbluex.liquidbounce.value.ListValue;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.item.ItemEnderPearl;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.network.play.server.S08PacketPlayerPosLook;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
+import net.ccbluex.liquidbounce.LiquidBounce
+import net.ccbluex.liquidbounce.event.*
+import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type
+import net.ccbluex.liquidbounce.utils.ClientUtils
+import net.ccbluex.liquidbounce.utils.MovementUtils
+import net.ccbluex.liquidbounce.utils.PacketUtils.sendPacketNoEvent
+import net.ccbluex.liquidbounce.utils.PosLookInstance
+import net.ccbluex.liquidbounce.utils.timer.MSTimer
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
+import net.minecraft.item.ItemEnderPearl
+import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.network.play.client.C03PacketPlayer.*
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
+import net.minecraft.network.play.client.C09PacketHeldItemChange
+import net.minecraft.network.play.server.S08PacketPlayerPosLook
+import net.minecraft.util.BlockPos
+import net.minecraft.util.EnumFacing
+import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
 @ModuleInfo(name = "LongJump", spacedName = "Long Jump", description = "Allows you to jump further.", category = ModuleCategory.MOVEMENT)
-public class LongJump extends Module {
-
-    private final ListValue modeValue = new ListValue("Mode", new String[] {"NCP", "Damage", "AACv1", "AACv2", "AACv3", "AACv4", "Mineplex", "Mineplex2", "Mineplex3", "RedeskyMaki", "Redesky", "InfiniteRedesky", "MatrixFlag", "VerusDmg", "Pearl"}, "NCP");
-    private final BoolValue autoJumpValue = new BoolValue("AutoJump", false);
-
-    private final FloatValue ncpBoostValue = new FloatValue("NCPBoost", 4.25F, 1F, 10F, () -> modeValue.get().equalsIgnoreCase("ncp"));
-
-    private final FloatValue matrixBoostValue = new FloatValue("MatrixFlag-Boost", 1.95F, 0F, 3F, () -> modeValue.get().equalsIgnoreCase("matrixflag"));
-    private final FloatValue matrixHeightValue = new FloatValue("MatrixFlag-Height", 5F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("matrixflag"));
-    private final BoolValue matrixSilentValue = new BoolValue("MatrixFlag-Silent", true, () -> modeValue.get().equalsIgnoreCase("matrixflag"));
-    private final ListValue matrixBypassModeValue = new ListValue("MatrixFlag-BypassMode", new String[] {"Motion", "Clip", "None"}, "EqualMotion", () -> modeValue.get().equalsIgnoreCase("matrixflag"));
-    private final BoolValue matrixDebugValue = new BoolValue("MatrixFlag-Debug", true, () -> modeValue.get().equalsIgnoreCase("matrixflag"));
-
-    private final BoolValue redeskyTimerBoostValue = new BoolValue("Redesky-TimerBoost", false, () -> modeValue.get().equalsIgnoreCase("redesky"));
-    private final BoolValue redeskyGlideAfterTicksValue = new BoolValue("Redesky-GlideAfterTicks", false, () -> modeValue.get().equalsIgnoreCase("redesky"));
-    private final IntegerValue redeskyTickValue = new IntegerValue("Redesky-Ticks", 21, 1, 25, () -> modeValue.get().equalsIgnoreCase("redesky"));
-    private final FloatValue redeskyYMultiplier = new FloatValue("Redesky-YMultiplier", 0.77F, 0.1F, 1F, () -> modeValue.get().equalsIgnoreCase("redesky"));
-    private final FloatValue redeskyXZMultiplier = new FloatValue("Redesky-XZMultiplier", 0.9F, 0.1F, 1F, () -> modeValue.get().equalsIgnoreCase("redesky"));
-    private final FloatValue redeskyTimerBoostStartValue = new FloatValue("Redesky-TimerBoostStart", 1.85F, 0.05F, 10F, () -> modeValue.get().equalsIgnoreCase("redesky") && redeskyTimerBoostValue.get());
-    private final FloatValue redeskyTimerBoostEndValue = new FloatValue("Redesky-TimerBoostEnd", 1.0F, 0.05F, 10F, () -> modeValue.get().equalsIgnoreCase("redesky") && redeskyTimerBoostValue.get());
-    private final IntegerValue redeskyTimerBoostSlowDownSpeedValue = new IntegerValue("Redesky-TimerBoost-SlowDownSpeed", 2, 1, 10, () -> modeValue.get().equalsIgnoreCase("redesky") && redeskyTimerBoostValue.get());
-
-    private final ListValue verusDmgModeValue = new ListValue("VerusDmg-DamageMode", new String[]{"Instant", "InstantC06", "Jump"}, "None", () -> modeValue.get().equalsIgnoreCase("verusdmg"));
-    private final FloatValue verusBoostValue = new FloatValue("VerusDmg-Boost", 4.25F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("verusdmg"));
-    private final FloatValue verusHeightValue = new FloatValue("VerusDmg-Height", 0.42F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("verusdmg"));
-    private final FloatValue verusTimerValue = new FloatValue("VerusDmg-Timer", 1F, 0.05F, 10F, () -> modeValue.get().equalsIgnoreCase("verusdmg"));
-
-    private final FloatValue pearlBoostValue = new FloatValue("Pearl-Boost", 4.25F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("pearl"));
-    private final FloatValue pearlHeightValue = new FloatValue("Pearl-Height", 0.42F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("pearl"));
-    private final FloatValue pearlTimerValue = new FloatValue("Pearl-Timer", 1F, 0.05F, 10F, () -> modeValue.get().equalsIgnoreCase("pearl"));
-
-    private final FloatValue damageBoostValue = new FloatValue("Damage-Boost", 4.25F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("damage"));
-    private final FloatValue damageHeightValue = new FloatValue("Damage-Height", 0.42F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("damage"));
-    private final FloatValue damageTimerValue = new FloatValue("Damage-Timer", 1F, 0.05F, 10F, () -> modeValue.get().equalsIgnoreCase("damage"));
-    private final BoolValue damageNoMoveValue = new BoolValue("Damage-NoMove", false, () -> modeValue.get().equalsIgnoreCase("damage"));
-    private final BoolValue damageARValue = new BoolValue("Damage-AutoReset", false, () -> modeValue.get().equalsIgnoreCase("damage"));
-
-    public final BoolValue fakeValue = new BoolValue("SpoofY", false);
-
-    private final BoolValue autoDisableValue = new BoolValue("AutoDisable", false);
-
-    private boolean hasJumped = false;
-    private boolean no = false;
-
-    private boolean jumped;
-
-    private int jumpState = 0;
-    private boolean canBoost;
-    private boolean teleported;
-    private boolean canMineplexBoost;
-    private int ticks = 0;
-    public double rendery = 0.0;
-    private float currentTimer = 1F;
-
-    private boolean verusDmged, hpxDamage, damaged = false;
-    private int verusJumpTimes = 0;
-    private int pearlState = 0;
-
-    private double lastMotX, lastMotY, lastMotZ;
-    private boolean flagged = false;
-    private boolean hasFell = false;
-
-    private final MSTimer dmgTimer = new MSTimer();
-    private final PosLookInstance posLookInstance = new PosLookInstance();
-
-    private void debug(String message) {
-        if (matrixDebugValue.get())
-            ClientUtils.displayChatMessage(message);
+class LongJump : Module() {
+    private val modeValue = ListValue("Mode", arrayOf("NCP", "Damage", "AACv1", "AACv2", "AACv3", "AACv4", "Mineplex", "Mineplex2", "Mineplex3", "RedeskyMaki", "Redesky", "InfiniteRedesky", "MatrixFlag", "VerusDmg", "Pearl"), "NCP")
+    private val autoJumpValue = BoolValue("AutoJump", false)
+    private val ncpBoostValue = FloatValue("NCPBoost", 4.25f, 1f, 10f) { modeValue.get().equals("ncp", ignoreCase = true) }
+    private val matrixBoostValue = FloatValue("MatrixFlag-Boost", 1.95f, 0f, 3f) { modeValue.get().equals("matrixflag", ignoreCase = true) }
+    private val matrixHeightValue = FloatValue("MatrixFlag-Height", 5f, 0f, 10f) { modeValue.get().equals("matrixflag", ignoreCase = true) }
+    private val matrixSilentValue = BoolValue("MatrixFlag-Silent", true) { modeValue.get().equals("matrixflag", ignoreCase = true) }
+    private val matrixBypassModeValue = ListValue("MatrixFlag-BypassMode", arrayOf("Motion", "Clip", "None"), "EqualMotion") { modeValue.get().equals("matrixflag", ignoreCase = true) }
+    private val matrixDebugValue = BoolValue("MatrixFlag-Debug", true) { modeValue.get().equals("matrixflag", ignoreCase = true) }
+    private val redeskyTimerBoostValue = BoolValue("Redesky-TimerBoost", false) { modeValue.get().equals("redesky", ignoreCase = true) }
+    private val redeskyGlideAfterTicksValue = BoolValue("Redesky-GlideAfterTicks", false) { modeValue.get().equals("redesky", ignoreCase = true) }
+    private val redeskyTickValue = IntegerValue("Redesky-Ticks", 21, 1, 25) { modeValue.get().equals("redesky", ignoreCase = true) }
+    private val redeskyYMultiplier = FloatValue("Redesky-YMultiplier", 0.77f, 0.1f, 1f) { modeValue.get().equals("redesky", ignoreCase = true) }
+    private val redeskyXZMultiplier = FloatValue("Redesky-XZMultiplier", 0.9f, 0.1f, 1f) { modeValue.get().equals("redesky", ignoreCase = true) }
+    private val redeskyTimerBoostStartValue = FloatValue("Redesky-TimerBoostStart", 1.85f, 0.05f, 10f) { modeValue.get().equals("redesky", ignoreCase = true) && redeskyTimerBoostValue.get() }
+    private val redeskyTimerBoostEndValue = FloatValue("Redesky-TimerBoostEnd", 1.0f, 0.05f, 10f) { modeValue.get().equals("redesky", ignoreCase = true) && redeskyTimerBoostValue.get() }
+    private val redeskyTimerBoostSlowDownSpeedValue = IntegerValue("Redesky-TimerBoost-SlowDownSpeed", 2, 1, 10) { modeValue.get().equals("redesky", ignoreCase = true) && redeskyTimerBoostValue.get() }
+    private val verusDmgModeValue = ListValue("VerusDmg-DamageMode", arrayOf("Instant", "InstantC06", "Jump"), "None") { modeValue.get().equals("verusdmg", ignoreCase = true) }
+    private val verusBoostValue = FloatValue("VerusDmg-Boost", 4.25f, 0f, 10f) { modeValue.get().equals("verusdmg", ignoreCase = true) }
+    private val verusHeightValue = FloatValue("VerusDmg-Height", 0.42f, 0f, 10f) { modeValue.get().equals("verusdmg", ignoreCase = true) }
+    private val verusTimerValue = FloatValue("VerusDmg-Timer", 1f, 0.05f, 10f) { modeValue.get().equals("verusdmg", ignoreCase = true) }
+    private val pearlBoostValue = FloatValue("Pearl-Boost", 4.25f, 0f, 10f) { modeValue.get().equals("pearl", ignoreCase = true) }
+    private val pearlHeightValue = FloatValue("Pearl-Height", 0.42f, 0f, 10f) { modeValue.get().equals("pearl", ignoreCase = true) }
+    private val pearlTimerValue = FloatValue("Pearl-Timer", 1f, 0.05f, 10f) { modeValue.get().equals("pearl", ignoreCase = true) }
+    private val damageBoostValue = FloatValue("Damage-Boost", 4.25f, 0f, 10f) { modeValue.get().equals("damage", ignoreCase = true) }
+    private val damageHeightValue = FloatValue("Damage-Height", 0.42f, 0f, 10f) { modeValue.get().equals("damage", ignoreCase = true) }
+    private val damageTimerValue = FloatValue("Damage-Timer", 1f, 0.05f, 10f) { modeValue.get().equals("damage", ignoreCase = true) }
+    private val damageNoMoveValue = BoolValue("Damage-NoMove", false) { modeValue.get().equals("damage", ignoreCase = true) }
+    private val damageARValue = BoolValue("Damage-AutoReset", false) { modeValue.get().equals("damage", ignoreCase = true) }
+    val fakeValue = BoolValue("SpoofY", false)
+    private val autoDisableValue = BoolValue("AutoDisable", false)
+    private var hasJumped = false
+    private var no = false
+    private var jumped = false
+    private var jumpState = 0
+    private var canBoost = false
+    private var teleported = false
+    private var canMineplexBoost = false
+    private var ticks = 0
+    var rendery = 0.0
+    private var currentTimer = 1f
+    private var verusDmged = false
+    private var hpxDamage = false
+    private var damaged = false
+    private var verusJumpTimes = 0
+    private var pearlState = 0
+    private var lastMotX = 0.0
+    private var lastMotY = 0.0
+    private var lastMotZ = 0.0
+    private var flagged = false
+    private var hasFell = false
+    private val dmgTimer = MSTimer()
+    private val posLookInstance = PosLookInstance()
+    private fun debug(message: String) {
+        if (matrixDebugValue.get()) ClientUtils.displayChatMessage(message)
     }
 
-    public void onEnable() {
-        if (mc.thePlayer == null) return;
-        if (modeValue.get().equalsIgnoreCase("redesky") && redeskyTimerBoostValue.get())
-            currentTimer = redeskyTimerBoostStartValue.get();
-
-        jumped = false;
-        hasJumped = false;
-        no = false;
-        jumpState = 0;
-        ticks = 0;
-        verusDmged = false;
-        hpxDamage = false;
-        damaged = false;
-        flagged = false;
-        hasFell = false;
-        pearlState = 0;
-        verusJumpTimes = 0;
-
-        dmgTimer.reset();
-        posLookInstance.reset();
-
-        rendery = mc.thePlayer.posY;
-
-        double x = mc.thePlayer.posX;
-        double y = mc.thePlayer.posY;
-        double z = mc.thePlayer.posZ;
-
-        if (modeValue.get().equalsIgnoreCase("verusdmg")) {
-            if (verusDmgModeValue.get().equalsIgnoreCase("Instant")) {
-                if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, 4, 0).expand(0, 0, 0)).isEmpty()) {
-                    PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, false));
-                    PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, false));
-                    PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, true));
-                    mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+    override fun onEnable() {
+        if (mc.thePlayer == null) return
+        if (modeValue.get().equals("redesky", ignoreCase = true) && redeskyTimerBoostValue.get()) currentTimer = redeskyTimerBoostStartValue.get()
+        jumped = false
+        hasJumped = false
+        no = false
+        jumpState = 0
+        ticks = 0
+        verusDmged = false
+        hpxDamage = false
+        damaged = false
+        flagged = false
+        hasFell = false
+        pearlState = 0
+        verusJumpTimes = 0
+        dmgTimer.reset()
+        posLookInstance.reset()
+        rendery = mc.thePlayer.posY
+        val x = mc.thePlayer.posX
+        val y = mc.thePlayer.posY
+        val z = mc.thePlayer.posZ
+        if (modeValue.get().equals("verusdmg", ignoreCase = true)) {
+            if (verusDmgModeValue.get().equals("Instant", ignoreCase = true)) {
+                if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(0.0, 4.0, 0.0).expand(0.0, 0.0, 0.0)).isEmpty()) {
+                    sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, false))
+                    sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, false))
+                    sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, true))
+                    mc.thePlayer.motionZ = 0.0
+                    mc.thePlayer.motionX = mc.thePlayer.motionZ
                 }
-            } else if (verusDmgModeValue.get().equalsIgnoreCase("InstantC06")) {
-                if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, 4, 0).expand(0, 0, 0)).isEmpty()) {
-                    PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false));
-                    PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false));
-                    PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true));
-                    mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+            } else if (verusDmgModeValue.get().equals("InstantC06", ignoreCase = true)) {
+                if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(0.0, 4.0, 0.0).expand(0.0, 0.0, 0.0)).isEmpty()) {
+                    sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                    sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                    sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true))
+                    mc.thePlayer.motionZ = 0.0
+                    mc.thePlayer.motionX = mc.thePlayer.motionZ
                 }
-            } else if (verusDmgModeValue.get().equalsIgnoreCase("Jump")) {
+            } else if (verusDmgModeValue.get().equals("Jump", ignoreCase = true)) {
                 if (mc.thePlayer.onGround) {
-                    mc.thePlayer.jump();
-                    verusJumpTimes = 1;
+                    mc.thePlayer.jump()
+                    verusJumpTimes = 1
                 }
             }
         }
-
-        if (modeValue.get().equalsIgnoreCase("matrixflag")) {
-            if (matrixBypassModeValue.get().equalsIgnoreCase("none")) {
-                debug("no less flag enabled.");
-                hasFell = true;
-                return;
+        if (modeValue.get().equals("matrixflag", ignoreCase = true)) {
+            if (matrixBypassModeValue.get().equals("none", ignoreCase = true)) {
+                debug("no less flag enabled.")
+                hasFell = true
+                return
             }
             if (mc.thePlayer.onGround) {
-                if (matrixBypassModeValue.get().equalsIgnoreCase("clip")) {
-                    mc.thePlayer.setPosition(x, y + 0.01, z);
-                    debug("clipped");
+                if (matrixBypassModeValue.get().equals("clip", ignoreCase = true)) {
+                    mc.thePlayer.setPosition(x, y + 0.01, z)
+                    debug("clipped")
                 }
-                if (matrixBypassModeValue.get().equalsIgnoreCase("motion"))
-                    mc.thePlayer.jump();
-            } else if (mc.thePlayer.fallDistance > 0F) {
-                hasFell = true;
-                debug("falling detected");
+                if (matrixBypassModeValue.get().equals("motion", ignoreCase = true)) mc.thePlayer.jump()
+            } else if (mc.thePlayer.fallDistance > 0f) {
+                hasFell = true
+                debug("falling detected")
             }
         }
     }
 
     @EventTarget
-    public void onUpdate(final UpdateEvent event) {
+    fun onUpdate(event: UpdateEvent?) {
         if (!no && autoJumpValue.get() && mc.thePlayer.onGround && MovementUtils.isMoving()) {
-            jumped = true;
+            jumped = true
             if (hasJumped && autoDisableValue.get()) {
-                jumpState = 0;
-                this.setState(false);
-                return;
+                jumpState = 0
+                state = false
+                return
             }
-            mc.thePlayer.jump();
-            hasJumped = true;
+            mc.thePlayer.jump()
+            hasJumped = true
         }
-
-        if (modeValue.get().equalsIgnoreCase("matrixflag")) {
+        if (modeValue.get().equals("matrixflag", ignoreCase = true)) {
             if (hasFell) {
                 if (!flagged && !matrixSilentValue.get()) {
-                    MovementUtils.strafe(matrixBoostValue.get());
-                    mc.thePlayer.motionY = matrixHeightValue.get();
-                    debug("triggering");
+                    MovementUtils.strafe(matrixBoostValue.get())
+                    mc.thePlayer.motionY = matrixHeightValue.get().toDouble()
+                    debug("triggering")
                 }
             } else {
-                if (matrixBypassModeValue.get().equalsIgnoreCase("motion")) {
-                    mc.thePlayer.motionX *= 0.2;
-                    mc.thePlayer.motionZ *= 0.2;
+                if (matrixBypassModeValue.get().equals("motion", ignoreCase = true)) {
+                    mc.thePlayer.motionX *= 0.2
+                    mc.thePlayer.motionZ *= 0.2
                     if (mc.thePlayer.fallDistance > 0) {
-                        hasFell = true;
-                        debug("activated");
+                        hasFell = true
+                        debug("activated")
                     }
                 }
-                if (matrixBypassModeValue.get().equalsIgnoreCase("clip") && mc.thePlayer.motionY < 0F) {
-                    hasFell = true;
-                    debug("activated");
+                if (matrixBypassModeValue.get().equals("clip", ignoreCase = true) && mc.thePlayer.motionY < 0f) {
+                    hasFell = true
+                    debug("activated")
                 }
             }
-            return;
+            return
         }
-
-        if (modeValue.get().equalsIgnoreCase("verusdmg")) {
+        if (modeValue.get().equals("verusdmg", ignoreCase = true)) {
             if (mc.thePlayer.hurtTime > 0 && !verusDmged) {
-                verusDmged = true;
-                MovementUtils.strafe(verusBoostValue.get());
-                mc.thePlayer.motionY = verusHeightValue.get();
+                verusDmged = true
+                MovementUtils.strafe(verusBoostValue.get())
+                mc.thePlayer.motionY = verusHeightValue.get().toDouble()
             }
-
-            if (verusDmgModeValue.get().equalsIgnoreCase("Jump") && verusJumpTimes < 5) {
+            if (verusDmgModeValue.get().equals("Jump", ignoreCase = true) && verusJumpTimes < 5) {
                 if (mc.thePlayer.onGround) {
-                    mc.thePlayer.jump();
-                    verusJumpTimes += 1;
+                    mc.thePlayer.jump()
+                    verusJumpTimes += 1
                 }
-                return;
+                return
             }
-
-            if (verusDmged)
-                mc.timer.timerSpeed = verusTimerValue.get();
-            else {
-                mc.thePlayer.movementInput.moveForward = 0F;
-                mc.thePlayer.movementInput.moveStrafe = 0F;
-                if (!verusDmgModeValue.get().equalsIgnoreCase("Jump"))
-                    mc.thePlayer.motionY = 0;
+            if (verusDmged) mc.timer.timerSpeed = verusTimerValue.get() else {
+                mc.thePlayer.movementInput.moveForward = 0f
+                mc.thePlayer.movementInput.moveStrafe = 0f
+                if (!verusDmgModeValue.get().equals("Jump", ignoreCase = true)) mc.thePlayer.motionY = 0.0
             }
-
-            return;
+            return
         }
-
-        if (modeValue.get().equalsIgnoreCase("damage")) {
+        if (modeValue.get().equals("damage", ignoreCase = true)) {
             if (mc.thePlayer.hurtTime > 0 && !damaged) {
-                damaged = true;
-                MovementUtils.strafe(damageBoostValue.get());
-                mc.thePlayer.motionY = damageHeightValue.get();
+                damaged = true
+                MovementUtils.strafe(damageBoostValue.get())
+                mc.thePlayer.motionY = damageHeightValue.get().toDouble()
             }
             if (damaged) {
-                mc.timer.timerSpeed = damageTimerValue.get();
-                if (damageARValue.get() && mc.thePlayer.hurtTime <= 0) damaged = false;
+                mc.timer.timerSpeed = damageTimerValue.get()
+                if (damageARValue.get() && mc.thePlayer.hurtTime <= 0) damaged = false
             }
-
-            return;
+            return
         }
-
-        if (modeValue.get().equalsIgnoreCase("pearl")) {
-            int enderPearlSlot = getPearlSlot();
+        if (modeValue.get().equals("pearl", ignoreCase = true)) {
+            val enderPearlSlot = pearlSlot
             if (pearlState == 0) {
                 if (enderPearlSlot == -1) {
-                    LiquidBounce.hud.addNotification(new Notification("You don't have any ender pearl!", Type.ERROR, 500));
-                    pearlState = -1;
-                    this.setState(false);
-                    return;
+                    LiquidBounce.hud.addNotification(Notification("You don't have any ender pearl!", Type.ERROR, 500))
+                    pearlState = -1
+                    state = false
+                    return
                 }
                 if (mc.thePlayer.inventory.currentItem != enderPearlSlot) {
-                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(enderPearlSlot));
+                    mc.thePlayer.sendQueue.addToSendQueue(C09PacketHeldItemChange(enderPearlSlot))
                 }
-                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C05PacketPlayerLook(mc.thePlayer.rotationYaw, 90, mc.thePlayer.onGround));
-                mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 255, mc.thePlayer.inventoryContainer.getSlot(enderPearlSlot + 36).getStack(), 0, 0, 0));
+                mc.thePlayer.sendQueue.addToSendQueue(C05PacketPlayerLook(mc.thePlayer.rotationYaw, 90f, mc.thePlayer.onGround))
+                mc.thePlayer.sendQueue.addToSendQueue(C08PacketPlayerBlockPlacement(BlockPos(-1, -1, -1), 255, mc.thePlayer.inventoryContainer.getSlot(enderPearlSlot + 36).stack, 0f, 0f, 0f))
                 if (enderPearlSlot != mc.thePlayer.inventory.currentItem) {
-                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                    mc.thePlayer.sendQueue.addToSendQueue(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem))
                 }
-                pearlState = 1;
+                pearlState = 1
             }
-
             if (pearlState == 1 && mc.thePlayer.hurtTime > 0) {
-                pearlState = 2;
-                MovementUtils.strafe(pearlBoostValue.get());
-                mc.thePlayer.motionY = pearlHeightValue.get();
+                pearlState = 2
+                MovementUtils.strafe(pearlBoostValue.get())
+                mc.thePlayer.motionY = pearlHeightValue.get().toDouble()
             }
-
-            if (pearlState == 2)
-                mc.timer.timerSpeed = pearlTimerValue.get();
-
-            return;
+            if (pearlState == 2) mc.timer.timerSpeed = pearlTimerValue.get()
+            return
         }
-
-        if(jumped) {
-            final String mode = modeValue.get();
-
+        if (jumped) {
+            val mode = modeValue.get()
             if (mc.thePlayer.onGround || mc.thePlayer.capabilities.isFlying) {
-                jumped = false;
-                canMineplexBoost = false;
-
-                if (mode.equalsIgnoreCase("NCP")) {
-                    mc.thePlayer.motionX = 0;
-                    mc.thePlayer.motionZ = 0;
+                jumped = false
+                canMineplexBoost = false
+                if (mode.equals("NCP", ignoreCase = true)) {
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
                 }
-                return;
+                return
             }
+            for (duh in arrayOf(mode))
+            when (mode.lowercase(Locale.getDefault())) {
+                "ncp" -> {
+                    MovementUtils.strafe(MovementUtils.getSpeed() * if (canBoost) ncpBoostValue.get() else 1f)
+                    canBoost = false
+                }
 
-            switch (mode.toLowerCase()) {
-                case "ncp":
-                    MovementUtils.strafe(MovementUtils.getSpeed() * (canBoost ? ncpBoostValue.get() : 1F));
-                    canBoost = false;
-                    break;
-                case "aacv1":
-                    mc.thePlayer.motionY += 0.05999D;
-                    MovementUtils.strafe(MovementUtils.getSpeed() * 1.08F);
-                    break;
-                case "aacv2":
-                case "mineplex3":
-                    mc.thePlayer.jumpMovementFactor = 0.09F;
-                    mc.thePlayer.motionY += 0.0132099999999999999999999999999;
-                    mc.thePlayer.jumpMovementFactor = 0.08F;
-                    MovementUtils.strafe();
-                    break;
-                case "aacv3":
-                    final EntityPlayerSP player = mc.thePlayer;
+                "aacv1" -> {
+                    mc.thePlayer.motionY += 0.05999
+                    MovementUtils.strafe(MovementUtils.getSpeed() * 1.08f)
+                }
 
-                    if (player.fallDistance > 0.5F && !teleported) {
-                        double value = 3;
-                        EnumFacing horizontalFacing = player.getHorizontalFacing();
-                        double x = 0;
-                        double z = 0;
-                        switch (horizontalFacing) {
-                            case NORTH:
-                                z = -value;
-                                break;
-                            case EAST:
-                                x = +value;
-                                break;
-                            case SOUTH:
-                                z = +value;
-                                break;
-                            case WEST:
-                                x = -value;
-                                break;
+                "aacv2", "mineplex3" -> {
+                    mc.thePlayer.jumpMovementFactor = 0.09f
+                    mc.thePlayer.motionY += 0.01321
+                    mc.thePlayer.jumpMovementFactor = 0.08f
+                    MovementUtils.strafe()
+                }
+
+                "aacv3" -> {
+                    val player = mc.thePlayer
+                    if (player.fallDistance > 0.5f && !teleported) {
+                        val value = 3.0
+                        val horizontalFacing = player.horizontalFacing
+                        var x = 0.0
+                        var z = 0.0
+                        when (horizontalFacing) {
+                            EnumFacing.NORTH -> z = -value
+                            EnumFacing.EAST -> x = value
+                            EnumFacing.SOUTH -> z = value
+                            EnumFacing.WEST -> x = -value
                         }
-
-                        player.setPosition(player.posX + x, player.posY, player.posZ + z);
-                        teleported = true;
+                        player.setPosition(player.posX + x, player.posY, player.posZ + z)
+                        teleported = true
                     }
-                    break;
-                case "mineplex":
-                    mc.thePlayer.motionY += 0.0132099999999999999999999999999;
-                    mc.thePlayer.jumpMovementFactor = 0.08F;
-                    MovementUtils.strafe();
-                    break;
-                case "mineplex2":
-                    if (!canMineplexBoost)
-                        break;
+                }
 
-                    mc.thePlayer.jumpMovementFactor = 0.1F;
+                "mineplex" -> {
+                    mc.thePlayer.motionY += 0.01321
+                    mc.thePlayer.jumpMovementFactor = 0.08f
+                    MovementUtils.strafe()
+                }
 
-                    if (mc.thePlayer.fallDistance > 1.5F) {
-                        mc.thePlayer.jumpMovementFactor = 0F;
-                        mc.thePlayer.motionY = -10F;
+                "mineplex2" -> {
+                    if (!canMineplexBoost) break
+                    mc.thePlayer.jumpMovementFactor = 0.1f
+                    if (mc.thePlayer.fallDistance > 1.5f) {
+                        mc.thePlayer.jumpMovementFactor = 0f
+                        mc.thePlayer.motionY = -10.0
                     }
-                    MovementUtils.strafe();
-                    break;
-                // add timer to use longjump longer forward without boost
-                case "aacv4":
-                    mc.thePlayer.jumpMovementFactor = 0.05837456f;
-                    mc.timer.timerSpeed = 0.5F;
-                    break;
-                //simple lmfao
-                case "redeskymaki":
-                    mc.thePlayer.jumpMovementFactor = 0.15f;
-                    mc.thePlayer.motionY += 0.05F;
-                    break;
-                case "redesky":
+                    MovementUtils.strafe()
+                }
+
+                "aacv4" -> {
+                    mc.thePlayer.jumpMovementFactor = 0.05837456f
+                    mc.timer.timerSpeed = 0.5f
+                }
+
+                "redeskymaki" -> {
+                    mc.thePlayer.jumpMovementFactor = 0.15f
+                    mc.thePlayer.motionY += 0.05
+                }
+
+                "redesky" -> {
                     if (redeskyTimerBoostValue.get()) {
-                        mc.timer.timerSpeed = currentTimer;
+                        mc.timer.timerSpeed = currentTimer
                     }
                     if (ticks < redeskyTickValue.get()) {
-                        mc.thePlayer.jump();
-                        mc.thePlayer.motionY *= redeskyYMultiplier.get();
-                        mc.thePlayer.motionX *= redeskyXZMultiplier.get();
-                        mc.thePlayer.motionZ *= redeskyXZMultiplier.get();
+                        mc.thePlayer.jump()
+                        mc.thePlayer.motionY *= redeskyYMultiplier.get().toDouble()
+                        mc.thePlayer.motionX *= redeskyXZMultiplier.get().toDouble()
+                        mc.thePlayer.motionZ *= redeskyXZMultiplier.get().toDouble()
                     } else {
                         if (redeskyGlideAfterTicksValue.get()) {
-                            mc.thePlayer.motionY += 0.03F;
+                            mc.thePlayer.motionY += 0.03
                         }
                         if (redeskyTimerBoostValue.get() && currentTimer > redeskyTimerBoostEndValue.get()) {
-                            currentTimer = Math.max(0.08F, currentTimer - 0.05F * redeskyTimerBoostSlowDownSpeedValue.get()); // zero-timer protection
+                            currentTimer = max(0.08, (currentTimer - 0.05f * redeskyTimerBoostSlowDownSpeedValue.get()).toDouble()).toFloat() // zero-timer protection
                         }
                     }
-                    ticks++;
-                    break;
-                case "infiniteredesky":
-                    if(mc.thePlayer.fallDistance > 0.6F)
-                        mc.thePlayer.motionY += 0.02F;
+                    ticks++
+                }
 
-                    MovementUtils.strafe((float) Math.min(0.85, Math.max(0.25, MovementUtils.getSpeed() * 1.05878)));
-                    break;
+                "infiniteredesky" -> {
+                    if (mc.thePlayer.fallDistance > 0.6f) mc.thePlayer.motionY += 0.02
+                    MovementUtils.strafe(min(0.85, max(0.25, MovementUtils.getSpeed() * 1.05878)).toFloat())
+                }
             }
         }
-
         if (autoJumpValue.get() && mc.thePlayer.onGround && MovementUtils.isMoving()) {
-            jumped = true;
-            mc.thePlayer.jump();
+            jumped = true
+            mc.thePlayer.jump()
         }
     }
 
     @EventTarget
-    public void onMove(final MoveEvent event) {
-        final String mode = modeValue.get();
-
-        if (mode.equalsIgnoreCase("mineplex3")) {
-            if(mc.thePlayer.fallDistance != 0)
-                mc.thePlayer.motionY += 0.037;
-        } else if (mode.equalsIgnoreCase("ncp") && !MovementUtils.isMoving() && jumped) {
-            mc.thePlayer.motionX = 0;
-            mc.thePlayer.motionZ = 0;
-            event.zeroXZ();
+    fun onMove(event: MoveEvent) {
+        val mode = modeValue.get()
+        if (mode.equals("mineplex3", ignoreCase = true)) {
+            if (mc.thePlayer.fallDistance != 0f) mc.thePlayer.motionY += 0.037
+        } else if (mode.equals("ncp", ignoreCase = true) && !MovementUtils.isMoving() && jumped) {
+            mc.thePlayer.motionX = 0.0
+            mc.thePlayer.motionZ = 0.0
+            event.zeroXZ()
         }
-
-        if ((mode.equalsIgnoreCase("damage") && damageNoMoveValue.get() && !damaged) || (mode.equalsIgnoreCase("verusdmg") && !verusDmged))
-            event.zeroXZ();
-
-        if (mode.equalsIgnoreCase("pearl") && pearlState != 2)
-            event.cancelEvent();
-
-        if (matrixSilentValue.get() && hasFell && !flagged)
-            event.cancelEvent();
+        if (mode.equals("damage", ignoreCase = true) && damageNoMoveValue.get() && !damaged || mode.equals("verusdmg", ignoreCase = true) && !verusDmged) event.zeroXZ()
+        if (mode.equals("pearl", ignoreCase = true) && pearlState != 2) event.cancelEvent()
+        if (matrixSilentValue.get() && hasFell && !flagged) event.cancelEvent()
     }
 
     @EventTarget
-    public void onPacket(PacketEvent event) {
-        final String mode = modeValue.get();
-        if (event.getPacket() instanceof C03PacketPlayer) {
-            C03PacketPlayer packetPlayer = (C03PacketPlayer) event.getPacket();
-            if (mode.equalsIgnoreCase("verusdmg") && verusDmgModeValue.get().equalsIgnoreCase("Jump") && verusJumpTimes < 5) {
-                packetPlayer.onGround = false;
+    fun onPacket(event: PacketEvent) {
+        val mode = modeValue.get()
+        if (event.packet is C03PacketPlayer) {
+            val packetPlayer = event.packet
+            if (mode.equals("verusdmg", ignoreCase = true) && verusDmgModeValue.get().equals("Jump", ignoreCase = true) && verusJumpTimes < 5) {
+                packetPlayer.onGround = false
             }
-            if (mode.equalsIgnoreCase("matrixflag")) {
-                if (event.getPacket() instanceof C03PacketPlayer.C06PacketPlayerPosLook && posLookInstance.equalFlag((C03PacketPlayer.C06PacketPlayerPosLook) event.getPacket())) {
-                    posLookInstance.reset();
-                    mc.thePlayer.motionX = lastMotX;
-                    mc.thePlayer.motionY = lastMotY;
-                    mc.thePlayer.motionZ = lastMotZ;
-                    debug("should be launched by now");
+            if (mode.equals("matrixflag", ignoreCase = true)) {
+                if (event.packet is C06PacketPlayerPosLook && posLookInstance.equalFlag(event.packet)) {
+                    posLookInstance.reset()
+                    mc.thePlayer.motionX = lastMotX
+                    mc.thePlayer.motionY = lastMotY
+                    mc.thePlayer.motionZ = lastMotZ
+                    debug("should be launched by now")
                 } else if (matrixSilentValue.get()) {
                     if (hasFell && !flagged) {
-                        if (packetPlayer.isMoving()) {
-                            debug("modifying packet: rotate false, onGround false, moving enabled, x, y, z set to expected speed");
-                            packetPlayer.onGround = false;
-                            double[] data = MovementUtils.getXZDist(matrixBoostValue.get(), packetPlayer.rotating ? packetPlayer.yaw : mc.thePlayer.rotationYaw);
-                            lastMotX = data[0];
-                            lastMotZ = data[1];
-                            lastMotY = matrixHeightValue.get();
-                            packetPlayer.x += lastMotX;
-                            packetPlayer.y += lastMotY;
-                            packetPlayer.z += lastMotZ;
+                        if (packetPlayer.isMoving) {
+                            debug("modifying packet: rotate false, onGround false, moving enabled, x, y, z set to expected speed")
+                            packetPlayer.onGround = false
+                            val data = MovementUtils.getXZDist(matrixBoostValue.get(), if (packetPlayer.rotating) packetPlayer.yaw else mc.thePlayer.rotationYaw)
+                            lastMotX = data[0]
+                            lastMotZ = data[1]
+                            lastMotY = matrixHeightValue.get().toDouble()
+                            packetPlayer.x += lastMotX
+                            packetPlayer.y += lastMotY
+                            packetPlayer.z += lastMotZ
                         }
                     }
                 }
             }
         }
-        if (event.getPacket() instanceof S08PacketPlayerPosLook && mode.equalsIgnoreCase("matrixflag") && hasFell) {
-            debug("flag check started");
-            flagged = true;
-            posLookInstance.set((S08PacketPlayerPosLook) event.getPacket());
+        if (event.packet is S08PacketPlayerPosLook && mode.equals("matrixflag", ignoreCase = true) && hasFell) {
+            debug("flag check started")
+            flagged = true
+            posLookInstance.set(event.packet)
             if (!matrixSilentValue.get()) {
-                debug("data saved");
-                lastMotX = mc.thePlayer.motionX;
-                lastMotY = mc.thePlayer.motionY;
-                lastMotZ = mc.thePlayer.motionZ;
+                debug("data saved")
+                lastMotX = mc.thePlayer.motionX
+                lastMotY = mc.thePlayer.motionY
+                lastMotZ = mc.thePlayer.motionZ
             }
         }
     }
 
     @EventTarget(ignoreCondition = true)
-    public void onJump(final JumpEvent event) {
-        jumped = true;
-        canBoost = true;
-        teleported = false;
+    fun onJump(event: JumpEvent) {
+        jumped = true
+        canBoost = true
+        teleported = false
+        if (state) {
+            when (modeValue.get().lowercase(Locale.getDefault())) {
+                "mineplex" -> event.motion = event.motion * 4.08f
+                "mineplex2" -> if (mc.thePlayer.isCollidedHorizontally) {
+                    event.motion = 2.31f
+                    canMineplexBoost = true
+                    mc.thePlayer.onGround = false
+                }
 
-        if(getState()) {
-            switch(modeValue.get().toLowerCase()) {
-                case "mineplex":
-                    event.setMotion(event.getMotion() * 4.08f);
-                    break;
-                case "mineplex2":
-                    if(mc.thePlayer.isCollidedHorizontally) {
-                        event.setMotion(2.31f);
-                        canMineplexBoost = true;
-                        mc.thePlayer.onGround = false;
-                    }
-                    break;
-                case "aacv4":
-                    event.setMotion(event.getMotion() * 1.0799F);
-                    break;
+                "aacv4" -> event.motion = event.motion * 1.0799f
             }
         }
-
     }
 
-    private int getPearlSlot() {
-        for(int i = 36; i < 45; ++i) {
-            ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-            if (stack != null && stack.getItem() instanceof ItemEnderPearl) {
-                return i - 36;
+    private val pearlSlot: Int
+        private get() {
+            for (i in 36..44) {
+                val stack = mc.thePlayer.inventoryContainer.getSlot(i).stack
+                if (stack != null && stack.item is ItemEnderPearl) {
+                    return i - 36
+                }
             }
+            return -1
         }
-        return -1;
+
+    override fun onDisable() {
+        mc.timer.timerSpeed = 1.0f
     }
 
-    public void onDisable(){
-        mc.timer.timerSpeed = 1.0F;
-    }
-
-    @Override
-    public String getTag() {
-        return modeValue.get();
-    }
+    override val tag: String
+        get() = modeValue.get()
 }

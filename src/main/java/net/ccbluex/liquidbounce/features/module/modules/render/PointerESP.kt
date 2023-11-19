@@ -51,7 +51,7 @@ class PointerESP : Module() {
         val playerOffsetX = mc.thePlayer.posX
         val playerOffSetZ = mc.thePlayer.posZ
 
-        for (entity in mc.theWorld.loadedEntityList) {
+        for (entity in RenderConfig.entities()) {
             if (EntityUtils.isSelected(entity,true) && (!noInViewValue.get() || !isInViewFrustrum(entity))) {
                 val pos1 = (((entity.posX + (entity.posX - entity.lastTickPosX) * mc.timer.renderPartialTicks) - playerOffsetX) * 0.2)
                 val pos2 = (((entity.posZ + (entity.posZ - entity.lastTickPosZ) * mc.timer.renderPartialTicks) - playerOffSetZ) * 0.2)

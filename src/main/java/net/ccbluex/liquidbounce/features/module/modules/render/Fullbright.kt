@@ -3,61 +3,50 @@
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/WYSI-Foundation/LiquidBouncePlus/
  */
-package net.ccbluex.liquidbounce.features.module.modules.render;
+package net.ccbluex.liquidbounce.features.module.modules.render
 
-import net.ccbluex.liquidbounce.LiquidBounce;
-import net.ccbluex.liquidbounce.event.ClientShutdownEvent;
-import net.ccbluex.liquidbounce.event.EventTarget;
-import net.ccbluex.liquidbounce.event.UpdateEvent;
-import net.ccbluex.liquidbounce.features.module.Module;
-import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.module.ModuleInfo;
-import net.ccbluex.liquidbounce.value.ListValue;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
+import net.ccbluex.liquidbounce.LiquidBounce
+import net.ccbluex.liquidbounce.event.ClientShutdownEvent
+import net.ccbluex.liquidbounce.event.EventTarget
+import net.ccbluex.liquidbounce.event.UpdateEvent
+import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.value.ListValue
+import net.minecraft.potion.Potion
+import net.minecraft.potion.PotionEffect
+import java.util.*
 
 @ModuleInfo(name = "Fullbright", description = "Brightens up the world around you.", category = ModuleCategory.RENDER)
-public class Fullbright extends Module {
-    private final ListValue modeValue = new ListValue("Mode", new String[] {"Gamma", "NightVision"}, "Gamma");
-
-    private float prevGamma = -1;
-
-    @Override
-    public void onEnable() {
-        prevGamma = mc.gameSettings.gammaSetting;
+class Fullbright : Module() {
+    private val modeValue = ListValue("Mode", arrayOf("Gamma", "NightVision"), "Gamma")
+    private var prevGamma = -1f
+    override fun onEnable() {
+        prevGamma = mc.gameSettings.gammaSetting
     }
 
-    @Override
-    public void onDisable() {
-        if(prevGamma == -1)
-            return;
-
-        mc.gameSettings.gammaSetting = prevGamma;
-        prevGamma = -1;
-        if(mc.thePlayer != null) mc.thePlayer.removePotionEffectClient(Potion.nightVision.id);
+    override fun onDisable() {
+        if (prevGamma == -1f) return
+        mc.gameSettings.gammaSetting = prevGamma
+        prevGamma = -1f
+        if (mc.thePlayer != null) mc.thePlayer.removePotionEffectClient(Potion.nightVision.id)
     }
 
     @EventTarget(ignoreCondition = true)
-    public void onUpdate(final UpdateEvent event) {
-        if (getState() || LiquidBounce.moduleManager.getModule(XRay.class).getState()) {
-            switch(modeValue.get().toLowerCase()) {
-                case "gamma":
-                    if(mc.gameSettings.gammaSetting <= 100F)
-                        mc.gameSettings.gammaSetting++;
-                    break;
-                case "nightvision":
-                    mc.thePlayer.addPotionEffect(new PotionEffect(Potion.nightVision.id, 5200, 1));
-                    break;
+    fun onUpdate(event: UpdateEvent?) {
+        if (state || LiquidBounce.moduleManager.getModule(XRay::class.java)!!.state) {
+            when (modeValue.get().lowercase(Locale.getDefault())) {
+                "gamma" -> if (mc.gameSettings.gammaSetting <= 100f) mc.gameSettings.gammaSetting++
+                "nightvision" -> mc.thePlayer.addPotionEffect(PotionEffect(Potion.nightVision.id, 5200, 1))
             }
-        }else if(prevGamma != -1) {
-            mc.gameSettings.gammaSetting = prevGamma;
-            prevGamma = -1;
+        } else if (prevGamma != -1f) {
+            mc.gameSettings.gammaSetting = prevGamma
+            prevGamma = -1f
         }
     }
 
     @EventTarget(ignoreCondition = true)
-    public void onShutdown(final ClientShutdownEvent event) {
-        onDisable();
+    fun onShutdown(event: ClientShutdownEvent?) {
+        onDisable()
     }
-
 }

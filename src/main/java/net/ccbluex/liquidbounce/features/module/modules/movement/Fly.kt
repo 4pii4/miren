@@ -3,102 +3,83 @@
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/WYSI-Foundation/LiquidBouncePlus/
  */
-package net.ccbluex.liquidbounce.features.module.modules.movement;
+package net.ccbluex.liquidbounce.features.module.modules.movement
 
-import net.ccbluex.liquidbounce.LiquidBounce;
-import net.ccbluex.liquidbounce.event.*;
-import net.ccbluex.liquidbounce.features.module.Module;
-import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.module.ModuleInfo;
-import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification;
-import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type;
-import net.ccbluex.liquidbounce.utils.*;
-import net.ccbluex.liquidbounce.utils.misc.RandomUtils;
-import net.ccbluex.liquidbounce.utils.render.RenderUtils;
-import net.ccbluex.liquidbounce.utils.timer.MSTimer;
-import net.ccbluex.liquidbounce.utils.timer.TickTimer;
-import net.ccbluex.liquidbounce.value.BoolValue;
-import net.ccbluex.liquidbounce.value.FloatValue;
-import net.ccbluex.liquidbounce.value.IntegerValue;
-import net.ccbluex.liquidbounce.value.ListValue;
-import net.minecraft.block.BlockAir;
-import net.minecraft.block.BlockSlime;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemEnderPearl;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.*;
-import net.minecraft.network.play.server.S08PacketPlayerPosLook;
-import net.minecraft.potion.Potion;
-import net.minecraft.util.*;
-import org.lwjgl.input.Keyboard;
-
-import javax.vecmath.Vector2f;
-import java.awt.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-
-import static net.ccbluex.liquidbounce.utils.MovementUtils.isBlockUnder;
+import net.ccbluex.liquidbounce.LiquidBounce
+import net.ccbluex.liquidbounce.event.*
+import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type
+import net.ccbluex.liquidbounce.utils.ClientUtils
+import net.ccbluex.liquidbounce.utils.MovementUtils
+import net.ccbluex.liquidbounce.utils.PacketUtils.sendPacketNoEvent
+import net.ccbluex.liquidbounce.utils.RotationUtils
+import net.ccbluex.liquidbounce.utils.misc.RandomUtils
+import net.ccbluex.liquidbounce.utils.render.RenderUtils
+import net.ccbluex.liquidbounce.utils.timer.MSTimer
+import net.ccbluex.liquidbounce.utils.timer.TickTimer
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
+import net.minecraft.block.BlockAir
+import net.minecraft.block.BlockSlime
+import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.item.ItemBlock
+import net.minecraft.item.ItemEnderPearl
+import net.minecraft.network.play.client.*
+import net.minecraft.network.play.client.C03PacketPlayer.*
+import net.minecraft.network.play.server.S08PacketPlayerPosLook
+import net.minecraft.potion.Potion
+import net.minecraft.util.*
+import org.lwjgl.input.Keyboard
+import java.awt.Color
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.util.*
+import javax.vecmath.Vector2f
+import kotlin.math.*
 
 @ModuleInfo(name = "Fly", description = "Allows you to fly in survival mode.", category = ModuleCategory.MOVEMENT, keyBind = Keyboard.KEY_F)
-public class Fly extends Module {
-
-    public final ListValue modeValue = new ListValue("Mode", new String[] {
-            // Motion-based fly modes, or vanilla one.
+class Fly : Module() {
+    val modeValue = ListValue(
+        "Mode", arrayOf( // Motion-based fly modes, or vanilla one.
             "Motion",
             "Creative",
             "Damage",
-            "Pearl",
-
-            // Specified fly modes for NCP.
+            "Pearl",  // Specified fly modes for NCP.
             "NCP",
-            "OldNCP",
-
-            // Old AAC fly modes.
+            "OldNCP",  // Old AAC fly modes.
             "AAC1.9.10",
             "AAC3.0.5",
             "AAC3.1.6-Gomme",
             "AAC3.3.12",
             "AAC3.3.12-Glide",
-            "AAC3.3.13",
-
-            // New AAC Fly using exploit.
-            "AAC5-Vanilla",
-
-            // For other servers, mostly outdated.
+            "AAC3.3.13",  // New AAC Fly using exploit.
+            "AAC5-Vanilla",  // For other servers, mostly outdated.
             "CubeCraft",
             "Rewinside",
             "TeleportRewinside",
             "FunCraft",
             "Mineplex",
             "NeruxVace",
-            "Minesucht",
-
-            // Specified fly modes for Verus.
+            "Minesucht",  // Specified fly modes for Verus.
             "Verus",
-            "VerusLowHop",
-
-            // Old Spartan fly modes.
+            "VerusLowHop",  // Old Spartan fly modes.
             "Spartan",
             "Spartan2",
-            "BugSpartan",
-
-            // Old Hypixel modes.
+            "BugSpartan",  // Old Hypixel modes.
             "Hypixel",
             "BoostHypixel",
-            "FreeHypixel",
-
-            // Other anticheats' fly modes.
+            "FreeHypixel",  // Other anticheats' fly modes.
             "MineSecure",
             "HawkEye",
             "HAC",
             "WatchCat",
             "Watchdog",
-            "BlockDrop",
-
-            // Other exploit-based stuffs.
+            "BlockDrop",  // Other exploit-based stuffs.
             "Jetpack",
             "KeepAlive",
             "Flag",
@@ -107,1330 +88,1140 @@ public class Fly extends Module {
             "Derp",
             "Collide",
             "BlocksMC"
-    }, "Motion");
-
-    private final FloatValue vanillaSpeedValue = new FloatValue("Speed", 2F, 0F, 5F, () -> {
-        return (modeValue.get().equalsIgnoreCase("motion")|| modeValue.get().equalsIgnoreCase("blockdrop") || modeValue.get().equalsIgnoreCase("damage") || modeValue.get().equalsIgnoreCase("pearl") || modeValue.get().equalsIgnoreCase("aac5-vanilla") || modeValue.get().equalsIgnoreCase("bugspartan") || modeValue.get().equalsIgnoreCase("keepalive") || modeValue.get().equalsIgnoreCase("derp"));
-    });
-    private final FloatValue vanillaVSpeedValue = new FloatValue("V-Speed", 2F, 0F, 5F, () -> modeValue.get().equalsIgnoreCase("motion") || modeValue.get().equalsIgnoreCase("blockdrop"));
-    private final FloatValue vanillaMotionYValue = new FloatValue("Y-Motion", 0F, -1F, 1F, () -> modeValue.get().equalsIgnoreCase("motion") || modeValue.get().equalsIgnoreCase("blockdrop"));
-    private final BoolValue vanillaKickBypassValue = new BoolValue("KickBypass", false, () -> modeValue.get().equalsIgnoreCase("motion") || modeValue.get().equalsIgnoreCase("creative") || modeValue.get().equalsIgnoreCase("blockdrop"));
-
-    private final BoolValue groundSpoofValue = new BoolValue("GroundSpoof", false, () -> modeValue.get().equalsIgnoreCase("motion") || modeValue.get().equalsIgnoreCase("creative") || modeValue.get().equalsIgnoreCase("blockdrop"));
-
-    private final FloatValue ncpMotionValue = new FloatValue("NCPMotion", 0F, 0F, 1F, () -> modeValue.get().equalsIgnoreCase("ncp"));
+        ), "Motion"
+    )
+    private val vanillaSpeedValue = FloatValue("Speed", 2f, 0f, 5f) { modeValue.get().equals("motion", ignoreCase = true) || modeValue.get().equals("blockdrop", ignoreCase = true) || modeValue.get().equals("damage", ignoreCase = true) || modeValue.get().equals("pearl", ignoreCase = true) || modeValue.get().equals("aac5-vanilla", ignoreCase = true) || modeValue.get().equals("bugspartan", ignoreCase = true) || modeValue.get().equals("keepalive", ignoreCase = true) || modeValue.get().equals("derp", ignoreCase = true) }
+    private val vanillaVSpeedValue = FloatValue("V-Speed", 2f, 0f, 5f) { modeValue.get().equals("motion", ignoreCase = true) || modeValue.get().equals("blockdrop", ignoreCase = true) }
+    private val vanillaMotionYValue = FloatValue("Y-Motion", 0f, -1f, 1f) { modeValue.get().equals("motion", ignoreCase = true) || modeValue.get().equals("blockdrop", ignoreCase = true) }
+    private val vanillaKickBypassValue = BoolValue("KickBypass", false) { modeValue.get().equals("motion", ignoreCase = true) || modeValue.get().equals("creative", ignoreCase = true) || modeValue.get().equals("blockdrop", ignoreCase = true) }
+    private val groundSpoofValue = BoolValue("GroundSpoof", false) { modeValue.get().equals("motion", ignoreCase = true) || modeValue.get().equals("creative", ignoreCase = true) || modeValue.get().equals("blockdrop", ignoreCase = true) }
+    private val ncpMotionValue = FloatValue("NCPMotion", 0f, 0f, 1f) { modeValue.get().equals("ncp", ignoreCase = true) }
 
     // Verus
-    private final ListValue verusDmgModeValue = new ListValue("Verus-DamageMode", new String[]{"None", "Instant", "InstantC06", "Jump"}, "None", () -> modeValue.get().equalsIgnoreCase("verus"));
-    private final ListValue verusBoostModeValue = new ListValue("Verus-BoostMode", new String[]{"Static", "Gradual"}, "Gradual", () -> modeValue.get().equalsIgnoreCase("verus") && !verusDmgModeValue.get().equalsIgnoreCase("none"));
-    private final BoolValue verusReDamageValue = new BoolValue("Verus-ReDamage", true, () -> modeValue.get().equalsIgnoreCase("verus") && !verusDmgModeValue.get().equalsIgnoreCase("none") && !verusDmgModeValue.get().equalsIgnoreCase("jump"));
-    private final IntegerValue verusReDmgTickValue = new IntegerValue("Verus-ReDamage-Ticks", 20, 0, 300, () -> modeValue.get().equalsIgnoreCase("verus") && !verusDmgModeValue.get().equalsIgnoreCase("none") && !verusDmgModeValue.get().equalsIgnoreCase("jump") && verusReDamageValue.get());
-    private final BoolValue verusVisualValue = new BoolValue("Verus-VisualPos", false, () -> modeValue.get().equalsIgnoreCase("verus"));
-    private final FloatValue verusVisualHeightValue = new FloatValue("Verus-VisualHeight", 0.42F, 0F, 1F, () -> modeValue.get().equalsIgnoreCase("verus") && verusVisualValue.get());
-    private final FloatValue verusSpeedValue = new FloatValue("Verus-Speed", 5F, 0F, 10F, () -> modeValue.get().equalsIgnoreCase("verus") && !verusDmgModeValue.get().equalsIgnoreCase("none"));
-    private final FloatValue verusTimerValue = new FloatValue("Verus-Timer", 1F, 0.1F, 10F, () -> modeValue.get().equalsIgnoreCase("verus") && !verusDmgModeValue.get().equalsIgnoreCase("none"));
-    private final IntegerValue verusDmgTickValue = new IntegerValue("Verus-Ticks", 20, 0, 300, () -> modeValue.get().equalsIgnoreCase("verus") && !verusDmgModeValue.get().equalsIgnoreCase("none"));
-    private final BoolValue verusSpoofGround = new BoolValue("Verus-SpoofGround", false, () -> modeValue.get().equalsIgnoreCase("verus"));
+    private val verusDmgModeValue = ListValue("Verus-DamageMode", arrayOf("None", "Instant", "InstantC06", "Jump"), "None") { modeValue.get().equals("verus", ignoreCase = true) }
+    private val verusBoostModeValue = ListValue("Verus-BoostMode", arrayOf("Static", "Gradual"), "Gradual") { modeValue.get().equals("verus", ignoreCase = true) && !verusDmgModeValue.get().equals("none", ignoreCase = true) }
+    private val verusReDamageValue = BoolValue("Verus-ReDamage", true) { modeValue.get().equals("verus", ignoreCase = true) && !verusDmgModeValue.get().equals("none", ignoreCase = true) && !verusDmgModeValue.get().equals("jump", ignoreCase = true) }
+    private val verusReDmgTickValue = IntegerValue("Verus-ReDamage-Ticks", 20, 0, 300) { modeValue.get().equals("verus", ignoreCase = true) && !verusDmgModeValue.get().equals("none", ignoreCase = true) && !verusDmgModeValue.get().equals("jump", ignoreCase = true) && verusReDamageValue.get() }
+    private val verusVisualValue = BoolValue("Verus-VisualPos", false) { modeValue.get().equals("verus", ignoreCase = true) }
+    private val verusVisualHeightValue = FloatValue("Verus-VisualHeight", 0.42f, 0f, 1f) { modeValue.get().equals("verus", ignoreCase = true) && verusVisualValue.get() }
+    private val verusSpeedValue = FloatValue("Verus-Speed", 5f, 0f, 10f) { modeValue.get().equals("verus", ignoreCase = true) && !verusDmgModeValue.get().equals("none", ignoreCase = true) }
+    private val verusTimerValue = FloatValue("Verus-Timer", 1f, 0.1f, 10f) { modeValue.get().equals("verus", ignoreCase = true) && !verusDmgModeValue.get().equals("none", ignoreCase = true) }
+    private val verusDmgTickValue = IntegerValue("Verus-Ticks", 20, 0, 300) { modeValue.get().equals("verus", ignoreCase = true) && !verusDmgModeValue.get().equals("none", ignoreCase = true) }
+    private val verusSpoofGround = BoolValue("Verus-SpoofGround", false) { modeValue.get().equals("verus", ignoreCase = true) }
 
     // AAC
-    private final BoolValue aac5NoClipValue = new BoolValue("AAC5-NoClip", true, () -> modeValue.get().equalsIgnoreCase("aac5-vanilla"));
-    private final BoolValue aac5NofallValue = new BoolValue("AAC5-NoFall", true, () -> modeValue.get().equalsIgnoreCase("aac5-vanilla"));
-    private final BoolValue aac5UseC04Packet = new BoolValue("AAC5-UseC04", true, () -> modeValue.get().equalsIgnoreCase("aac5-vanilla"));
-    private final ListValue aac5Packet = new ListValue("AAC5-Packet", new String[]{"Original", "Rise", "Other"}, "Original", () -> modeValue.get().equalsIgnoreCase("aac5-vanilla")); // Original is from UnlegitMC/FDPClient.
-    private final IntegerValue aac5PursePacketsValue = new IntegerValue("AAC5-Purse", 7, 3, 20, () -> modeValue.get().equalsIgnoreCase("aac5-vanilla"));
-
-    private final IntegerValue clipDelay = new IntegerValue("Clip-DelayTick", 25, 1, 50, () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final FloatValue clipH = new FloatValue("Clip-Horizontal", 7.9F, 0, 10, () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final FloatValue clipV = new FloatValue("Clip-Vertical", 1.75F, -10, 10, () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final FloatValue clipMotionY = new FloatValue("Clip-MotionY", 0F, -2, 2, () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final FloatValue clipTimer = new FloatValue("Clip-Timer", 1F, 0.08F, 10F, () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final BoolValue clipGroundSpoof = new BoolValue("Clip-GroundSpoof", true, () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final BoolValue clipCollisionCheck = new BoolValue("Clip-CollisionCheck", true, () -> modeValue.get().equalsIgnoreCase("clip"));
-    private final BoolValue clipNoMove = new BoolValue("Clip-NoMove", true, () -> modeValue.get().equalsIgnoreCase("clip"));
+    private val aac5NoClipValue = BoolValue("AAC5-NoClip", true) { modeValue.get().equals("aac5-vanilla", ignoreCase = true) }
+    private val aac5NofallValue = BoolValue("AAC5-NoFall", true) { modeValue.get().equals("aac5-vanilla", ignoreCase = true) }
+    private val aac5UseC04Packet = BoolValue("AAC5-UseC04", true) { modeValue.get().equals("aac5-vanilla", ignoreCase = true) }
+    private val aac5Packet = ListValue("AAC5-Packet", arrayOf("Original", "Rise", "Other"), "Original") { modeValue.get().equals("aac5-vanilla", ignoreCase = true) } // Original is from UnlegitMC/FDPClient.
+    private val aac5PursePacketsValue = IntegerValue("AAC5-Purse", 7, 3, 20) { modeValue.get().equals("aac5-vanilla", ignoreCase = true) }
+    private val clipDelay = IntegerValue("Clip-DelayTick", 25, 1, 50) { modeValue.get().equals("clip", ignoreCase = true) }
+    private val clipH = FloatValue("Clip-Horizontal", 7.9f, 0f, 10f) { modeValue.get().equals("clip", ignoreCase = true) }
+    private val clipV = FloatValue("Clip-Vertical", 1.75f, -10f, 10f) { modeValue.get().equals("clip", ignoreCase = true) }
+    private val clipMotionY = FloatValue("Clip-MotionY", 0f, -2f, 2f) { modeValue.get().equals("clip", ignoreCase = true) }
+    private val clipTimer = FloatValue("Clip-Timer", 1f, 0.08f, 10f) { modeValue.get().equals("clip", ignoreCase = true) }
+    private val clipGroundSpoof = BoolValue("Clip-GroundSpoof", true) { modeValue.get().equals("clip", ignoreCase = true) }
+    private val clipCollisionCheck = BoolValue("Clip-CollisionCheck", true) { modeValue.get().equals("clip", ignoreCase = true) }
+    private val clipNoMove = BoolValue("Clip-NoMove", true) { modeValue.get().equals("clip", ignoreCase = true) }
 
     // Pearl
-    private final ListValue pearlActivateCheck = new ListValue("PearlActiveCheck", new String[] { "Teleport", "Damage" }, "Teleport" , () -> modeValue.get().equalsIgnoreCase("pearl"));
+    private val pearlActivateCheck = ListValue("PearlActiveCheck", arrayOf("Teleport", "Damage"), "Teleport") { modeValue.get().equals("pearl", ignoreCase = true) }
 
     // AAC
-    private final FloatValue aacSpeedValue = new FloatValue("AAC1.9.10-Speed", 0.3F, 0F, 1F, () -> modeValue.get().equalsIgnoreCase("aac1.9.10"));
-    private final BoolValue aacFast = new BoolValue("AAC3.0.5-Fast", true, () -> modeValue.get().equalsIgnoreCase("aac3.0.5"));
-    private final FloatValue aacMotion = new FloatValue("AAC3.3.12-Motion", 10F, 0.1F, 10F, () -> modeValue.get().equalsIgnoreCase("aac3.3.12"));
-    private final FloatValue aacMotion2 = new FloatValue("AAC3.3.13-Motion", 10F, 0.1F, 10F, () -> modeValue.get().equalsIgnoreCase("aac3.3.13"));
-
-    private final ListValue hypixelBoostMode = new ListValue("BoostHypixel-Mode", new String[] { "Default", "MorePackets", "NCP" }, "Default", () -> modeValue.get().equalsIgnoreCase("boosthypixel"));
-    private final BoolValue hypixelVisualY = new BoolValue("BoostHypixel-VisualY", true, () -> modeValue.get().equalsIgnoreCase("boosthypixel"));
-    private final BoolValue hypixelC04 = new BoolValue("BoostHypixel-MoreC04s", false, () -> modeValue.get().equalsIgnoreCase("boosthypixel"));
+    private val aacSpeedValue = FloatValue("AAC1.9.10-Speed", 0.3f, 0f, 1f) { modeValue.get().equals("aac1.9.10", ignoreCase = true) }
+    private val aacFast = BoolValue("AAC3.0.5-Fast", true) { modeValue.get().equals("aac3.0.5", ignoreCase = true) }
+    private val aacMotion = FloatValue("AAC3.3.12-Motion", 10f, 0.1f, 10f) { modeValue.get().equals("aac3.3.12", ignoreCase = true) }
+    private val aacMotion2 = FloatValue("AAC3.3.13-Motion", 10f, 0.1f, 10f) { modeValue.get().equals("aac3.3.13", ignoreCase = true) }
+    private val hypixelBoostMode = ListValue("BoostHypixel-Mode", arrayOf("Default", "MorePackets", "NCP"), "Default") { modeValue.get().equals("boosthypixel", ignoreCase = true) }
+    private val hypixelVisualY = BoolValue("BoostHypixel-VisualY", true) { modeValue.get().equals("boosthypixel", ignoreCase = true) }
+    private val hypixelC04 = BoolValue("BoostHypixel-MoreC04s", false) { modeValue.get().equals("boosthypixel", ignoreCase = true) }
 
     // Hypixel
-    private final BoolValue hypixelBoost = new BoolValue("Hypixel-Boost", true, () -> modeValue.get().equalsIgnoreCase("hypixel"));
-    private final IntegerValue hypixelBoostDelay = new IntegerValue("Hypixel-BoostDelay", 1200, 0, 2000, () -> modeValue.get().equalsIgnoreCase("hypixel"));
-    private final FloatValue hypixelBoostTimer = new FloatValue("Hypixel-BoostTimer", 1F, 0F, 5F, () -> modeValue.get().equalsIgnoreCase("hypixel"));
-
-    private final FloatValue mineplexSpeedValue = new FloatValue("MineplexSpeed", 1F, 0.5F, 10F, () -> modeValue.get().equalsIgnoreCase("mineplex"));
-    private final IntegerValue neruxVaceTicks = new IntegerValue("NeruxVace-Ticks", 6, 0, 20, () -> modeValue.get().equalsIgnoreCase("neruxvace"));
+    private val hypixelBoost = BoolValue("Hypixel-Boost", true) { modeValue.get().equals("hypixel", ignoreCase = true) }
+    private val hypixelBoostDelay = IntegerValue("Hypixel-BoostDelay", 1200, 0, 2000) { modeValue.get().equals("hypixel", ignoreCase = true) }
+    private val hypixelBoostTimer = FloatValue("Hypixel-BoostTimer", 1f, 0f, 5f) { modeValue.get().equals("hypixel", ignoreCase = true) }
+    private val mineplexSpeedValue = FloatValue("MineplexSpeed", 1f, 0.5f, 10f) { modeValue.get().equals("mineplex", ignoreCase = true) }
+    private val neruxVaceTicks = IntegerValue("NeruxVace-Ticks", 6, 0, 20) { modeValue.get().equals("neruxvace", ignoreCase = true) }
 
     // General
-    private final BoolValue resetMotionValue = new BoolValue("ResetMotion", true);
+    private val resetMotionValue = BoolValue("ResetMotion", true)
 
     // Visuals
-    private final BoolValue fakeDmgValue = new BoolValue("FakeDamage", true);
-    private final BoolValue bobbingValue = new BoolValue("Bobbing", true);
-    private final FloatValue bobbingAmountValue = new FloatValue("BobbingAmount", 0.2F, 0F, 1F, () -> bobbingValue.get());
-    private final BoolValue markValue = new BoolValue("Mark", true);
-
-    private BlockPos lastPosition;
-
-    private double startY;
-
-    private final MSTimer flyTimer = new MSTimer();
-    private final MSTimer groundTimer = new MSTimer();
-    private final MSTimer boostTimer = new MSTimer();
-    private final MSTimer wdTimer = new MSTimer();
-    private final MSTimer mineSecureVClipTimer = new MSTimer();
-    private final MSTimer mineplexTimer = new MSTimer();
-
-    private final TickTimer spartanTimer = new TickTimer();
-    private final TickTimer verusTimer = new TickTimer();
-    private final TickTimer hypixelTimer = new TickTimer();
-    private final TickTimer cubecraftTeleportTickTimer = new TickTimer();
-    private final TickTimer freeHypixelTimer = new TickTimer();
-
-    private boolean shouldFakeJump, shouldActive = false;
-
-    private boolean noPacketModify;
-    private boolean isBoostActive = false;
-
-    private boolean noFlag;
-    private int pearlState = 0;
-
-    private Vec3 startVec;
-    private Vector2f rotationVec;
-
-    private boolean wasDead;
-
-    private int boostTicks, dmgCooldown = 0;
-    private int verusJumpTimes = 0;
-    public int wdState, wdTick = 0;
-
-    private boolean verusDmged, shouldActiveDmg = false;
-
-    private float lastYaw, lastPitch;
-
-    private double moveSpeed = 0.0;
-    private int expectItemStack = -1;
-
-    private double aacJump;
-
-    private int aac3delay;
-    private int aac3glideDelay;
-
-    private long minesuchtTP;
-
-    private int boostHypixelState = 1;
-    private double lastDistance;
-    private boolean failedStart = false;
-
-    private float freeHypixelYaw;
-    private float freeHypixelPitch;
-
-    private double bmcSpeed;
-    private boolean started;
-
-    private void doMove(double h, double v) {
-        if (mc.thePlayer == null) return;
-
-        double x = mc.thePlayer.posX;
-        double y = mc.thePlayer.posY;
-        double z = mc.thePlayer.posZ;
-
-        final double yaw = Math.toRadians(mc.thePlayer.rotationYaw);
-
-        double expectedX = x + (-Math.sin(yaw) * h);
-        double expectedY = y + v;
-        double expectedZ = z + (Math.cos(yaw) * h);
-
-        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(expectedX, expectedY, expectedZ, mc.thePlayer.onGround));
-        mc.thePlayer.setPosition(expectedX, expectedY, expectedZ);
+    private val fakeDmgValue = BoolValue("FakeDamage", true)
+    private val bobbingValue = BoolValue("Bobbing", true)
+    private val bobbingAmountValue = FloatValue("BobbingAmount", 0.2f, 0f, 1f) { bobbingValue.get() }
+    private val markValue = BoolValue("Mark", true)
+    private var startY = 0.0
+    private val flyTimer = MSTimer()
+    private val groundTimer = MSTimer()
+    private val mineSecureVClipTimer = MSTimer()
+    private val mineplexTimer = MSTimer()
+    private val spartanTimer = TickTimer()
+    private val verusTimer = TickTimer()
+    private val hypixelTimer = TickTimer()
+    private val cubecraftTeleportTickTimer = TickTimer()
+    private val freeHypixelTimer = TickTimer()
+    private var shouldFakeJump = false
+    private var shouldActive = false
+    private var noPacketModify = false
+    private var isBoostActive = false
+    private var noFlag = false
+    private var pearlState = 0
+    private var startVec: Vec3? = null
+    private var rotationVec: Vector2f? = null
+    private var wasDead = false
+    private var boostTicks = 0
+    private var dmgCooldown = 0
+    private var verusJumpTimes = 0
+    var wdState = 0
+    var wdTick = 0
+    private var verusDmged = false
+    private var shouldActiveDmg = false
+    private var lastYaw = 0f
+    private var lastPitch = 0f
+    private var moveSpeed = 0.0
+    private var expectItemStack = -1
+    private var aacJump = 0.0
+    private var aac3delay = 0
+    private var aac3glideDelay = 0
+    private var minesuchtTP: Long = 0
+    private var boostHypixelState = 1
+    private var lastDistance = 0.0
+    private var failedStart = false
+    private var freeHypixelYaw = 0f
+    private var freeHypixelPitch = 0f
+    private var bmcSpeed = 0.0
+    private var started = false
+    private fun doMove(h: Double, v: Double) {
+        if (mc.thePlayer == null) return
+        val x = mc.thePlayer.posX
+        val y = mc.thePlayer.posY
+        val z = mc.thePlayer.posZ
+        val yaw = Math.toRadians(mc.thePlayer.rotationYaw.toDouble())
+        val expectedX = x + -sin(yaw) * h
+        val expectedY = y + v
+        val expectedZ = z + cos(yaw) * h
+        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(expectedX, expectedY, expectedZ, mc.thePlayer.onGround))
+        mc.thePlayer.setPosition(expectedX, expectedY, expectedZ)
     }
 
-    private void hClip(double x, double y, double z) {
-        if (mc.thePlayer == null) return;
-
-        double expectedX = mc.thePlayer.posX + x;
-        double expectedY = mc.thePlayer.posY + y;
-        double expectedZ = mc.thePlayer.posZ + z;
-
-        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(expectedX, expectedY, expectedZ, mc.thePlayer.onGround));
-        mc.thePlayer.setPosition(expectedX, expectedY, expectedZ);
+    private fun hClip(x: Double, y: Double, z: Double) {
+        if (mc.thePlayer == null) return
+        val expectedX = mc.thePlayer.posX + x
+        val expectedY = mc.thePlayer.posY + y
+        val expectedZ = mc.thePlayer.posZ + z
+        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(expectedX, expectedY, expectedZ, mc.thePlayer.onGround))
+        mc.thePlayer.setPosition(expectedX, expectedY, expectedZ)
     }
 
-    private double[] getMoves(double h, double v) {
-        if (mc.thePlayer == null) return new double[]{ 0.0, 0.0, 0.0 };
-
-        final double yaw = Math.toRadians(mc.thePlayer.rotationYaw);
-
-        double expectedX = (-Math.sin(yaw) * h);
-        double expectedY = v;
-        double expectedZ = (Math.cos(yaw) * h);
-
-        return new double[] { expectedX, expectedY, expectedZ };
+    private fun getMoves(h: Double, v: Double): DoubleArray {
+        if (mc.thePlayer == null) return doubleArrayOf(0.0, 0.0, 0.0)
+        val yaw = Math.toRadians(mc.thePlayer.rotationYaw.toDouble())
+        val expectedX = -sin(yaw) * h
+        val expectedZ = cos(yaw) * h
+        return doubleArrayOf(expectedX, v, expectedZ)
     }
 
-    @Override
-    public void onEnable() {
-        if(mc.thePlayer == null)
-            return;
+    override fun onEnable() {
+        if (mc.thePlayer == null) return
+        noPacketModify = true
+        verusTimer.reset()
+        flyTimer.reset()
+        shouldFakeJump = false
+        shouldActive = true
+        isBoostActive = false
+        expectItemStack = -1
+        val x = mc.thePlayer.posX
+        val y = mc.thePlayer.posY
+        val z = mc.thePlayer.posZ
+        lastYaw = mc.thePlayer.rotationYaw
+        lastPitch = mc.thePlayer.rotationPitch
+        val mode = modeValue.get()
+        boostTicks = 0
+        dmgCooldown = 0
+        pearlState = 0
+        verusJumpTimes = 0
+        verusDmged = false
+        moveSpeed = 0.0
+        wdState = 0
+        wdTick = 0
+        bmcSpeed = 0.0
+        started = false
 
-        noPacketModify = true;
+        duh@
+        for (duh in arrayOf(mode)) {
+            when (mode.lowercase(Locale.getDefault())) {
+                "ncp" -> {
+                    mc.thePlayer.motionY = -ncpMotionValue.get().toDouble()
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY = -0.5
+                    MovementUtils.strafe()
+                }
 
-        verusTimer.reset();
-        flyTimer.reset();
+                "blockdrop" -> {
+                    startVec = Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)
+                    rotationVec = Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
+                }
 
-        shouldFakeJump = false;
-        shouldActive = true;
-        isBoostActive = false;
+                "oldncp" -> {
+                    if (startY > mc.thePlayer.posY) mc.thePlayer.motionY = -0.000000000000000000000000000000001
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY = -0.2
+                    if (mc.gameSettings.keyBindJump.isKeyDown && mc.thePlayer.posY < startY - 0.1) mc.thePlayer.motionY = 0.2
+                    MovementUtils.strafe()
+                }
 
-        expectItemStack = -1;
-
-        double x = mc.thePlayer.posX;
-        double y = mc.thePlayer.posY;
-        double z = mc.thePlayer.posZ;
-
-        lastYaw = mc.thePlayer.rotationYaw;
-        lastPitch = mc.thePlayer.rotationPitch;
-
-        final String mode = modeValue.get();
-
-        boostTicks = 0;
-        dmgCooldown = 0;
-        pearlState = 0;
-
-        verusJumpTimes = 0;
-        verusDmged = false;
-
-        moveSpeed = 0;
-        wdState = 0;
-        wdTick = 0;
-
-        bmcSpeed = 0;
-        started = false;
-
-        switch (mode.toLowerCase()) {
-            case "ncp":
-                mc.thePlayer.motionY = -ncpMotionValue.get();
-
-                if(mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY = -0.5D;
-                MovementUtils.strafe();
-                break;
-            case "blockdrop":
-                startVec = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
-                rotationVec = new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-                break;
-            case "oldncp":
-                if(startY > mc.thePlayer.posY)
-                    mc.thePlayer.motionY = -0.000000000000000000000000000000001D;
-
-                if(mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY = -0.2D;
-
-                if(mc.gameSettings.keyBindJump.isKeyDown() && mc.thePlayer.posY < (startY - 0.1D))
-                    mc.thePlayer.motionY = 0.2D;
-                MovementUtils.strafe();
-                break;
-            case "verus":
-                if (verusDmgModeValue.get().equalsIgnoreCase("Instant")) {
-                    if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, 4, 0).expand(0, 0, 0)).isEmpty()) {
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, false));
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, false));
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, true));
-                        mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-                        if (verusReDamageValue.get()) dmgCooldown = verusReDmgTickValue.get();
+                "verus" -> {
+                    if (verusDmgModeValue.get().equals("Instant", ignoreCase = true)) {
+                        if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(0.0, 4.0, 0.0).expand(0.0, 0.0, 0.0)).isEmpty()) {
+                            sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, false))
+                            sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, false))
+                            sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, true))
+                            mc.thePlayer.motionZ = 0.0
+                            mc.thePlayer.motionX = mc.thePlayer.motionZ
+                            if (verusReDamageValue.get()) dmgCooldown = verusReDmgTickValue.get()
+                        }
+                    } else if (verusDmgModeValue.get().equals("InstantC06", ignoreCase = true)) {
+                        if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(0.0, 4.0, 0.0).expand(0.0, 0.0, 0.0)).isEmpty()) {
+                            sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                            sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                            sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true))
+                            mc.thePlayer.motionZ = 0.0
+                            mc.thePlayer.motionX = mc.thePlayer.motionZ
+                            if (verusReDamageValue.get()) dmgCooldown = verusReDmgTickValue.get()
+                        }
+                    } else if (verusDmgModeValue.get().equals("Jump", ignoreCase = true)) {
+                        if (mc.thePlayer.onGround) {
+                            mc.thePlayer.jump()
+                            verusJumpTimes = 1
+                        }
+                    } else {
+                        // set dmged = true since there's no damage method
+                        verusDmged = true
                     }
-                } else if (verusDmgModeValue.get().equalsIgnoreCase("InstantC06")) {
-                    if (mc.thePlayer.onGround && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, 4, 0).expand(0, 0, 0)).isEmpty()) {
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false));
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false));
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true));
-                        mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-                        if (verusReDamageValue.get()) dmgCooldown = verusReDmgTickValue.get();
+                    if (verusVisualValue.get()) mc.thePlayer.setPosition(mc.thePlayer.posX, y + verusVisualHeightValue.get(), mc.thePlayer.posZ)
+                    shouldActiveDmg = dmgCooldown > 0
+                }
+
+                "bugspartan" -> {
+                    var i = 0
+                    while (i < 65) {
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(x, y + 0.049, z, false))
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(x, y, z, false))
+                        ++i
                     }
-                } else if (verusDmgModeValue.get().equalsIgnoreCase("Jump")) {
+                    mc.netHandler.addToSendQueue(C04PacketPlayerPosition(x, y + 0.1, z, true))
+                    mc.thePlayer.motionX *= 0.1
+                    mc.thePlayer.motionZ *= 0.1
+                    mc.thePlayer.swingItem()
+                }
+
+                "funcraft" -> {
+                    if (mc.thePlayer.onGround) mc.thePlayer.jump()
+                    moveSpeed = 1.0
+                }
+
+                "watchdog" -> {
+                    expectItemStack = slimeSlot
+                    if (expectItemStack == -1) {
+                        LiquidBounce.hud.addNotification(Notification("The fly requires slime blocks to be activated properly.", Type.ERROR, 500))
+                        break
+                    }
                     if (mc.thePlayer.onGround) {
-                        mc.thePlayer.jump();
-                        verusJumpTimes = 1;
-                    }
-                } else {
-                    // set dmged = true since there's no damage method
-                    verusDmged = true;
-                }
-                if (verusVisualValue.get()) mc.thePlayer.setPosition(mc.thePlayer.posX, y + verusVisualHeightValue.get(), mc.thePlayer.posZ);
-                shouldActiveDmg = dmgCooldown > 0;
-                break;
-            case "bugspartan":
-                for(int i = 0; i < 65; ++i) {
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(x, y + 0.049D, z, false));
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(x, y, z, false));
-                }
-                mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(x, y + 0.1D, z, true));
-                mc.thePlayer.motionX *= 0.1D;
-                mc.thePlayer.motionZ *= 0.1D;
-                mc.thePlayer.swingItem();
-                break;
-            case "funcraft":
-                if (mc.thePlayer.onGround)
-                    mc.thePlayer.jump();
-                moveSpeed = 1;
-                break;
-            case "watchdog":
-                expectItemStack = getSlimeSlot();
-                if (expectItemStack == -1) {
-                    LiquidBounce.hud.addNotification(new Notification("The fly requires slime blocks to be activated properly.", Type.ERROR, 500));
-                    break;
-                }
-
-                if (mc.thePlayer.onGround) {
-                    mc.thePlayer.jump();
-                    wdState = 1;
-                }
-                break;
-            case "boosthypixel":
-                if(!mc.thePlayer.onGround) break;
-
-                if (hypixelC04.get()) for (int i = 0; i < 10; i++) //Imagine flagging to NCP.
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true));
-
-                if (hypixelBoostMode.get().equalsIgnoreCase("ncp")) {
-                    for (int i = 0; i < 65; i++) {
-                        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.049, mc.thePlayer.posZ, false));
-                        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, false));
-                    }
-                } else {
-                    double fallDistance = hypixelBoostMode.get().equalsIgnoreCase("morepackets") ? 3.4025 : 3.0125; //add 0.0125 to ensure we get the fall dmg
-                    while (fallDistance > 0) {
-                        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0624986421, mc.thePlayer.posZ, false));
-                        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0625      , mc.thePlayer.posZ, false));
-                        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0624986421, mc.thePlayer.posZ, false));
-                        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0000013579, mc.thePlayer.posZ, false));
-                        fallDistance -= 0.0624986421;
+                        mc.thePlayer.jump()
+                        wdState = 1
                     }
                 }
-                mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true));
 
-                if (hypixelVisualY.get()) {
-                    mc.thePlayer.jump();
-                    mc.thePlayer.posY += 0.42F; // Visual
+                "boosthypixel" -> {
+                    if (!mc.thePlayer.onGround) break
+                    if (hypixelC04.get()) {
+                        var i = 0
+                        while (i < 10) {
+                            //Imagine flagging to NCP.
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true))
+                            i++
+                        }
+                    }
+                    if (hypixelBoostMode.get().equals("ncp", ignoreCase = true)) {
+                        var i = 0
+                        while (i < 65) {
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.049, mc.thePlayer.posZ, false))
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, false))
+                            i++
+                        }
+                    } else {
+                        var fallDistance = if (hypixelBoostMode.get().equals("morepackets", ignoreCase = true)) 3.4025 else 3.0125 //add 0.0125 to ensure we get the fall dmg
+                        while (fallDistance > 0) {
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0624986421, mc.thePlayer.posZ, false))
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0625, mc.thePlayer.posZ, false))
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0624986421, mc.thePlayer.posZ, false))
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0000013579, mc.thePlayer.posZ, false))
+                            fallDistance -= 0.0624986421
+                        }
+                    }
+                    mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true))
+                    if (hypixelVisualY.get()) {
+                        mc.thePlayer.jump()
+                        mc.thePlayer.posY += 0.42 // Visual
+                    }
+                    boostHypixelState = 1
+                    moveSpeed = 0.1
+                    lastDistance = 0.0
+                    failedStart = false
                 }
-
-                boostHypixelState = 1;
-                moveSpeed = 0.1D;
-                lastDistance = 0D;
-                failedStart = false;
-                break;
+            }
         }
 
-        startY = mc.thePlayer.posY;
-        noPacketModify = false;
-        aacJump = -3.8D;
-
-        if (mode.equalsIgnoreCase("freehypixel")) {
-            freeHypixelTimer.reset();
-            mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY + 0.42D, mc.thePlayer.posZ);
-            freeHypixelYaw = mc.thePlayer.rotationYaw;
-            freeHypixelPitch = mc.thePlayer.rotationPitch;
+        startY = mc.thePlayer.posY
+        noPacketModify = false
+        aacJump = -3.8
+        if (mode.equals("freehypixel", ignoreCase = true)) {
+            freeHypixelTimer.reset()
+            mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY + 0.42, mc.thePlayer.posZ)
+            freeHypixelYaw = mc.thePlayer.rotationYaw
+            freeHypixelPitch = mc.thePlayer.rotationPitch
         }
-
-        if (!mode.equalsIgnoreCase("watchdog")
-                && !mode.equalsIgnoreCase("bugspartan") && !mode.equalsIgnoreCase("verus") && !mode.equalsIgnoreCase("damage") && !mode.toLowerCase().contains("hypixel")
-                && fakeDmgValue.get()) {
-            mc.thePlayer.handleStatusUpdate((byte) 2);
+        if (!mode.equals("watchdog", ignoreCase = true)
+            && !mode.equals("bugspartan", ignoreCase = true) && !mode.equals("verus", ignoreCase = true) && !mode.equals("damage", ignoreCase = true) && !mode.lowercase(Locale.getDefault()).contains("hypixel")
+            && fakeDmgValue.get()
+        ) {
+            mc.thePlayer.handleStatusUpdate(2.toByte())
         }
-
-        super.onEnable();
+        super.onEnable()
     }
 
-    @Override
-    public void onDisable() {
-        wasDead = false;
-
-        if (mc.thePlayer == null)
-            return;
-
-        noFlag = false;
-
-        final String mode = modeValue.get();
-
-        if (resetMotionValue.get() && (!mode.toUpperCase().startsWith("AAC") && !mode.equalsIgnoreCase("Hypixel") &&
-                !mode.equalsIgnoreCase("CubeCraft") && !mode.equalsIgnoreCase("Collide") && !mode.equalsIgnoreCase("Verus") && !mode.equalsIgnoreCase("Jump") && !mode.equalsIgnoreCase("creative")) || (mode.equalsIgnoreCase("pearl") && pearlState != -1)) {
-            mc.thePlayer.motionX = 0;
-            mc.thePlayer.motionY = 0;
-            mc.thePlayer.motionZ = 0;
+    override fun onDisable() {
+        wasDead = false
+        if (mc.thePlayer == null) return
+        noFlag = false
+        val mode = modeValue.get()
+        if (resetMotionValue.get() && !mode.uppercase(Locale.getDefault()).startsWith("AAC") && !mode.equals("Hypixel", ignoreCase = true) &&
+            !mode.equals("CubeCraft", ignoreCase = true) && !mode.equals("Collide", ignoreCase = true) && !mode.equals("Verus", ignoreCase = true) && !mode.equals("Jump", ignoreCase = true) && !mode.equals("creative", ignoreCase = true) || mode.equals("pearl", ignoreCase = true) && pearlState != -1
+        ) {
+            mc.thePlayer.motionX = 0.0
+            mc.thePlayer.motionY = 0.0
+            mc.thePlayer.motionZ = 0.0
         }
-
-        if (resetMotionValue.get() && boostTicks > 0 && mode.equalsIgnoreCase("Verus")) {
-            mc.thePlayer.motionX = 0;
-            mc.thePlayer.motionZ = 0;
+        if (resetMotionValue.get() && boostTicks > 0 && mode.equals("Verus", ignoreCase = true)) {
+            mc.thePlayer.motionX = 0.0
+            mc.thePlayer.motionZ = 0.0
         }
-
-        if (mode.equalsIgnoreCase("AAC5-Vanilla") && !mc.isIntegratedServerRunning()) {
-            sendAAC5Packets();
+        if (mode.equals("AAC5-Vanilla", ignoreCase = true) && !mc.isIntegratedServerRunning) {
+            sendAAC5Packets()
         }
-
-        mc.thePlayer.capabilities.isFlying = false;
-
-        mc.timer.timerSpeed = 1F;
-        mc.thePlayer.speedInAir = 0.02F;
+        mc.thePlayer.capabilities.isFlying = false
+        mc.timer.timerSpeed = 1f
+        mc.thePlayer.speedInAir = 0.02f
     }
 
     @EventTarget
-    public void onUpdate(final UpdateEvent event) {
-        final float vanillaSpeed = vanillaSpeedValue.get();
-        final float vanillaVSpeed = vanillaVSpeedValue.get();
-        mc.thePlayer.noClip = modeValue.get().equalsIgnoreCase("aac5-vanilla") && aac5NoClipValue.get();
-
-        switch (modeValue.get().toLowerCase()) {
-            case "motion":
-            case "blockdrop":
-                mc.thePlayer.capabilities.isFlying = false;
-                mc.thePlayer.motionY = vanillaMotionYValue.get();
-                mc.thePlayer.motionX = 0;
-                mc.thePlayer.motionZ = 0;
-                if (mc.gameSettings.keyBindJump.isKeyDown())
-                    mc.thePlayer.motionY += vanillaVSpeed;
-                if (mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY -= vanillaVSpeed;
-                MovementUtils.strafe(vanillaSpeed);
-                handleVanillaKickBypass();
-                break;
-            case "cubecraft":
-                mc.timer.timerSpeed = 0.6F;
-
-                cubecraftTeleportTickTimer.update();
-                break;
-            case "ncp":
-                mc.thePlayer.motionY = -ncpMotionValue.get();
-
-                if(mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY = -0.5D;
-                MovementUtils.strafe();
-                break;
-            case "oldncp":
-                if(startY > mc.thePlayer.posY)
-                    mc.thePlayer.motionY = -0.000000000000000000000000000000001D;
-
-                if(mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY = -0.2D;
-
-                if(mc.gameSettings.keyBindJump.isKeyDown() && mc.thePlayer.posY < (startY - 0.1D))
-                    mc.thePlayer.motionY = 0.2D;
-                MovementUtils.strafe();
-                break;
-            case "clip":
-                mc.thePlayer.motionY = clipMotionY.get();
-                mc.timer.timerSpeed = clipTimer.get();
-                if (mc.thePlayer.ticksExisted % clipDelay.get() == 0) {
-                    double[] expectMoves = getMoves((double)clipH.get(), (double)clipV.get());
-                    if (!clipCollisionCheck.get() || mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(expectMoves[0], expectMoves[1], expectMoves[2]).expand(0, 0, 0)).isEmpty())
-                        hClip(expectMoves[0], expectMoves[1], expectMoves[2]);
+    fun onUpdate(event: UpdateEvent?) {
+        val vanillaSpeed = vanillaSpeedValue.get()
+        val vanillaVSpeed = vanillaVSpeedValue.get()
+        mc.thePlayer.noClip = modeValue.get().equals("aac5-vanilla", ignoreCase = true) && aac5NoClipValue.get()
+        for (duh in arrayOf(modeValue)) {
+            when (modeValue.get().lowercase(Locale.getDefault())) {
+                "motion", "blockdrop" -> {
+                    mc.thePlayer.capabilities.isFlying = false
+                    mc.thePlayer.motionY = vanillaMotionYValue.get().toDouble()
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
+                    if (mc.gameSettings.keyBindJump.isKeyDown) mc.thePlayer.motionY += vanillaVSpeed.toDouble()
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY -= vanillaVSpeed.toDouble()
+                    MovementUtils.strafe(vanillaSpeed)
+                    handleVanillaKickBypass()
                 }
-                break;
-            case "damage":
-                mc.thePlayer.capabilities.isFlying = false;
-                if (mc.thePlayer.hurtTime <= 0) break;
-            case "derp":
-            case "aac5-vanilla":
-            case "bugspartan":
-                mc.thePlayer.capabilities.isFlying = false;
-                mc.thePlayer.motionY = 0;
-                mc.thePlayer.motionX = 0;
-                mc.thePlayer.motionZ = 0;
-                if (mc.gameSettings.keyBindJump.isKeyDown())
-                    mc.thePlayer.motionY += vanillaSpeed;
-                if (mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY -= vanillaSpeed;
-                MovementUtils.strafe(vanillaSpeed);
-                break;
-            case "verus":
-                mc.thePlayer.capabilities.isFlying = false;
-                mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-                if (!verusDmgModeValue.get().equalsIgnoreCase("Jump") || shouldActiveDmg || verusDmged)
-                    mc.thePlayer.motionY = 0;
 
-                if (verusDmgModeValue.get().equalsIgnoreCase("Jump") && verusJumpTimes < 5) {
-                    if (mc.thePlayer.onGround) {
-                        mc.thePlayer.jump();
-                        verusJumpTimes += 1;
+                "cubecraft" -> {
+                    mc.timer.timerSpeed = 0.6f
+                    cubecraftTeleportTickTimer.update()
+                }
+
+                "ncp" -> {
+                    mc.thePlayer.motionY = -ncpMotionValue.get().toDouble()
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY = -0.5
+                    MovementUtils.strafe()
+                }
+
+                "oldncp" -> {
+                    if (startY > mc.thePlayer.posY) mc.thePlayer.motionY = -0.000000000000000000000000000000001
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY = -0.2
+                    if (mc.gameSettings.keyBindJump.isKeyDown && mc.thePlayer.posY < startY - 0.1) mc.thePlayer.motionY = 0.2
+                    MovementUtils.strafe()
+                }
+
+                "clip" -> {
+                    mc.thePlayer.motionY = clipMotionY.get().toDouble()
+                    mc.timer.timerSpeed = clipTimer.get()
+                    if (mc.thePlayer.ticksExisted % clipDelay.get() == 0) {
+                        val expectMoves = getMoves(clipH.get().toDouble(), clipV.get().toDouble())
+                        if (!clipCollisionCheck.get() || mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(expectMoves[0], expectMoves[1], expectMoves[2]).expand(0.0, 0.0, 0.0)).isEmpty()) hClip(expectMoves[0], expectMoves[1], expectMoves[2])
                     }
-                    return;
                 }
 
-                if (shouldActiveDmg) {
-                    if (dmgCooldown > 0)
-                        dmgCooldown--;
-                    else if (verusDmged) {
-                        verusDmged = false;
-                        double y = mc.thePlayer.posY;
-                        if (verusDmgModeValue.get().equalsIgnoreCase("Instant")) {
-                            if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, 4, 0).expand(0, 0, 0)).isEmpty()) {
-                                PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, false));
-                                PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, false));
-                                PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, true));
-                                mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-                            }
-                        } else if (verusDmgModeValue.get().equalsIgnoreCase("InstantC06")) {
-                            if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, 4, 0).expand(0, 0, 0)).isEmpty()) {
-                                PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false));
-                                PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false));
-                                PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true));
-                                mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-                            }
+                "damage" -> {
+                    mc.thePlayer.capabilities.isFlying = false
+                    if (mc.thePlayer.hurtTime <= 0) break
+                    mc.thePlayer.capabilities.isFlying = false
+                    mc.thePlayer.motionY = 0.0
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
+                    if (mc.gameSettings.keyBindJump.isKeyDown) mc.thePlayer.motionY += vanillaSpeed.toDouble()
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY -= vanillaSpeed.toDouble()
+                    MovementUtils.strafe(vanillaSpeed)
+                }
+
+                "derp", "aac5-vanilla", "bugspartan" -> {
+                    mc.thePlayer.capabilities.isFlying = false
+                    mc.thePlayer.motionY = 0.0
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
+                    if (mc.gameSettings.keyBindJump.isKeyDown) mc.thePlayer.motionY += vanillaSpeed.toDouble()
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY -= vanillaSpeed.toDouble()
+                    MovementUtils.strafe(vanillaSpeed)
+                }
+
+                "verus" -> {
+                    mc.thePlayer.capabilities.isFlying = false
+                    run {
+                        mc.thePlayer.motionZ = 0.0
+                        mc.thePlayer.motionX = mc.thePlayer.motionZ
+                    }
+                    if (!verusDmgModeValue.get().equals("Jump", ignoreCase = true) || shouldActiveDmg || verusDmged) mc.thePlayer.motionY = 0.0
+                    if (verusDmgModeValue.get().equals("Jump", ignoreCase = true) && verusJumpTimes < 5) {
+                        if (mc.thePlayer.onGround) {
+                            mc.thePlayer.jump()
+                            verusJumpTimes += 1
                         }
-                        dmgCooldown = verusReDmgTickValue.get();
+                        return
+                    }
+                    if (shouldActiveDmg) {
+                        if (dmgCooldown > 0) dmgCooldown-- else if (verusDmged) {
+                            verusDmged = false
+                            val y = mc.thePlayer.posY
+                            if (verusDmgModeValue.get().equals("Instant", ignoreCase = true)) {
+                                if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(0.0, 4.0, 0.0).expand(0.0, 0.0, 0.0)).isEmpty()) {
+                                    sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, false))
+                                    sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, false))
+                                    sendPacketNoEvent(C04PacketPlayerPosition(mc.thePlayer.posX, y, mc.thePlayer.posZ, true))
+                                    mc.thePlayer.motionZ = 0.0
+                                    mc.thePlayer.motionX = mc.thePlayer.motionZ
+                                }
+                            } else if (verusDmgModeValue.get().equals("InstantC06", ignoreCase = true)) {
+                                if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(0.0, 4.0, 0.0).expand(0.0, 0.0, 0.0)).isEmpty()) {
+                                    sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y + 4, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                                    sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                                    sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, y, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true))
+                                    mc.thePlayer.motionZ = 0.0
+                                    mc.thePlayer.motionX = mc.thePlayer.motionZ
+                                }
+                            }
+                            dmgCooldown = verusReDmgTickValue.get()
+                        }
+                    }
+                    if (!verusDmged && mc.thePlayer.hurtTime > 0) {
+                        verusDmged = true
+                        boostTicks = verusDmgTickValue.get()
+                    }
+                    if (boostTicks > 0) {
+                        mc.timer.timerSpeed = verusTimerValue.get()
+                        val motion: Float = if (verusBoostModeValue.get().equals("static", ignoreCase = true)) verusSpeedValue.get() else boostTicks.toFloat() / verusDmgTickValue.get().toFloat() * verusSpeedValue.get()
+                        boostTicks--
+                        MovementUtils.strafe(motion)
+                    } else if (verusDmged) {
+                        mc.timer.timerSpeed = 1f
+                        MovementUtils.strafe(MovementUtils.getBaseMoveSpeed().toFloat() * 0.6f)
+                    } else {
+                        mc.thePlayer.movementInput.moveForward = 0f
+                        mc.thePlayer.movementInput.moveStrafe = 0f
                     }
                 }
 
-                if (!verusDmged && mc.thePlayer.hurtTime > 0) {
-                    verusDmged = true;
-                    boostTicks = verusDmgTickValue.get();
+                "creative" -> {
+                    mc.thePlayer.capabilities.isFlying = true
+                    handleVanillaKickBypass()
                 }
 
-                if (boostTicks > 0) {
-                    mc.timer.timerSpeed = verusTimerValue.get();
-                    float motion = 0F;
+                "aac1.9.10" -> {
+                    if (mc.gameSettings.keyBindJump.isKeyDown) aacJump += 0.2
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) aacJump -= 0.2
+                    if (startY + aacJump > mc.thePlayer.posY) {
+                        mc.netHandler.addToSendQueue(C03PacketPlayer(true))
+                        mc.thePlayer.motionY = 0.8
+                        MovementUtils.strafe(aacSpeedValue.get())
+                    }
+                    MovementUtils.strafe()
+                }
 
-                    if (verusBoostModeValue.get().equalsIgnoreCase("static")) motion = verusSpeedValue.get(); else motion = ((float)boostTicks / (float)verusDmgTickValue.get()) * verusSpeedValue.get();
-                    boostTicks--;
+                "aac3.0.5" -> {
+                    if (aac3delay == 2) mc.thePlayer.motionY = 0.1 else if (aac3delay > 2) aac3delay = 0
+                    if (aacFast.get()) {
+                        if (mc.thePlayer.movementInput.moveStrafe.toDouble() == 0.0) mc.thePlayer.jumpMovementFactor = 0.08f else mc.thePlayer.jumpMovementFactor = 0f
+                    }
+                    aac3delay++
+                }
 
-                    MovementUtils.strafe(motion);
-                } else if (verusDmged) {
-                    mc.timer.timerSpeed = 1F;
-                    MovementUtils.strafe((float)MovementUtils.getBaseMoveSpeed() * 0.6F);
+                "aac3.1.6-gomme" -> {
+                    mc.thePlayer.capabilities.isFlying = true
+                    if (aac3delay == 2) {
+                        mc.thePlayer.motionY += 0.05
+                    } else if (aac3delay > 2) {
+                        mc.thePlayer.motionY -= 0.05
+                        aac3delay = 0
+                    }
+                    aac3delay++
+                    if (!noFlag) mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround))
+                    if (mc.thePlayer.posY <= 0.0) noFlag = true
+                }
+
+                "flag" -> {
+                    mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(mc.thePlayer.posX + mc.thePlayer.motionX * 999, mc.thePlayer.posY + (if (mc.gameSettings.keyBindJump.isKeyDown) 1.5624 else 0.00000001) - if (mc.gameSettings.keyBindSneak.isKeyDown) 0.0624 else 0.00000002, mc.thePlayer.posZ + mc.thePlayer.motionZ * 999, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true))
+                    mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(mc.thePlayer.posX + mc.thePlayer.motionX * 999, mc.thePlayer.posY - 6969, mc.thePlayer.posZ + mc.thePlayer.motionZ * 999, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true))
+                    mc.thePlayer.setPosition(mc.thePlayer.posX + mc.thePlayer.motionX * 11, mc.thePlayer.posY, mc.thePlayer.posZ + mc.thePlayer.motionZ * 11)
+                    mc.thePlayer.motionY = 0.0
+                }
+
+                "keepalive" -> {
+                    mc.netHandler.addToSendQueue(C00PacketKeepAlive())
+                    mc.thePlayer.capabilities.isFlying = false
+                    mc.thePlayer.motionY = 0.0
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
+                    if (mc.gameSettings.keyBindJump.isKeyDown) mc.thePlayer.motionY += vanillaSpeed.toDouble()
+                    if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY -= vanillaSpeed.toDouble()
+                    MovementUtils.strafe(vanillaSpeed)
+                }
+
+                "minesecure" -> {
+                    mc.thePlayer.capabilities.isFlying = false
+                    if (!mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY = -0.01
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
+                    MovementUtils.strafe(vanillaSpeed)
+                    if (mineSecureVClipTimer.hasTimePassed(150) && mc.gameSettings.keyBindJump.isKeyDown) {
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 5, mc.thePlayer.posZ, false))
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(0.5, -1000.0, 0.5, false))
+                        val yaw = Math.toRadians(mc.thePlayer.rotationYaw.toDouble())
+                        val x = -sin(yaw) * 0.4
+                        val z = cos(yaw) * 0.4
+                        mc.thePlayer.setPosition(mc.thePlayer.posX + x, mc.thePlayer.posY, mc.thePlayer.posZ + z)
+                        mineSecureVClipTimer.reset()
+                    }
+                }
+
+                "hac" -> {
+                    mc.thePlayer.motionX *= 0.8
+                    mc.thePlayer.motionZ *= 0.8
+                    mc.thePlayer.motionY = if (mc.thePlayer.motionY <= -0.42) 0.42 else -0.42
+                }
+
+                "hawkeye" -> mc.thePlayer.motionY = if (mc.thePlayer.motionY <= -0.42) 0.42 else -0.42
+                "teleportrewinside" -> {
+                    val vectorStart = Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)
+                    val yaw = -mc.thePlayer.rotationYaw
+                    val pitch = -mc.thePlayer.rotationPitch
+                    val length = 9.9
+                    val vectorEnd = Vec3(
+                        sin(Math.toRadians(yaw.toDouble())) * cos(Math.toRadians(pitch.toDouble())) * length + vectorStart.xCoord,
+                        sin(Math.toRadians(pitch.toDouble())) * length + vectorStart.yCoord,
+                        cos(Math.toRadians(yaw.toDouble())) * cos(Math.toRadians(pitch.toDouble())) * length + vectorStart.zCoord
+                    )
+                    mc.netHandler.addToSendQueue(C04PacketPlayerPosition(vectorEnd.xCoord, mc.thePlayer.posY + 2, vectorEnd.zCoord, true))
+                    mc.netHandler.addToSendQueue(C04PacketPlayerPosition(vectorStart.xCoord, mc.thePlayer.posY + 2, vectorStart.zCoord, true))
+                    mc.thePlayer.motionY = 0.0
+                }
+
+                "minesucht" -> {
+                    val posX = mc.thePlayer.posX
+                    val posY = mc.thePlayer.posY
+                    val posZ = mc.thePlayer.posZ
+                    if (!mc.gameSettings.keyBindForward.isKeyDown) break
+                    if (System.currentTimeMillis() - minesuchtTP > 99) {
+                        val vec3 = mc.thePlayer.getPositionEyes(0f)
+                        val vec31 = mc.thePlayer.getLook(0f)
+                        val vec32 = vec3.addVector(vec31.xCoord * 7, vec31.yCoord * 7, vec31.zCoord * 7)
+                        if (mc.thePlayer.fallDistance > 0.8) {
+                            mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(posX, posY + 50, posZ, false))
+                            mc.thePlayer.fall(100f, 100f)
+                            mc.thePlayer.fallDistance = 0f
+                            mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(posX, posY + 20, posZ, true))
+                        }
+                        mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(vec32.xCoord, mc.thePlayer.posY + 50, vec32.zCoord, true))
+                        mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(posX, posY, posZ, false))
+                        mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(vec32.xCoord, posY, vec32.zCoord, true))
+                        mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(posX, posY, posZ, false))
+                        minesuchtTP = System.currentTimeMillis()
+                    } else {
+                        mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, false))
+                        mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(posX, posY, posZ, true))
+                    }
+                }
+
+                "jetpack" -> if (mc.gameSettings.keyBindJump.isKeyDown) {
+                    mc.effectRenderer.spawnEffectParticle(EnumParticleTypes.FLAME.particleID, mc.thePlayer.posX, mc.thePlayer.posY + 0.2, mc.thePlayer.posZ, -mc.thePlayer.motionX, -0.5, -mc.thePlayer.motionZ)
+                    mc.thePlayer.motionY += 0.15
+                    mc.thePlayer.motionX *= 1.1
+                    mc.thePlayer.motionZ *= 1.1
+                }
+
+                "mineplex" -> if (mc.thePlayer.inventory.getCurrentItem() == null) {
+                    if (mc.gameSettings.keyBindJump.isKeyDown && mineplexTimer.hasTimePassed(100)) {
+                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.6, mc.thePlayer.posZ)
+                        mineplexTimer.reset()
+                    }
+                    if (mc.thePlayer.isSneaking && mineplexTimer.hasTimePassed(100)) {
+                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY - 0.6, mc.thePlayer.posZ)
+                        mineplexTimer.reset()
+                    }
+                    val blockPos = BlockPos(mc.thePlayer.posX, mc.thePlayer.entityBoundingBox.minY - 1, mc.thePlayer.posZ)
+                    val vec = Vec3(blockPos).addVector(0.4, 0.4, 0.4).add(Vec3(EnumFacing.UP.directionVec))
+                    mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem(), blockPos, EnumFacing.UP, Vec3(vec.xCoord * 0.4f, vec.yCoord * 0.4f, vec.zCoord * 0.4f))
+                    MovementUtils.strafe(0.27f)
+                    mc.timer.timerSpeed = 1 + mineplexSpeedValue.get()
                 } else {
-                    mc.thePlayer.movementInput.moveForward = 0F;
-                    mc.thePlayer.movementInput.moveStrafe = 0F;
-                }
-                break;
-            case "creative":
-                mc.thePlayer.capabilities.isFlying = true;
-
-                handleVanillaKickBypass();
-                break;
-            case "aac1.9.10":
-                if(mc.gameSettings.keyBindJump.isKeyDown())
-                    aacJump += 0.2D;
-
-                if(mc.gameSettings.keyBindSneak.isKeyDown())
-                    aacJump -= 0.2D;
-
-                if((startY + aacJump) > mc.thePlayer.posY) {
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer(true));
-                    mc.thePlayer.motionY = 0.8D;
-                    MovementUtils.strafe(aacSpeedValue.get());
+                    mc.timer.timerSpeed = 1f
+                    state = false
+                    ClientUtils.displayChatMessage("§8[§c§lMineplex-§a§lFly§8] §aSelect an empty slot to fly.")
                 }
 
-                MovementUtils.strafe();
-                break;
-            case "aac3.0.5":
-                if (aac3delay == 2)
-                    mc.thePlayer.motionY = 0.1D;
-                else if (aac3delay > 2)
-                    aac3delay = 0;
-
-                if (aacFast.get()) {
-                    if (mc.thePlayer.movementInput.moveStrafe == 0D)
-                        mc.thePlayer.jumpMovementFactor = 0.08F;
-                    else
-                        mc.thePlayer.jumpMovementFactor = 0F;
-                }
-
-                aac3delay++;
-                break;
-            case "aac3.1.6-gomme":
-                mc.thePlayer.capabilities.isFlying = true;
-
-                if (aac3delay == 2) {
-                    mc.thePlayer.motionY += 0.05D;
-                } else if (aac3delay > 2) {
-                    mc.thePlayer.motionY -= 0.05D;
-                    aac3delay = 0;
-                }
-
-                aac3delay++;
-
-                if(!noFlag)
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
-                if(mc.thePlayer.posY <= 0D)
-                    noFlag = true;
-                break;
-            case "flag":
-                mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX + mc.thePlayer.motionX * 999, mc.thePlayer.posY + (mc.gameSettings.keyBindJump.isKeyDown() ? 1.5624 : 0.00000001) - (mc.gameSettings.keyBindSneak.isKeyDown() ? 0.0624 : 0.00000002), mc.thePlayer.posZ + mc.thePlayer.motionZ * 999, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true));
-                mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX + mc.thePlayer.motionX * 999, mc.thePlayer.posY - 6969, mc.thePlayer.posZ + mc.thePlayer.motionZ * 999, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true));
-                mc.thePlayer.setPosition(mc.thePlayer.posX + mc.thePlayer.motionX * 11, mc.thePlayer.posY, mc.thePlayer.posZ + mc.thePlayer.motionZ * 11);
-                mc.thePlayer.motionY = 0F;
-                break;
-            case "keepalive":
-                mc.getNetHandler().addToSendQueue(new C00PacketKeepAlive());
-
-                mc.thePlayer.capabilities.isFlying = false;
-                mc.thePlayer.motionY = 0;
-                mc.thePlayer.motionX = 0;
-                mc.thePlayer.motionZ = 0;
-                if(mc.gameSettings.keyBindJump.isKeyDown())
-                    mc.thePlayer.motionY += vanillaSpeed;
-                if(mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY -= vanillaSpeed;
-                MovementUtils.strafe(vanillaSpeed);
-                break;
-            case "minesecure":
-                mc.thePlayer.capabilities.isFlying = false;
-
-                if(!mc.gameSettings.keyBindSneak.isKeyDown())
-                    mc.thePlayer.motionY = -0.01F;
-
-                mc.thePlayer.motionX = 0;
-                mc.thePlayer.motionZ = 0;
-                MovementUtils.strafe(vanillaSpeed);
-
-                if(mineSecureVClipTimer.hasTimePassed(150) && mc.gameSettings.keyBindJump.isKeyDown()) {
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 5, mc.thePlayer.posZ, false));
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(0.5D, -1000, 0.5D, false));
-                    final double yaw = Math.toRadians(mc.thePlayer.rotationYaw);
-                    final double x = -Math.sin(yaw) * 0.4D;
-                    final double z = Math.cos(yaw) * 0.4D;
-                    mc.thePlayer.setPosition(mc.thePlayer.posX + x, mc.thePlayer.posY, mc.thePlayer.posZ + z);
-
-                    mineSecureVClipTimer.reset();
-                }
-                break;
-            case "hac":
-                mc.thePlayer.motionX *= 0.8;
-                mc.thePlayer.motionZ *= 0.8;
-            case "hawkeye":
-                mc.thePlayer.motionY = mc.thePlayer.motionY <= -0.42 ? 0.42 : -0.42;
-                break;
-            case "teleportrewinside":
-                final Vec3 vectorStart = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
-                final float yaw = -mc.thePlayer.rotationYaw;
-                final float pitch = -mc.thePlayer.rotationPitch;
-                final double length = 9.9;
-                final Vec3 vectorEnd = new Vec3(
-                        Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * length + vectorStart.xCoord,
-                        Math.sin(Math.toRadians(pitch)) * length + vectorStart.yCoord,
-                        Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * length + vectorStart.zCoord
-                );
-                mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(vectorEnd.xCoord, mc.thePlayer.posY + 2, vectorEnd.zCoord, true));
-                mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(vectorStart.xCoord, mc.thePlayer.posY + 2, vectorStart.zCoord, true));
-                mc.thePlayer.motionY = 0;
-                break;
-            case "minesucht":
-                final double posX = mc.thePlayer.posX;
-                final double posY = mc.thePlayer.posY;
-                final double posZ = mc.thePlayer.posZ;
-
-                if(!mc.gameSettings.keyBindForward.isKeyDown())
-                    break;
-
-                if(System.currentTimeMillis() - minesuchtTP > 99) {
-                    final Vec3 vec3 = mc.thePlayer.getPositionEyes(0);
-                    final Vec3 vec31 = mc.thePlayer.getLook(0);
-                    final Vec3 vec32 = vec3.addVector(vec31.xCoord * 7, vec31.yCoord * 7, vec31.zCoord * 7);
-
-                    if(mc.thePlayer.fallDistance > 0.8) {
-                        mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(posX, posY + 50, posZ, false));
-                        mc.thePlayer.fall(100, 100);
-                        mc.thePlayer.fallDistance = 0;
-                        mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(posX, posY + 20, posZ, true));
+                "aac3.3.12" -> {
+                    if (mc.thePlayer.posY < -70) mc.thePlayer.motionY = aacMotion.get().toDouble()
+                    mc.timer.timerSpeed = 1f
+                    if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+                        mc.timer.timerSpeed = 0.2f
+                        mc.rightClickDelayTimer = 0
                     }
+                }
 
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(vec32.xCoord, mc.thePlayer.posY + 50, vec32.zCoord, true));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(posX, posY, posZ, false));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(vec32.xCoord, posY, vec32.zCoord, true));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(posX, posY, posZ, false));
-                    minesuchtTP = System.currentTimeMillis();
-                }else{
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, false));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(posX, posY, posZ, true));
-                }
-                break;
-            case "jetpack":
-                if(mc.gameSettings.keyBindJump.isKeyDown()) {
-                    mc.effectRenderer.spawnEffectParticle(EnumParticleTypes.FLAME.getParticleID(), mc.thePlayer.posX, mc.thePlayer.posY + 0.2D, mc.thePlayer.posZ, -mc.thePlayer.motionX, -0.5D, -mc.thePlayer.motionZ);
-                    mc.thePlayer.motionY += 0.15D;
-                    mc.thePlayer.motionX *= 1.1D;
-                    mc.thePlayer.motionZ *= 1.1D;
-                }
-                break;
-            case "mineplex":
-                if(mc.thePlayer.inventory.getCurrentItem() == null) {
-                    if(mc.gameSettings.keyBindJump.isKeyDown() && mineplexTimer.hasTimePassed(100)) {
-                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.6, mc.thePlayer.posZ);
-                        mineplexTimer.reset();
+                "aac3.3.12-glide" -> {
+                    if (!mc.thePlayer.onGround) aac3glideDelay++
+                    if (aac3glideDelay == 2) mc.timer.timerSpeed = 1f
+                    if (aac3glideDelay == 12) mc.timer.timerSpeed = 0.1f
+                    if (aac3glideDelay >= 12 && !mc.thePlayer.onGround) {
+                        aac3glideDelay = 0
+                        mc.thePlayer.motionY = .015
                     }
+                }
 
-                    if(mc.thePlayer.isSneaking() && mineplexTimer.hasTimePassed(100)) {
-                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY - 0.6, mc.thePlayer.posZ);
-                        mineplexTimer.reset();
+                "aac3.3.13" -> {
+                    if (mc.thePlayer.isDead) wasDead = true
+                    if (wasDead || mc.thePlayer.onGround) {
+                        wasDead = false
+                        mc.thePlayer.motionY = aacMotion2.get().toDouble()
+                        mc.thePlayer.onGround = false
                     }
-
-                    final BlockPos blockPos = new BlockPos(mc.thePlayer.posX, mc.thePlayer.getEntityBoundingBox().minY - 1, mc.thePlayer.posZ);
-                    final Vec3 vec = new Vec3(blockPos).addVector(0.4F, 0.4F, 0.4F).add(new Vec3(EnumFacing.UP.getDirectionVec()));
-                    mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem(), blockPos, EnumFacing.UP, new Vec3(vec.xCoord * 0.4F, vec.yCoord * 0.4F, vec.zCoord * 0.4F));
-                    MovementUtils.strafe(0.27F);
-
-                    mc.timer.timerSpeed = (1 + mineplexSpeedValue.get());
-                }else{
-                    mc.timer.timerSpeed = 1;
-                    setState(false);
-                    ClientUtils.displayChatMessage("§8[§c§lMineplex-§a§lFly§8] §aSelect an empty slot to fly.");
-                }
-                break;
-            case "aac3.3.12":
-                if(mc.thePlayer.posY < -70)
-                    mc.thePlayer.motionY = aacMotion.get();
-
-                mc.timer.timerSpeed = 1F;
-
-                if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-                    mc.timer.timerSpeed = 0.2F;
-                    mc.rightClickDelayTimer = 0;
-                }
-                break;
-            case "aac3.3.12-glide":
-                if(!mc.thePlayer.onGround)
-                    aac3glideDelay++;
-
-                if(aac3glideDelay == 2)
-                    mc.timer.timerSpeed = 1F;
-
-                if(aac3glideDelay == 12)
-                    mc.timer.timerSpeed = 0.1F;
-
-                if(aac3glideDelay >= 12 && !mc.thePlayer.onGround) {
-                    aac3glideDelay = 0;
-                    mc.thePlayer.motionY = .015;
-                }
-                break;
-            case "aac3.3.13":
-                if(mc.thePlayer.isDead)
-                    wasDead = true;
-
-                if(wasDead || mc.thePlayer.onGround) {
-                    wasDead = false;
-
-                    mc.thePlayer.motionY = aacMotion2.get();
-                    mc.thePlayer.onGround = false;
-                }
-
-                mc.timer.timerSpeed = 1F;
-
-                if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-                    mc.timer.timerSpeed = 0.2F;
-                    mc.rightClickDelayTimer = 0;
-                }
-                break;
-            case "watchcat":
-                MovementUtils.strafe(0.15F);
-                mc.thePlayer.setSprinting(true);
-
-                if(mc.thePlayer.posY < startY + 2) {
-                    mc.thePlayer.motionY = Math.random() * 0.5;
-                    break;
-                }
-
-                if(startY > mc.thePlayer.posY)
-                    MovementUtils.strafe(0F);
-                break;
-            case "spartan":
-                mc.thePlayer.motionY = 0;
-                spartanTimer.update();
-                if(spartanTimer.hasTimePassed(12)) {
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 8, mc.thePlayer.posZ, true));
-                    mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY - 8, mc.thePlayer.posZ, true));
-                    spartanTimer.reset();
-                }
-                break;
-            case "spartan2":
-                MovementUtils.strafe(0.264F);
-
-                if(mc.thePlayer.ticksExisted % 8 == 0)
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 10, mc.thePlayer.posZ, true));
-                break;
-            case "pearl":
-                mc.thePlayer.capabilities.isFlying = false;
-                mc.thePlayer.motionX = mc.thePlayer.motionY = mc.thePlayer.motionZ = 0;
-
-                int enderPearlSlot = getPearlSlot();
-                if (pearlState == 0) {
-                    if (enderPearlSlot == -1) {
-                        LiquidBounce.hud.addNotification(new Notification("You don't have any ender pearl!", Type.ERROR, 500));
-                        pearlState = -1;
-                        this.setState(false);
-                        return;
+                    mc.timer.timerSpeed = 1f
+                    if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+                        mc.timer.timerSpeed = 0.2f
+                        mc.rightClickDelayTimer = 0
                     }
+                }
 
-                    if (mc.thePlayer.inventory.currentItem != enderPearlSlot) {
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(enderPearlSlot));
+                "watchcat" -> {
+                    MovementUtils.strafe(0.15f)
+                    mc.thePlayer.isSprinting = true
+                    if (mc.thePlayer.posY < startY + 2) {
+                        mc.thePlayer.motionY = Math.random() * 0.5
+                        break
                     }
+                    if (startY > mc.thePlayer.posY) MovementUtils.strafe(0f)
+                }
 
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C05PacketPlayerLook(mc.thePlayer.rotationYaw, 90, mc.thePlayer.onGround));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 255, mc.thePlayer.inventoryContainer.getSlot(enderPearlSlot + 36).getStack(), 0, 0, 0));
-                    if (enderPearlSlot != mc.thePlayer.inventory.currentItem) {
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                "spartan" -> {
+                    mc.thePlayer.motionY = 0.0
+                    spartanTimer.update()
+                    if (spartanTimer.hasTimePassed(12)) {
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 8, mc.thePlayer.posZ, true))
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY - 8, mc.thePlayer.posZ, true))
+                        spartanTimer.reset()
                     }
-                    pearlState = 1;
                 }
 
-                if (pearlActivateCheck.get().equalsIgnoreCase("damage") && pearlState == 1 && mc.thePlayer.hurtTime > 0)
-                    pearlState = 2;
-
-                if (pearlState == 2) {
-                    if (mc.gameSettings.keyBindJump.isKeyDown())
-                        mc.thePlayer.motionY += vanillaSpeed;
-                    if (mc.gameSettings.keyBindSneak.isKeyDown())
-                        mc.thePlayer.motionY -= vanillaSpeed;
-                    MovementUtils.strafe(vanillaSpeed);
-                }
-                break;
-            case "jump":
-                if (mc.thePlayer.onGround)
-                    mc.thePlayer.jump();
-                break;
-            case "neruxvace":
-                if (!mc.thePlayer.onGround)
-                    aac3glideDelay++;
-
-                if (aac3glideDelay >= neruxVaceTicks.get() && !mc.thePlayer.onGround) {
-                    aac3glideDelay = 0;
-                    mc.thePlayer.motionY = .015;
-                }
-                break;
-            case "hypixel":
-                final int boostDelay = hypixelBoostDelay.get();
-                if (hypixelBoost.get() && !flyTimer.hasTimePassed(boostDelay)) {
-                    mc.timer.timerSpeed = 1F + (hypixelBoostTimer.get() * ((float) flyTimer.hasTimeLeft(boostDelay) / (float) boostDelay));
+                "spartan2" -> {
+                    MovementUtils.strafe(0.264f)
+                    if (mc.thePlayer.ticksExisted % 8 == 0) mc.thePlayer.sendQueue.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 10, mc.thePlayer.posZ, true))
                 }
 
-                hypixelTimer.update();
-
-                if (hypixelTimer.hasTimePassed(2)) {
-                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0E-5, mc.thePlayer.posZ);
-                    hypixelTimer.reset();
+                "pearl" -> {
+                    mc.thePlayer.capabilities.isFlying = false
+                    run {
+                        mc.thePlayer.motionZ = 0.0
+                        mc.thePlayer.motionY = mc.thePlayer.motionZ
+                        mc.thePlayer.motionX = mc.thePlayer.motionY
+                    }
+                    val enderPearlSlot = pearlSlot
+                    if (pearlState == 0) {
+                        if (enderPearlSlot == -1) {
+                            LiquidBounce.hud.addNotification(Notification("You don't have any ender pearl!", Type.ERROR, 500))
+                            pearlState = -1
+                            state = false
+                            return
+                        }
+                        if (mc.thePlayer.inventory.currentItem != enderPearlSlot) {
+                            mc.thePlayer.sendQueue.addToSendQueue(C09PacketHeldItemChange(enderPearlSlot))
+                        }
+                        mc.thePlayer.sendQueue.addToSendQueue(C05PacketPlayerLook(mc.thePlayer.rotationYaw, 90f, mc.thePlayer.onGround))
+                        mc.thePlayer.sendQueue.addToSendQueue(C08PacketPlayerBlockPlacement(BlockPos(-1, -1, -1), 255, mc.thePlayer.inventoryContainer.getSlot(enderPearlSlot + 36).stack, 0f, 0f, 0f))
+                        if (enderPearlSlot != mc.thePlayer.inventory.currentItem) {
+                            mc.thePlayer.sendQueue.addToSendQueue(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem))
+                        }
+                        pearlState = 1
+                    }
+                    if (pearlActivateCheck.get().equals("damage", ignoreCase = true) && pearlState == 1 && mc.thePlayer.hurtTime > 0) pearlState = 2
+                    if (pearlState == 2) {
+                        if (mc.gameSettings.keyBindJump.isKeyDown) mc.thePlayer.motionY += vanillaSpeed.toDouble()
+                        if (mc.gameSettings.keyBindSneak.isKeyDown) mc.thePlayer.motionY -= vanillaSpeed.toDouble()
+                        MovementUtils.strafe(vanillaSpeed)
+                    }
                 }
-                break;
-            case "freehypixel":
-                if (freeHypixelTimer.hasTimePassed(10)) {
-                    mc.thePlayer.capabilities.isFlying = true;
-                    break;
-                } else {
-                    mc.thePlayer.rotationYaw = freeHypixelYaw;
-                    mc.thePlayer.rotationPitch = freeHypixelPitch;
-                    mc.thePlayer.motionX = mc.thePlayer.motionZ = mc.thePlayer.motionY = 0;
+
+                "jump" -> if (mc.thePlayer.onGround) mc.thePlayer.jump()
+                "neruxvace" -> {
+                    if (!mc.thePlayer.onGround) aac3glideDelay++
+                    if (aac3glideDelay >= neruxVaceTicks.get() && !mc.thePlayer.onGround) {
+                        aac3glideDelay = 0
+                        mc.thePlayer.motionY = .015
+                    }
                 }
 
-                if (startY == new BigDecimal(mc.thePlayer.posY).setScale(3, RoundingMode.HALF_DOWN).doubleValue())
-                    freeHypixelTimer.update();
-                break;
+                "hypixel" -> {
+                    val boostDelay = hypixelBoostDelay.get()
+                    if (hypixelBoost.get() && !flyTimer.hasTimePassed(boostDelay)) {
+                        mc.timer.timerSpeed = 1f + hypixelBoostTimer.get() * (flyTimer.hasTimeLeft(boostDelay).toFloat() / boostDelay.toFloat())
+                    }
+                    hypixelTimer.update()
+                    if (hypixelTimer.hasTimePassed(2)) {
+                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0E-5, mc.thePlayer.posZ)
+                        hypixelTimer.reset()
+                    }
+                }
+
+                "freehypixel" -> {
+                    if (freeHypixelTimer.hasTimePassed(10)) {
+                        mc.thePlayer.capabilities.isFlying = true
+                        break
+                    } else {
+                        mc.thePlayer.rotationYaw = freeHypixelYaw
+                        mc.thePlayer.rotationPitch = freeHypixelPitch
+                        mc.thePlayer.motionY = 0.0
+                        mc.thePlayer.motionZ = mc.thePlayer.motionY
+                        mc.thePlayer.motionX = mc.thePlayer.motionZ
+                    }
+                    if (startY == BigDecimal(mc.thePlayer.posY).setScale(3, RoundingMode.HALF_DOWN).toDouble()) freeHypixelTimer.update()
+                }
+            }
         }
     }
 
     @EventTarget // drew
-    public void onMotion(final MotionEvent event) {
-        if (mc.thePlayer == null) return;
-
+    fun onMotion(event: MotionEvent) {
+        if (mc.thePlayer == null) return
         if (bobbingValue.get()) {
-            mc.thePlayer.cameraYaw = bobbingAmountValue.get();
-            mc.thePlayer.prevCameraYaw = bobbingAmountValue.get();
+            mc.thePlayer.cameraYaw = bobbingAmountValue.get()
+            mc.thePlayer.prevCameraYaw = bobbingAmountValue.get()
         }
-
-        if (modeValue.get().equalsIgnoreCase("boosthypixel")) {
-            switch (event.getEventState()) {
-                case PRE:
-                    hypixelTimer.update();
-
+        if (modeValue.get().equals("boosthypixel", ignoreCase = true)) {
+            when (event.eventState) {
+                EventState.PRE -> {
+                    hypixelTimer.update()
                     if (hypixelTimer.hasTimePassed(2)) {
-                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0E-5, mc.thePlayer.posZ);
-                        hypixelTimer.reset();
+                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0E-5, mc.thePlayer.posZ)
+                        hypixelTimer.reset()
                     }
+                    if (!failedStart) mc.thePlayer.motionY = 0.0
+                }
 
-                    if (!failedStart) mc.thePlayer.motionY = 0D;
-                    break;
-                case POST:
-                    double xDist = mc.thePlayer.posX - mc.thePlayer.prevPosX;
-                    double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
-                    lastDistance = Math.sqrt(xDist * xDist + zDist * zDist);
-                    break;
+                EventState.POST -> {
+                    val xDist = mc.thePlayer.posX - mc.thePlayer.prevPosX
+                    val zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ
+                    lastDistance = sqrt(xDist * xDist + zDist * zDist)
+                }
+                else -> { }
             }
         }
-        if (modeValue.get().equalsIgnoreCase("blockdrop")) {
-            switch (event.getEventState()) {
-                case PRE:
-                    mc.thePlayer.motionY = mc.gameSettings.keyBindJump.isKeyDown() ? 2.0 : (mc.gameSettings.keyBindJump.isKeyDown() ? -2.0 : 0.0);
-                    for (int var10_8 = 0; var10_8 < 3; ++var10_8) {
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(this.startVec.xCoord, this.startVec.yCoord, this.startVec.zCoord, this.rotationVec.getX(), this.rotationVec.getY(), false));
+        if (modeValue.get().equals("blockdrop", ignoreCase = true)) {
+            when (event.eventState) {
+                EventState.PRE -> {
+                    mc.thePlayer.motionY = if (mc.gameSettings.keyBindJump.isKeyDown) 2.0 else if (mc.gameSettings.keyBindJump.isKeyDown) -2.0 else 0.0
+                    var var10_8 = 0
+                    while (var10_8 < 3) {
+                        sendPacketNoEvent(C06PacketPlayerPosLook(startVec!!.xCoord, startVec!!.yCoord, startVec!!.zCoord, rotationVec!!.getX(), rotationVec!!.getY(), false))
+                        ++var10_8
                     }
-                    break;
-                case POST:
-                    for (int i2 = 0; i2 < 1; ++i2) {
-                        PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, this.rotationVec.getX(), this.rotationVec.getY(), false));
-                    }
-                    break;
-            }
-        }
+                }
 
-        switch (modeValue.get().toLowerCase()) {
-            case "funcraft":
-                event.setOnGround(true);
-                if (!MovementUtils.isMoving())
-                    moveSpeed = 0.25;
+                EventState.POST -> {
+                    var i2 = 0
+                    while (i2 < 1) {
+                        sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, rotationVec!!.getX(), rotationVec!!.getY(), false))
+                        ++i2
+                    }
+                }
+                else -> { }
+            }
+
+        }
+        when (modeValue.get().lowercase(Locale.getDefault())) {
+            "funcraft" -> {
+                event.onGround = true
+                if (!MovementUtils.isMoving()) moveSpeed = 0.25
                 if (moveSpeed > 0.25) {
-                    moveSpeed -= moveSpeed / 159.0;
+                    moveSpeed -= moveSpeed / 159.0
                 }
-                if (event.getEventState() == EventState.PRE) {
-                    mc.thePlayer.capabilities.isFlying = false;
-                    mc.thePlayer.motionY = 0;
-                    mc.thePlayer.motionX = 0;
-                    mc.thePlayer.motionZ = 0;
+                if (event.eventState === EventState.PRE) {
+                    mc.thePlayer.capabilities.isFlying = false
+                    mc.thePlayer.motionY = 0.0
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
+                    MovementUtils.strafe(moveSpeed.toFloat())
+                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY - 8e-6, mc.thePlayer.posZ)
+                }
+            }
 
-                    MovementUtils.strafe((float) moveSpeed);
-                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY - 8e-6, mc.thePlayer.posZ);
-                }
-                break;
-            case "watchdog":
-                int current = mc.thePlayer.inventory.currentItem;
-                if (event.getEventState() == EventState.PRE) {
-                    if (wdState == 1 && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().offset(0, -1, 0).expand(0, 0, 0)).isEmpty()) {
-                        PacketUtils.sendPacketNoEvent(new C09PacketHeldItemChange(expectItemStack));
-                        wdState = 2;
+            "watchdog" -> {
+                val current = mc.thePlayer.inventory.currentItem
+                if (event.eventState === EventState.PRE) {
+                    if (wdState == 1 && mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox.offset(0.0, -1.0, 0.0).expand(0.0, 0.0, 0.0)).isEmpty()) {
+                        sendPacketNoEvent(C09PacketHeldItemChange(expectItemStack))
+                        wdState = 2
                     }
-
-                    mc.timer.timerSpeed = 1F;
-
+                    mc.timer.timerSpeed = 1f
                     if (wdState == 3 && expectItemStack != -1) {
-                        PacketUtils.sendPacketNoEvent(new C09PacketHeldItemChange(current));
-                        expectItemStack = -1;
+                        sendPacketNoEvent(C09PacketHeldItemChange(current))
+                        expectItemStack = -1
                     }
-
                     if (wdState == 4) {
-                        if (MovementUtils.isMoving())
-                            MovementUtils.strafe((float) MovementUtils.getBaseMoveSpeed() * 0.938F);
-                        else
-                            MovementUtils.strafe(0F);
-
-                        mc.thePlayer.motionY = -0.0015F;
+                        if (MovementUtils.isMoving()) MovementUtils.strafe(MovementUtils.getBaseMoveSpeed().toFloat() * 0.938f) else MovementUtils.strafe(0f)
+                        mc.thePlayer.motionY = -0.0015
                     } else if (wdState < 3) {
-                        final Rotation rot = RotationUtils.getRotationFromPosition(mc.thePlayer.posX, mc.thePlayer.posZ, (int) mc.thePlayer.posY - 1);
-                        RotationUtils.setTargetRotation(rot);
-                        event.setYaw(rot.getYaw());
-                        event.setPitch(rot.getPitch());
-                    } else
-                        event.setY(event.getY() - 0.08);
+                        val rot = RotationUtils.getRotationFromPosition(mc.thePlayer.posX, mc.thePlayer.posZ, (mc.thePlayer.posY.toInt() - 1).toDouble())
+                        RotationUtils.setTargetRotation(rot)
+                        event.yaw = rot.yaw
+                        event.pitch = rot.pitch
+                    } else event.y = event.y - 0.08
                 } else if (wdState == 2) {
                     if (mc.playerController.onPlayerRightClick(
                             mc.thePlayer, mc.theWorld,
-                            mc.thePlayer.inventoryContainer.getSlot(expectItemStack).getStack(),
-                            new BlockPos(mc.thePlayer.posX, (int) mc.thePlayer.posY - 2, mc.thePlayer.posZ),
+                            mc.thePlayer.inventoryContainer.getSlot(expectItemStack).stack,
+                            BlockPos(mc.thePlayer.posX, (mc.thePlayer.posY.toInt() - 2).toDouble(), mc.thePlayer.posZ),
                             EnumFacing.UP,
-                            RotationUtils.getVectorForRotation(RotationUtils.getRotationFromPosition(mc.thePlayer.posX, mc.thePlayer.posZ, (int) mc.thePlayer.posY - 1))))
-                        mc.getNetHandler().addToSendQueue(new C0APacketAnimation());
-
-                    wdState = 3;
+                            RotationUtils.getVectorForRotation(RotationUtils.getRotationFromPosition(mc.thePlayer.posX, mc.thePlayer.posZ, (mc.thePlayer.posY.toInt() - 1).toDouble()))
+                        )
+                    ) mc.netHandler.addToSendQueue(C0APacketAnimation())
+                    wdState = 3
                 }
-                break;
+            }
         }
-        if (modeValue.get() == "BlocksMC") {
-            if (event.getEventState() == EventState.PRE) {
-                final AxisAlignedBB bb = mc.thePlayer.getEntityBoundingBox().offset(0, 1, 0);
-
+        if (modeValue.get() === "BlocksMC") {
+            if (event.eventState === EventState.PRE) {
+                val bb = mc.thePlayer.entityBoundingBox.offset(0.0, 1.0, 0.0)
                 if (started) {
-                    mc.thePlayer.motionY += 0.025;
-                    MovementUtils.strafe((float) (bmcSpeed *= 0.95F));
-
-                    if (mc.thePlayer.motionY < -0.5 && !isBlockUnder()) {
-                        toggle();
+                    mc.thePlayer.motionY += 0.025
+                    MovementUtils.strafe(0.95f.let { bmcSpeed *= it; bmcSpeed }.toFloat())
+                    if (mc.thePlayer.motionY < -0.5 && !MovementUtils.isBlockUnder()) {
+                        toggle()
                     }
                 }
-
                 if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, bb).isEmpty() && !started) {
-                    started = true;
-                    mc.thePlayer.jump();
-                    MovementUtils.strafe((float) (bmcSpeed = 4));
+                    started = true
+                    mc.thePlayer.jump()
+                    MovementUtils.strafe(4.also { bmcSpeed = it.toDouble() }.toFloat())
                 }
             }
         }
     }
-    public float coerceAtMost(double value, double max) {
-        return (float) Math.min(value, max);
+
+    fun coerceAtMost(value: Double, max: Double): Float {
+        return min(value, max).toFloat()
     }
 
     @EventTarget
-    public void onRender3D(final Render3DEvent event) {
-        final String mode = modeValue.get();
-
-        if (!markValue.get() || mode.equalsIgnoreCase("Motion")|| modeValue.get().equalsIgnoreCase("blockdrop") || mode.equalsIgnoreCase("Creative") || mode.equalsIgnoreCase("Damage") || mode.equalsIgnoreCase("AAC5-Vanilla") || mode.equalsIgnoreCase("Derp") || mode.equalsIgnoreCase("KeepAlive"))
-            return;
-
-        double y = startY + 2D;
-
-        RenderUtils.drawPlatform(y, mc.thePlayer.getEntityBoundingBox().maxY < y ? new Color(0, 255, 0, 90) : new Color(255, 0, 0, 90), 1);
-
-        switch (mode.toLowerCase()) {
-            case "aac1.9.10":
-                RenderUtils.drawPlatform(startY + aacJump, new Color(0, 0, 255, 90), 1);
-                break;
-            case "aac3.3.12":
-                RenderUtils.drawPlatform(-70, new Color(0, 0, 255, 90), 1);
-                break;
+    fun onRender3D(event: Render3DEvent?) {
+        val mode = modeValue.get()
+        if (!markValue.get() || mode.equals("Motion", ignoreCase = true) || modeValue.get().equals("blockdrop", ignoreCase = true) || mode.equals("Creative", ignoreCase = true) || mode.equals("Damage", ignoreCase = true) || mode.equals("AAC5-Vanilla", ignoreCase = true) || mode.equals("Derp", ignoreCase = true) || mode.equals("KeepAlive", ignoreCase = true)) return
+        val y = startY + 2.0
+        RenderUtils.drawPlatform(y, if (mc.thePlayer.entityBoundingBox.maxY < y) Color(0, 255, 0, 90) else Color(255, 0, 0, 90), 1.0)
+        when (mode.lowercase(Locale.getDefault())) {
+            "aac1.9.10" -> RenderUtils.drawPlatform(startY + aacJump, Color(0, 0, 255, 90), 1.0)
+            "aac3.3.12" -> RenderUtils.drawPlatform(-70.0, Color(0, 0, 255, 90), 1.0)
         }
     }
 
     @EventTarget
-    public void onRender2D(final Render2DEvent event) {
-        final String mode = modeValue.get();
-        ScaledResolution scaledRes = new ScaledResolution(mc);
-        if (mode.equalsIgnoreCase("Verus") && boostTicks > 0) {
-            float width = (float)(verusDmgTickValue.get() - boostTicks) / (float)verusDmgTickValue.get() * 60F;
-            RenderUtils.drawRect(scaledRes.getScaledWidth() / 2F - 31F, scaledRes.getScaledHeight() / 2F + 14F, scaledRes.getScaledWidth() / 2F + 31F, scaledRes.getScaledHeight() / 2F + 18F, 0xA0000000);
-            RenderUtils.drawRect(scaledRes.getScaledWidth() / 2F - 30F, scaledRes.getScaledHeight() / 2F + 15F, scaledRes.getScaledWidth() / 2F - 30F + width, scaledRes.getScaledHeight() / 2F + 17F, 0xFFFFFFFF);
+    fun onRender2D(event: Render2DEvent?) {
+        val mode = modeValue.get()
+        val scaledRes = ScaledResolution(mc)
+        if (mode.equals("Verus", ignoreCase = true) && boostTicks > 0) {
+            val width = (verusDmgTickValue.get() - boostTicks).toFloat() / verusDmgTickValue.get().toFloat() * 60f
+            RenderUtils.drawRect(scaledRes.scaledWidth / 2f - 31f, scaledRes.scaledHeight / 2f + 14f, scaledRes.scaledWidth / 2f + 31f, scaledRes.scaledHeight / 2f + 18f, -0x60000000)
+            RenderUtils.drawRect(scaledRes.scaledWidth / 2f - 30f, scaledRes.scaledHeight / 2f + 15f, scaledRes.scaledWidth / 2f - 30f + width, scaledRes.scaledHeight / 2f + 17f, -0x1)
         }
-        if (mode.equalsIgnoreCase("Verus") && shouldActiveDmg) {
-            float width = (float)(verusReDmgTickValue.get() - dmgCooldown) / (float)verusReDmgTickValue.get() * 60F;
-            RenderUtils.drawRect(scaledRes.getScaledWidth() / 2F - 31F, scaledRes.getScaledHeight() / 2F + 14F + 10F, scaledRes.getScaledWidth() / 2F + 31F, scaledRes.getScaledHeight() / 2F + 18F + 10F, 0xA0000000);
-            RenderUtils.drawRect(scaledRes.getScaledWidth() / 2F - 30F, scaledRes.getScaledHeight() / 2F + 15F + 10F, scaledRes.getScaledWidth() / 2F - 30F + width, scaledRes.getScaledHeight() / 2F + 17F + 10F, 0xFFFF1F1F);
+        if (mode.equals("Verus", ignoreCase = true) && shouldActiveDmg) {
+            val width = (verusReDmgTickValue.get() - dmgCooldown).toFloat() / verusReDmgTickValue.get().toFloat() * 60f
+            RenderUtils.drawRect(scaledRes.scaledWidth / 2f - 31f, scaledRes.scaledHeight / 2f + 14f + 10f, scaledRes.scaledWidth / 2f + 31f, scaledRes.scaledHeight / 2f + 18f + 10f, -0x60000000)
+            RenderUtils.drawRect(scaledRes.scaledWidth / 2f - 30f, scaledRes.scaledHeight / 2f + 15f + 10f, scaledRes.scaledWidth / 2f - 30f + width, scaledRes.scaledHeight / 2f + 17f + 10f, -0xe0e1)
         }
     }
 
     @EventTarget
-    public void onPacket(PacketEvent event) {
-        final Packet<?> packet = event.getPacket();
-        final String mode = modeValue.get();
-
-        if(noPacketModify)
-            return;
-
-        if (packet instanceof C09PacketHeldItemChange && mode.equalsIgnoreCase("watchdog") && wdState < 4)
-            event.cancelEvent();
-
-        if (packet instanceof S08PacketPlayerPosLook) {
-            if (mode.equalsIgnoreCase("watchdog") && wdState == 3) {
-                wdState = 4;
-                if (fakeDmgValue.get() && mc.thePlayer != null)
-                    mc.thePlayer.handleStatusUpdate((byte) 2);
+    fun onPacket(event: PacketEvent) {
+        val packet = event.packet
+        val mode = modeValue.get()
+        if (noPacketModify) return
+        if (packet is C09PacketHeldItemChange && mode.equals("watchdog", ignoreCase = true) && wdState < 4) event.cancelEvent()
+        if (packet is S08PacketPlayerPosLook) {
+            if (mode.equals("watchdog", ignoreCase = true) && wdState == 3) {
+                wdState = 4
+                if (fakeDmgValue.get() && mc.thePlayer != null) mc.thePlayer.handleStatusUpdate(2.toByte())
             }
-
-            if (mode.equalsIgnoreCase("pearl") && pearlActivateCheck.get().equalsIgnoreCase("teleport") && pearlState == 1)
-                pearlState = 2;
-
-            if (mode.equalsIgnoreCase("BoostHypixel")) {
-                failedStart = true;
-                ClientUtils.displayChatMessage("§8[§c§lBoostHypixel-§a§lFly§8] §cSetback detected.");
+            if (mode.equals("pearl", ignoreCase = true) && pearlActivateCheck.get().equals("teleport", ignoreCase = true) && pearlState == 1) pearlState = 2
+            if (mode.equals("BoostHypixel", ignoreCase = true)) {
+                failedStart = true
+                ClientUtils.displayChatMessage("§8[§c§lBoostHypixel-§a§lFly§8] §cSetback detected.")
             }
         }
-        if (mode.equalsIgnoreCase("blockdrop")) {
-            if (packet instanceof S08PacketPlayerPosLook) {
-                if (mc.thePlayer.ticksExisted <= 20) return;
-                final S08PacketPlayerPosLook i2 = (S08PacketPlayerPosLook) event.getPacket();
-                event.cancelEvent();
-                this.startVec = new Vec3(i2.getX(), i2.getY(), i2.getZ());
-                this.rotationVec = new Vector2f(i2.getYaw(), i2.getPitch());
+        if (mode.equals("blockdrop", ignoreCase = true)) {
+            if (packet is S08PacketPlayerPosLook) {
+                if (mc.thePlayer.ticksExisted <= 20) return
+                val i2 = event.packet as S08PacketPlayerPosLook
+                event.cancelEvent()
+                startVec = Vec3(i2.getX(), i2.getY(), i2.getZ())
+                rotationVec = Vector2f(i2.getYaw(), i2.getPitch())
             }
-
-            if (packet instanceof C03PacketPlayer) {
-                event.cancelEvent();
-                return;
+            if (packet is C03PacketPlayer) {
+                event.cancelEvent()
+                return
             }
-            if (!(packet instanceof C02PacketUseEntity)) return;
-            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false));
+            if (packet !is C02PacketUseEntity) return
+            sendPacketNoEvent(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
         }
-
-        if (packet instanceof C03PacketPlayer) {
-            final C03PacketPlayer packetPlayer = (C03PacketPlayer) packet;
-
-            boolean lastOnGround = packetPlayer.onGround;
-
-            if (mode.equalsIgnoreCase("NCP") || mode.equalsIgnoreCase("Rewinside") ||
-                    (mode.equalsIgnoreCase("Mineplex") && mc.thePlayer.inventory.getCurrentItem() == null) || (mode.equalsIgnoreCase("Verus") && verusSpoofGround.get() && verusDmged))
-                packetPlayer.onGround = true;
-
-            if (mode.equalsIgnoreCase("Hypixel") || mode.equalsIgnoreCase("BoostHypixel"))
-                packetPlayer.onGround = false;
-
-            if (mode.equalsIgnoreCase("Derp")) {
-                packetPlayer.yaw = RandomUtils.nextFloat(0F, 360F);
-                packetPlayer.pitch = RandomUtils.nextFloat(-90F, 90F);
+        if (packet is C03PacketPlayer) {
+            val packetPlayer = packet
+            val lastOnGround = packetPlayer.onGround
+            if (mode.equals("NCP", ignoreCase = true) || mode.equals("Rewinside", ignoreCase = true) || mode.equals("Mineplex", ignoreCase = true) && mc.thePlayer.inventory.getCurrentItem() == null || mode.equals("Verus", ignoreCase = true) && verusSpoofGround.get() && verusDmged) packetPlayer.onGround = true
+            if (mode.equals("Hypixel", ignoreCase = true) || mode.equals("BoostHypixel", ignoreCase = true)) packetPlayer.onGround = false
+            if (mode.equals("Derp", ignoreCase = true)) {
+                packetPlayer.yaw = RandomUtils.nextFloat(0f, 360f)
+                packetPlayer.pitch = RandomUtils.nextFloat(-90f, 90f)
             }
-
-            if (mode.equalsIgnoreCase("AAC5-Vanilla") && !mc.isIntegratedServerRunning()) {
-                if (aac5NofallValue.get()) packetPlayer.onGround = true;
-                aac5C03List.add(packetPlayer);
-                event.cancelEvent();
-                if(aac5C03List.size()>aac5PursePacketsValue.get())
-                    sendAAC5Packets();
+            if (mode.equals("AAC5-Vanilla", ignoreCase = true) && !mc.isIntegratedServerRunning) {
+                if (aac5NofallValue.get()) packetPlayer.onGround = true
+                aac5C03List.add(packetPlayer)
+                event.cancelEvent()
+                if (aac5C03List.size > aac5PursePacketsValue.get()) sendAAC5Packets()
             }
-
-            if (mode.equalsIgnoreCase("clip") && clipGroundSpoof.get())
-                packetPlayer.onGround = true;
-
-            if ((mode.equalsIgnoreCase("motion") || modeValue.get().equalsIgnoreCase("blockdrop") || mode.equalsIgnoreCase("creative")) && groundSpoofValue.get())
-                packetPlayer.onGround = true;
-
-            if (verusDmgModeValue.get().equalsIgnoreCase("Jump") && verusJumpTimes < 5 && mode.equalsIgnoreCase("Verus")) {
-                packetPlayer.onGround = false;
+            if (mode.equals("clip", ignoreCase = true) && clipGroundSpoof.get()) packetPlayer.onGround = true
+            if ((mode.equals("motion", ignoreCase = true) || modeValue.get().equals("blockdrop", ignoreCase = true) || mode.equals("creative", ignoreCase = true)) && groundSpoofValue.get()) packetPlayer.onGround = true
+            if (verusDmgModeValue.get().equals("Jump", ignoreCase = true) && verusJumpTimes < 5 && mode.equals("Verus", ignoreCase = true)) {
+                packetPlayer.onGround = false
             }
         }
     }
 
-    private final ArrayList<C03PacketPlayer> aac5C03List=new ArrayList<>();
-
-    private void sendAAC5Packets(){
-        float yaw = mc.thePlayer.rotationYaw;
-        float pitch = mc.thePlayer.rotationPitch;
-        for (C03PacketPlayer packet : aac5C03List) {
-            PacketUtils.sendPacketNoEvent(packet);
-            if (packet.isMoving()) {
+    private val aac5C03List = ArrayList<C03PacketPlayer>()
+    private fun sendAAC5Packets() {
+        var yaw = mc.thePlayer.rotationYaw
+        var pitch = mc.thePlayer.rotationPitch
+        for (packet in aac5C03List) {
+            sendPacketNoEvent(packet)
+            if (packet.isMoving) {
                 if (packet.getRotating()) {
-                    yaw = packet.yaw;
-                    pitch = packet.pitch;
+                    yaw = packet.yaw
+                    pitch = packet.pitch
                 }
-                switch (aac5Packet.get()) {
-                    case "Original":
-                        if (aac5UseC04Packet.get()) {
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(packet.x, 1e+159, packet.z, true));
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(packet.x,packet.y,packet.z, true));
-                        } else {
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(packet.x, 1e+159, packet.z, yaw, pitch, true));
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(packet.x,packet.y,packet.z, yaw, pitch, true));
-                        }
-                        break;
-                    case "Rise":
-                        if (aac5UseC04Packet.get()) {
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(packet.x, -1e+159, packet.z+10, true));
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(packet.x,packet.y,packet.z, true));
-                        } else {
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(packet.x, -1e+159, packet.z+10, yaw, pitch, true));
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(packet.x,packet.y,packet.z, yaw, pitch, true));
-                        }
-                        break;
-                    case "Other":
-                        if (aac5UseC04Packet.get()) {
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(packet.x, 1.7976931348623157E+308, packet.z, true));
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C04PacketPlayerPosition(packet.x,packet.y,packet.z, true));
-                        } else {
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(packet.x, 1.7976931348623157E+308, packet.z, yaw, pitch, true));
-                            PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C06PacketPlayerPosLook(packet.x,packet.y,packet.z, yaw, pitch, true));
-                        }
-                        break;
-                }
+                when (aac5Packet.get()) {
+                    "Original" -> if (aac5UseC04Packet.get()) {
+                        sendPacketNoEvent(C04PacketPlayerPosition(packet.x, 1e+159, packet.z, true))
+                        sendPacketNoEvent(C04PacketPlayerPosition(packet.x, packet.y, packet.z, true))
+                    } else {
+                        sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, 1e+159, packet.z, yaw, pitch, true))
+                        sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, yaw, pitch, true))
+                    }
 
-            }
-        }
-        aac5C03List.clear();
-    }
+                    "Rise" -> if (aac5UseC04Packet.get()) {
+                        sendPacketNoEvent(C04PacketPlayerPosition(packet.x, -1e+159, packet.z + 10, true))
+                        sendPacketNoEvent(C04PacketPlayerPosition(packet.x, packet.y, packet.z, true))
+                    } else {
+                        sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, -1e+159, packet.z + 10, yaw, pitch, true))
+                        sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, yaw, pitch, true))
+                    }
 
-    @EventTarget
-    public void onMove(final MoveEvent event) {
-        switch(modeValue.get().toLowerCase()) {
-            case "pearl":
-                if (pearlState != 2 && pearlState != -1) {
-                    event.cancelEvent();
-                }
-                break;
-            case "verus":
-                if (!verusDmged)
-                    if (verusDmgModeValue.get().equalsIgnoreCase("Jump"))
-                        event.zeroXZ();
-                    else
-                        event.cancelEvent();
-                break;
-            case "clip":
-                if (clipNoMove.get()) event.zeroXZ();
-                break;
-            case "veruslowhop":
-                if (!mc.thePlayer.isInWeb && !mc.thePlayer.isInLava() && !mc.thePlayer.isInWater() && !mc.thePlayer.isOnLadder() && !mc.gameSettings.keyBindJump.isKeyDown() && mc.thePlayer.ridingEntity == null) {
-                    if (MovementUtils.isMoving()) {
-                        mc.gameSettings.keyBindJump.pressed = false;
-                        if (mc.thePlayer.onGround) {
-                            mc.thePlayer.jump();
-                            mc.thePlayer.motionY = 0;
-                            MovementUtils.strafe(0.61F);
-                            event.setY(0.41999998688698);
-                        }
-                        MovementUtils.strafe();
+                    "Other" -> if (aac5UseC04Packet.get()) {
+                        sendPacketNoEvent(C04PacketPlayerPosition(packet.x, 1.7976931348623157E+308, packet.z, true))
+                        sendPacketNoEvent(C04PacketPlayerPosition(packet.x, packet.y, packet.z, true))
+                    } else {
+                        sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, 1.7976931348623157E+308, packet.z, yaw, pitch, true))
+                        sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, yaw, pitch, true))
                     }
                 }
-                break;
-            case "watchdog":
-                if (wdState < 4)
-                    event.zeroXZ();
-                break;
-            case "cubecraft": {
-                final double yaw = Math.toRadians(mc.thePlayer.rotationYaw);
-
-                if (cubecraftTeleportTickTimer.hasTimePassed(2)) {
-                    event.setX(-Math.sin(yaw) * 2.4D);
-                    event.setZ(Math.cos(yaw) * 2.4D);
-
-                    cubecraftTeleportTickTimer.reset();
-                } else {
-                    event.setX(-Math.sin(yaw) * 0.2D);
-                    event.setZ(Math.cos(yaw) * 0.2D);
-                }
-                break;
             }
-            case "boosthypixel":
-                if (!MovementUtils.isMoving()) {
-                    event.setX(0D);
-                    event.setZ(0D);
-                    break;
+        }
+        aac5C03List.clear()
+    }
+
+    @EventTarget
+    fun onMove(event: MoveEvent) {
+        for (duh in arrayOf(modeValue)) {
+            when (modeValue.get().lowercase(Locale.getDefault())) {
+                "pearl" -> if (pearlState != 2 && pearlState != -1) {
+                    event.cancelEvent()
                 }
 
-                if (failedStart)
-                    break;
-
-                final double amplifier = 1 + (mc.thePlayer.isPotionActive(Potion.moveSpeed) ? 0.2 *
-                        (mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier() + 1) : 0);
-                final double baseSpeed = 0.29D * amplifier;
-
-                switch (boostHypixelState) {
-                    case 1:
-                        moveSpeed = (mc.thePlayer.isPotionActive(Potion.moveSpeed) ? 1.56 : 2.034) * baseSpeed;
-                        boostHypixelState = 2;
-                        break;
-                    case 2:
-                        moveSpeed *= 2.16D;
-                        boostHypixelState = 3;
-                        break;
-                    case 3:
-                        moveSpeed = lastDistance - (mc.thePlayer.ticksExisted % 2 == 0 ? 0.0103D : 0.0123D) * (lastDistance - baseSpeed);
-
-                        boostHypixelState = 4;
-                        break;
-                    default:
-                        moveSpeed = lastDistance - lastDistance / 159.8D;
-                        break;
+                "verus" -> if (!verusDmged) if (verusDmgModeValue.get().equals("Jump", ignoreCase = true)) event.zeroXZ() else event.cancelEvent()
+                "clip" -> if (clipNoMove.get()) event.zeroXZ()
+                "veruslowhop" -> if (!mc.thePlayer.isInWeb && !mc.thePlayer.isInLava && !mc.thePlayer.isInWater && !mc.thePlayer.isOnLadder && !mc.gameSettings.keyBindJump.isKeyDown && mc.thePlayer.ridingEntity == null) {
+                    if (MovementUtils.isMoving()) {
+                        mc.gameSettings.keyBindJump.pressed = false
+                        if (mc.thePlayer.onGround) {
+                            mc.thePlayer.jump()
+                            mc.thePlayer.motionY = 0.0
+                            MovementUtils.strafe(0.61f)
+                            event.y = 0.41999998688698
+                        }
+                        MovementUtils.strafe()
+                    }
                 }
 
-                moveSpeed = Math.max(moveSpeed, 0.3D);
+                "watchdog" -> if (wdState < 4) event.zeroXZ()
+                "cubecraft" -> {
+                    val yaw = Math.toRadians(mc.thePlayer.rotationYaw.toDouble())
+                    if (cubecraftTeleportTickTimer.hasTimePassed(2)) {
+                        event.x = -sin(yaw) * 2.4
+                        event.z = cos(yaw) * 2.4
+                        cubecraftTeleportTickTimer.reset()
+                    } else {
+                        event.x = -sin(yaw) * 0.2
+                        event.z = cos(yaw) * 0.2
+                    }
+                }
 
-                final double yaw = MovementUtils.getDirection();
-                event.setX(-Math.sin(yaw) * moveSpeed);
-                event.setZ(Math.cos(yaw) * moveSpeed);
-                mc.thePlayer.motionX = event.getX();
-                mc.thePlayer.motionZ = event.getZ();
-                break;
-            case "freehypixel":
-                if (!freeHypixelTimer.hasTimePassed(10))
-                    event.zero();
-                break;
+                "boosthypixel" -> {
+                    if (!MovementUtils.isMoving()) {
+                        event.x = 0.0
+                        event.z = 0.0
+                        break
+                    }
+                    if (failedStart) break
+                    val amplifier: Double = 1.0 + if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) 0.2 *
+                            (mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).amplifier + 1) else 0.0
+                    val baseSpeed = 0.29 * amplifier
+                    when (boostHypixelState) {
+                        1 -> {
+                            moveSpeed = (if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) 1.56 else 2.034) * baseSpeed
+                            boostHypixelState = 2
+                        }
+
+                        2 -> {
+                            moveSpeed *= 2.16
+                            boostHypixelState = 3
+                        }
+
+                        3 -> {
+                            moveSpeed = lastDistance - (if (mc.thePlayer.ticksExisted % 2 == 0) 0.0103 else 0.0123) * (lastDistance - baseSpeed)
+                            boostHypixelState = 4
+                        }
+
+                        else -> moveSpeed = lastDistance - lastDistance / 159.8
+                    }
+                    moveSpeed = max(moveSpeed, 0.3)
+                    val yaw = MovementUtils.getDirection()
+                    event.x = -sin(yaw) * moveSpeed
+                    event.z = cos(yaw) * moveSpeed
+                    mc.thePlayer.motionX = event.x
+                    mc.thePlayer.motionZ = event.z
+                }
+
+                "freehypixel" -> if (!freeHypixelTimer.hasTimePassed(10)) event.zero()
+            }
         }
     }
 
     @EventTarget
-    public void onBB(final BlockBBEvent event) {
-        if (mc.thePlayer == null) return;
-
-        final String mode = modeValue.get();
-
-        if (event.getBlock() instanceof BlockAir && mode.equalsIgnoreCase("Jump") && event.getY() < startY)
-            event.setBoundingBox(AxisAlignedBB.fromBounds(event.getX(), event.getY(), event.getZ(), event.getX() + 1, startY, event.getZ() + 1));
-
-        if (event.getBlock() instanceof BlockAir && ((mode.equalsIgnoreCase("collide") && !mc.thePlayer.isSneaking()) || mode.equalsIgnoreCase("veruslowhop")))
-            event.setBoundingBox(new AxisAlignedBB(-2, -1, -2, 2, 1, 2).offset(event.getX(), event.getY(), event.getZ()));
-
-        if (event.getBlock() instanceof BlockAir && (mode.equalsIgnoreCase("Hypixel") ||
-                mode.equalsIgnoreCase("BoostHypixel") || mode.equalsIgnoreCase("Rewinside") ||
-                (mode.equalsIgnoreCase("Mineplex") && mc.thePlayer.inventory.getCurrentItem() == null) || (mode.equalsIgnoreCase("Verus") &&
-                (verusDmgModeValue.get().equalsIgnoreCase("none") || verusDmged)))
-                && event.getY() < mc.thePlayer.posY)
-            event.setBoundingBox(AxisAlignedBB.fromBounds(event.getX(), event.getY(), event.getZ(), event.getX() + 1, mc.thePlayer.posY, event.getZ() + 1));
+    fun onBB(event: BlockBBEvent) {
+        if (mc.thePlayer == null) return
+        val mode = modeValue.get()
+        if (event.block is BlockAir && mode.equals("Jump", ignoreCase = true) && event.y < startY) event.boundingBox = AxisAlignedBB.fromBounds(event.x.toDouble(), event.y.toDouble(), event.z.toDouble(), (event.x + 1).toDouble(), startY, (event.z + 1).toDouble())
+        if (event.block is BlockAir && (mode.equals("collide", ignoreCase = true) && !mc.thePlayer.isSneaking || mode.equals("veruslowhop", ignoreCase = true))) event.boundingBox = AxisAlignedBB(-2.0, -1.0, -2.0, 2.0, 1.0, 2.0).offset(event.x.toDouble(), event.y.toDouble(), event.z.toDouble())
+        if (event.block is BlockAir && (mode.equals("Hypixel", ignoreCase = true) ||
+                    mode.equals("BoostHypixel", ignoreCase = true) || mode.equals("Rewinside", ignoreCase = true) || mode.equals("Mineplex", ignoreCase = true) && mc.thePlayer.inventory.getCurrentItem() == null || mode.equals("Verus", ignoreCase = true) && (verusDmgModeValue.get().equals("none", ignoreCase = true) || verusDmged)) && event.y < mc.thePlayer.posY
+        ) event.boundingBox = AxisAlignedBB.fromBounds(event.x.toDouble(), event.y.toDouble(), event.z.toDouble(), (event.x + 1).toDouble(), mc.thePlayer.posY, (event.z + 1).toDouble())
     }
 
     @EventTarget
-    public void onJump(final JumpEvent e) {
-        final String mode = modeValue.get();
-
-        if (mode.equalsIgnoreCase("Hypixel") || mode.equalsIgnoreCase("BoostHypixel") ||
-                mode.equalsIgnoreCase("Rewinside") || (mode.equalsIgnoreCase("Mineplex") && mc.thePlayer.inventory.getCurrentItem() == null) || (mode.equalsIgnoreCase("FunCraft") && moveSpeed > 0) || (mode.equalsIgnoreCase("watchdog") && wdState >= 1))
-            e.cancelEvent();
+    fun onJump(e: JumpEvent) {
+        val mode = modeValue.get()
+        if (mode.equals("Hypixel", ignoreCase = true) || mode.equals("BoostHypixel", ignoreCase = true) ||
+            mode.equals("Rewinside", ignoreCase = true) || mode.equals("Mineplex", ignoreCase = true) && mc.thePlayer.inventory.getCurrentItem() == null || mode.equals("FunCraft", ignoreCase = true) && moveSpeed > 0 || mode.equals("watchdog", ignoreCase = true) && wdState >= 1
+        ) e.cancelEvent()
     }
 
     @EventTarget
-    public void onStep(final StepEvent e) {
-        final String mode = modeValue.get();
-
-        if (mode.equalsIgnoreCase("Hypixel") || mode.equalsIgnoreCase("BoostHypixel") ||
-                mode.equalsIgnoreCase("Rewinside") || (mode.equalsIgnoreCase("Mineplex") && mc.thePlayer.inventory.getCurrentItem() == null) || mode.equalsIgnoreCase("FunCraft") || mode.equalsIgnoreCase("watchdog"))
-            e.setStepHeight(0F);
+    fun onStep(e: StepEvent) {
+        val mode = modeValue.get()
+        if (mode.equals("Hypixel", ignoreCase = true) || mode.equals("BoostHypixel", ignoreCase = true) ||
+            mode.equals("Rewinside", ignoreCase = true) || mode.equals("Mineplex", ignoreCase = true) && mc.thePlayer.inventory.getCurrentItem() == null || mode.equals("FunCraft", ignoreCase = true) || mode.equals("watchdog", ignoreCase = true)
+        ) e.stepHeight = 0f
     }
 
-    private void handleVanillaKickBypass() {
-        if(!vanillaKickBypassValue.get() || !groundTimer.hasTimePassed(1000)) return;
-
-        final double ground = calculateGround();
-
-        for(double posY = mc.thePlayer.posY; posY > ground; posY -= 8D) {
-            mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, posY, mc.thePlayer.posZ, true));
-
-            if(posY - 8D < ground) break; // Prevent next step
+    private fun handleVanillaKickBypass() {
+        if (!vanillaKickBypassValue.get() || !groundTimer.hasTimePassed(1000)) return
+        val ground = calculateGround()
+        run {
+            var posY = mc.thePlayer.posY
+            while (posY > ground) {
+                mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, posY, mc.thePlayer.posZ, true))
+                if (posY - 8.0 < ground) break // Prevent next step
+                posY -= 8.0
+            }
         }
-
-        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, ground, mc.thePlayer.posZ, true));
-
-
-        for(double posY = ground; posY < mc.thePlayer.posY; posY += 8D) {
-            mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, posY, mc.thePlayer.posZ, true));
-
-            if(posY + 8D > mc.thePlayer.posY) break; // Prevent next step
+        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, ground, mc.thePlayer.posZ, true))
+        var posY = ground
+        while (posY < mc.thePlayer.posY) {
+            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, posY, mc.thePlayer.posZ, true))
+            if (posY + 8.0 > mc.thePlayer.posY) break // Prevent next step
+            posY += 8.0
         }
-
-        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true));
-
-        groundTimer.reset();
+        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true))
+        groundTimer.reset()
     }
 
     // TODO: Make better and faster calculation lol
-    private double calculateGround() {
-        final AxisAlignedBB playerBoundingBox = mc.thePlayer.getEntityBoundingBox();
-        double blockHeight = 1D;
-
-        for(double ground = mc.thePlayer.posY; ground > 0D; ground -= blockHeight) {
-            final AxisAlignedBB customBox = new AxisAlignedBB(playerBoundingBox.maxX, ground + blockHeight, playerBoundingBox.maxZ, playerBoundingBox.minX, ground, playerBoundingBox.minZ);
-
-            if(mc.theWorld.checkBlockCollision(customBox)) {
-                if(blockHeight <= 0.05D)
-                    return ground + blockHeight;
-
-                ground += blockHeight;
-                blockHeight = 0.05D;
+    private fun calculateGround(): Double {
+        val playerBoundingBox = mc.thePlayer.entityBoundingBox
+        var blockHeight = 1.0
+        var ground = mc.thePlayer.posY
+        while (ground > 0.0) {
+            val customBox = AxisAlignedBB(playerBoundingBox.maxX, ground + blockHeight, playerBoundingBox.maxZ, playerBoundingBox.minX, ground, playerBoundingBox.minZ)
+            if (mc.theWorld.checkBlockCollision(customBox)) {
+                if (blockHeight <= 0.05) return ground + blockHeight
+                ground += blockHeight
+                blockHeight = 0.05
             }
+            ground -= blockHeight
         }
-
-        return 0F;
+        return 0.0
     }
 
-    private int getPearlSlot() {
-        for(int i = 36; i < 45; ++i) {
-            ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-            if (stack != null && stack.getItem() instanceof ItemEnderPearl) {
-                return i - 36;
+    private val pearlSlot: Int
+        get() {
+            for (i in 36..44) {
+                val stack = mc.thePlayer.inventoryContainer.getSlot(i).stack
+                if (stack != null && stack.item is ItemEnderPearl) {
+                    return i - 36
+                }
             }
+            return -1
         }
-        return -1;
-    }
-
-    private int getSlimeSlot() {
-        for(int i = 36; i < 45; ++i) {
-            ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-            if (stack != null && stack.getItem() != null && stack.getItem() instanceof ItemBlock) {
-                final ItemBlock itemBlock = (ItemBlock) stack.getItem();
-                if (itemBlock.getBlock() instanceof BlockSlime)
-                    return i - 36;
+    private val slimeSlot: Int
+        get() {
+            for (i in 36..44) {
+                val stack = mc.thePlayer.inventoryContainer.getSlot(i).stack
+                if (stack != null && stack.item != null && stack.item is ItemBlock) {
+                    val itemBlock = stack.item as ItemBlock
+                    if (itemBlock.getBlock() is BlockSlime) return i - 36
+                }
             }
+            return -1
         }
-        return -1;
-    }
-
-    @Override
-    public String getTag() {
-        return modeValue.get();
-    }
+    override val tag: String
+        get() = modeValue.get()
 }

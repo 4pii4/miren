@@ -217,7 +217,6 @@ class ModuleManager : Listenable {
 
         registerModule(Breaker)
         registerModule(ChestAura)
-        registerModule(TimerRange)
         registerModule(Blink)
         registerModule(FakeLag)
         registerModule(Animations)

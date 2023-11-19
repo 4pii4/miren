@@ -13,6 +13,7 @@ import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.utils.EntityUtils
 import net.ccbluex.liquidbounce.utils.RotationUtils
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
+import net.ccbluex.liquidbounce.utils.render.Render
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.value.BoolValue
 import net.ccbluex.liquidbounce.value.FloatValue
@@ -52,8 +53,8 @@ class Tracers : Module() {
 
         GL11.glBegin(GL11.GL_LINES)
 
-        for (entity in if (fovModeValue.get().equals("all", true)) mc.theWorld.loadedEntityList else mc.theWorld.loadedEntityList.filter { if (fovModeValue.get().equals("back", true)) RotationUtils.getRotationBackDifference(it) <= fovValue.get() else RotationUtils.getRotationDifference(it) <= fovValue.get() }) {
-            if (entity != null && entity != mc.thePlayer && EntityUtils.isSelected(entity, false)) {
+        for (entity in if (fovModeValue.get().equals("all", true)) RenderConfig.entities() else RenderConfig.entities().filter { if (fovModeValue.get().equals("back", true)) RotationUtils.getRotationBackDifference(it) <= fovValue.get() else RotationUtils.getRotationDifference(it) <= fovValue.get() }) {
+            if (entity != mc.thePlayer && EntityUtils.isSelected(entity, false)) {
                 var dist = (mc.thePlayer.getDistanceToEntity(entity) * 2).toInt()
 
                 if (dist > 255) dist = 255
@@ -61,9 +62,9 @@ class Tracers : Module() {
                 val colorMode = colorMode.get().lowercase(Locale.getDefault())
                 val color = when {
                     EntityUtils.isFriend(entity) -> Color(0, 0, 255, 150)
-                    colorMode.equals("custom") -> Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get(), 150)
-                    colorMode.equals("distancecolor") -> Color(255 - dist, dist, 0, 150)
-                    colorMode.equals("rainbow") -> ColorUtils.rainbow()
+                    colorMode == "custom" -> Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get(), 150)
+                    colorMode == "distancecolor" -> Color(255 - dist, dist, 0, 150)
+                    colorMode == "rainbow" -> ColorUtils.rainbow()
                     else -> Color(255, 255, 255, 150)
                 }
 

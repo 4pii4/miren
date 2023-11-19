@@ -3,220 +3,180 @@
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/WYSI-Foundation/LiquidBouncePlus/
  */
-package net.ccbluex.liquidbounce.features.module.modules.movement;
+package net.ccbluex.liquidbounce.features.module.modules.movement
 
-import net.ccbluex.liquidbounce.LiquidBounce;
-import net.ccbluex.liquidbounce.event.*;
-import net.ccbluex.liquidbounce.features.module.Module;
-import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.module.ModuleInfo;
-import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification;
-import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type;
-import net.ccbluex.liquidbounce.ui.font.Fonts;
-import net.ccbluex.liquidbounce.utils.MovementUtils;
-import net.ccbluex.liquidbounce.utils.PacketUtils;
-import net.ccbluex.liquidbounce.utils.render.RenderUtils;
-import net.ccbluex.liquidbounce.value.BoolValue;
-import net.ccbluex.liquidbounce.value.FloatValue;
-import net.ccbluex.liquidbounce.value.IntegerValue;
-import net.ccbluex.liquidbounce.value.ListValue;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemBow;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-
-import java.awt.*;
+import net.ccbluex.liquidbounce.LiquidBounce
+import net.ccbluex.liquidbounce.event.*
+import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type
+import net.ccbluex.liquidbounce.ui.font.Fonts
+import net.ccbluex.liquidbounce.utils.MovementUtils
+import net.ccbluex.liquidbounce.utils.PacketUtils.sendPacketNoEvent
+import net.ccbluex.liquidbounce.utils.render.RenderUtils
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
+import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.init.Items
+import net.minecraft.item.ItemBow
+import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.network.play.client.C03PacketPlayer.C05PacketPlayerLook
+import net.minecraft.network.play.client.C07PacketPlayerDigging
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
+import net.minecraft.network.play.client.C09PacketHeldItemChange
+import net.minecraft.util.BlockPos
+import net.minecraft.util.EnumFacing
+import java.awt.Color
 
 @ModuleInfo(name = "BowJump", spacedName = "Bow Jump", description = "Allows you to jump further with auto bow shoot.", category = ModuleCategory.MOVEMENT)
-public class BowJump extends Module {
-
-    private final ListValue modeValue = new ListValue("Mode", new String[] {"Strafe","SpeedInAir"}, "Strafe");
-    private final FloatValue speedInAirBoostValue = new FloatValue("SpeedInAir", 0.5F, 0.02F, 1F, () -> modeValue.get().equalsIgnoreCase("SpeedInAir"));
-
-    private final FloatValue boostValue = new FloatValue("Boost", 4.25F, 0F, 10F, "x", () -> modeValue.get().equalsIgnoreCase("Strafe"));
-    private final FloatValue heightValue = new FloatValue("Height", 0.42F, 0F, 10F, "m");
-    private final FloatValue timerValue = new FloatValue("Timer", 1F, 0.1F, 10F, "x");
-    private final IntegerValue delayBeforeLaunch = new IntegerValue("DelayBeforeArrowLaunch", 1, 1, 20, " tick");
-    private final BoolValue autoDisable = new BoolValue("AutoDisable", true);
-    private final BoolValue renderValue = new BoolValue("RenderStatus", true);
-
-    public final BoolValue fakeValue = new BoolValue("SpoofY", false);
-
-    private int bowState = 0;
-    private long lastPlayerTick = 0;
-
-    public double rendery = 0.0;
-    private int lastSlot = -1;
-
-    public void onEnable() {
-
-        if (mc.thePlayer == null) return;
-        bowState = 0;
-        lastPlayerTick = -1;
-        lastSlot = mc.thePlayer.inventory.currentItem;
-
-        rendery = mc.thePlayer.posY;
-
-        MovementUtils.strafe(0);
+class BowJump : Module() {
+    private val modeValue = ListValue("Mode", arrayOf("Strafe", "SpeedInAir"), "Strafe")
+    private val speedInAirBoostValue = FloatValue("SpeedInAir", 0.5f, 0.02f, 1f) { modeValue.get().equals("SpeedInAir", ignoreCase = true) }
+    private val boostValue = FloatValue("Boost", 4.25f, 0f, 10f, "x") { modeValue.get().equals("Strafe", ignoreCase = true) }
+    private val heightValue = FloatValue("Height", 0.42f, 0f, 10f, "m")
+    private val timerValue = FloatValue("Timer", 1f, 0.1f, 10f, "x")
+    private val delayBeforeLaunch = IntegerValue("DelayBeforeArrowLaunch", 1, 1, 20, " tick")
+    private val autoDisable = BoolValue("AutoDisable", true)
+    private val renderValue = BoolValue("RenderStatus", true)
+    val fakeValue = BoolValue("SpoofY", false)
+    private var bowState = 0
+    private var lastPlayerTick: Long = 0
+    var rendery = 0.0
+    private var lastSlot = -1
+    override fun onEnable() {
+        if (mc.thePlayer == null) return
+        bowState = 0
+        lastPlayerTick = -1
+        lastSlot = mc.thePlayer.inventory.currentItem
+        rendery = mc.thePlayer.posY
+        MovementUtils.strafe(0f)
     }
 
     @EventTarget
-    public void onMove(MoveEvent event) {
-        if (mc.thePlayer.onGround && bowState < 3)
-            event.cancelEvent();
-
+    fun onMove(event: MoveEvent) {
+        if (mc.thePlayer.onGround && bowState < 3) event.cancelEvent()
     }
 
     @EventTarget
-    public void onPacket(PacketEvent event) {
-        if (event.getPacket() instanceof C09PacketHeldItemChange) {
-            C09PacketHeldItemChange c09 = (C09PacketHeldItemChange) event.getPacket();
-            lastSlot = c09.getSlotId();
-            event.cancelEvent();
+    fun onPacket(event: PacketEvent) {
+        if (event.packet is C09PacketHeldItemChange) {
+            lastSlot = event.packet.slotId
+            event.cancelEvent()
         }
-
-        if (event.getPacket() instanceof C03PacketPlayer) {
-            C03PacketPlayer c03 = (C03PacketPlayer) event.getPacket();
-            if (bowState < 3) c03.setMoving(false);
+        if (event.packet is C03PacketPlayer) {
+            if (bowState < 3) event.packet.isMoving = false
         }
     }
 
     @EventTarget
-    public void onUpdate(UpdateEvent event) {
-        mc.timer.timerSpeed = 1F;
-
-        boolean forceDisable = false;
-        switch (bowState) {
-        case 0:
-            int slot = getBowSlot();
-            if (slot < 0 || !mc.thePlayer.inventory.hasItem(Items.arrow)) {
-                LiquidBounce.hud.addNotification(new Notification("No arrows or bow found in your inventory!", Type.ERROR, 500));
-                forceDisable = true;
-                bowState = 5;
-                break; // nothing to shoot
-            } else if (lastPlayerTick == -1) {
-                ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(slot + 36).getStack();
-
-                if (lastSlot != slot) PacketUtils.sendPacketNoEvent(new C09PacketHeldItemChange(slot));
-                PacketUtils.sendPacketNoEvent(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 255, mc.thePlayer.inventoryContainer.getSlot(slot + 36).getStack(), 0, 0, 0));
-
-                lastPlayerTick = mc.thePlayer.ticksExisted;
-                bowState = 1;
-            }
-            break;
-        case 1:
-            int reSlot = getBowSlot();
-            if (mc.thePlayer.ticksExisted - lastPlayerTick > delayBeforeLaunch.get()) {
-                PacketUtils.sendPacketNoEvent(new C03PacketPlayer.C05PacketPlayerLook(mc.thePlayer.rotationYaw, -90, mc.thePlayer.onGround));
-                PacketUtils.sendPacketNoEvent(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-
-                if (lastSlot != reSlot) PacketUtils.sendPacketNoEvent(new C09PacketHeldItemChange(lastSlot));
-                bowState = 2;
-            }
-            break;
-        case 2:
-            if (mc.thePlayer.hurtTime > 0)
-                bowState = 3;
-            break;
-        case 3:
-            switch (modeValue.get()) {
-                case "Strafe": {
-                    MovementUtils.strafe(boostValue.get());
-                    break;
-                }
-                case "SpeedInAir":{
-                    mc.thePlayer.speedInAir = speedInAirBoostValue.getValue();
-                    mc.thePlayer.jump();
+    fun onUpdate(event: UpdateEvent?) {
+        mc.timer.timerSpeed = 1f
+        var forceDisable = false
+        when (bowState) {
+            0 -> {
+                val slot = bowSlot
+                if (slot < 0 || !mc.thePlayer.inventory.hasItem(Items.arrow)) {
+                    LiquidBounce.hud.addNotification(Notification("No arrows or bow found in your inventory!", Type.ERROR, 500))
+                    forceDisable = true
+                    bowState = 5
+                    state = false
+                } else if (lastPlayerTick == -1L) {
+                    val stack = mc.thePlayer.inventoryContainer.getSlot(slot + 36).stack
+                    if (lastSlot != slot) sendPacketNoEvent(C09PacketHeldItemChange(slot))
+                    sendPacketNoEvent(C08PacketPlayerBlockPlacement(BlockPos(-1, -1, -1), 255, mc.thePlayer.inventoryContainer.getSlot(slot + 36).stack, 0f, 0f, 0f))
+                    lastPlayerTick = mc.thePlayer.ticksExisted.toLong()
+                    bowState = 1
                 }
             }
-            mc.thePlayer.motionY = heightValue.get();
-            bowState = 4;
-            lastPlayerTick = mc.thePlayer.ticksExisted;
-            break;
-        case 4:
-            mc.timer.timerSpeed = timerValue.get();
-            if (mc.thePlayer.onGround && mc.thePlayer.ticksExisted - lastPlayerTick >= 1)
-                bowState = 5;
-            break;
-        }
 
+            1 -> {
+                val reSlot = bowSlot
+                if (mc.thePlayer.ticksExisted - lastPlayerTick > delayBeforeLaunch.get()) {
+                    sendPacketNoEvent(C05PacketPlayerLook(mc.thePlayer.rotationYaw, -90f, mc.thePlayer.onGround))
+                    sendPacketNoEvent(C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN))
+                    if (lastSlot != reSlot) sendPacketNoEvent(C09PacketHeldItemChange(lastSlot))
+                    bowState = 2
+                }
+            }
+
+            2 -> if (mc.thePlayer.hurtTime > 0) bowState = 3
+            3 -> {
+                when (modeValue.get()) {
+                    "Strafe" -> {
+                        MovementUtils.strafe(boostValue.get())
+                    }
+
+                    "SpeedInAir" -> {
+                        mc.thePlayer.speedInAir = speedInAirBoostValue.value
+                        mc.thePlayer.jump()
+                    }
+                }
+                mc.thePlayer.motionY = heightValue.get().toDouble()
+                bowState = 4
+                lastPlayerTick = mc.thePlayer.ticksExisted.toLong()
+            }
+
+            4 -> {
+                mc.timer.timerSpeed = timerValue.get()
+                if (mc.thePlayer.onGround && mc.thePlayer.ticksExisted - lastPlayerTick >= 1) bowState = 5
+            }
+        }
         if (bowState < 3) {
-            mc.thePlayer.movementInput.moveForward = 0F;
-            mc.thePlayer.movementInput.moveStrafe = 0F;
+            mc.thePlayer.movementInput.moveForward = 0f
+            mc.thePlayer.movementInput.moveStrafe = 0f
         }
-
-        if (bowState == 5 && (autoDisable.get() || forceDisable)) 
-            this.setState(false);
+        if (bowState == 5 && (autoDisable.get() || forceDisable)) state = false
     }
 
     @EventTarget
-    public void onWorld(WorldEvent event) {
-        this.setState(false); //prevent weird things
+    fun onWorld(event: WorldEvent?) {
+        state = false //prevent weird things
     }
 
-    public void onDisable(){
-        mc.timer.timerSpeed = 1.0F;
-        mc.thePlayer.speedInAir = 0.02F;
+    override fun onDisable() {
+        mc.timer.timerSpeed = 1.0f
+        mc.thePlayer.speedInAir = 0.02f
     }
 
-    private int getBowSlot() {
-        for(int i = 36; i < 45; ++i) {
-            ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-            if (stack != null && stack.getItem() instanceof ItemBow) {
-                return i - 36;
+    private val bowSlot: Int
+        get() {
+            for (i in 36..44) {
+                val stack = mc.thePlayer.inventoryContainer.getSlot(i).stack
+                if (stack != null && stack.item is ItemBow) {
+                    return i - 36
+                }
             }
+            return -1
         }
-        return -1;
-    }
 
     @EventTarget
-    public void onRender2D(final Render2DEvent event) {
-        if (!renderValue.get()) return;
-        ScaledResolution scaledRes = new ScaledResolution(mc);
-            
-        float width = (float) bowState / 5F * 60F;
-
-        Fonts.font40.drawCenteredString(getBowStatus(), scaledRes.getScaledWidth() / 2F, scaledRes.getScaledHeight() / 2F + 14F, -1, true);
-        RenderUtils.drawRect(scaledRes.getScaledWidth() / 2F - 31F, scaledRes.getScaledHeight() / 2F + 25F, scaledRes.getScaledWidth() / 2F + 31F, scaledRes.getScaledHeight() / 2F + 29F, 0xA0000000);
-        RenderUtils.drawRect(scaledRes.getScaledWidth() / 2F - 30F, scaledRes.getScaledHeight() / 2F + 26F, scaledRes.getScaledWidth() / 2F - 30F + width, scaledRes.getScaledHeight() / 2F + 28F, getStatusColor());
-        
+    fun onRender2D(event: Render2DEvent?) {
+        if (!renderValue.get()) return
+        val scaledRes = ScaledResolution(mc)
+        val width = bowState.toFloat() / 5f * 60f
+        Fonts.font40.drawCenteredString(bowStatus, scaledRes.scaledWidth / 2f, scaledRes.scaledHeight / 2f + 14f, -1, true)
+        RenderUtils.drawRect(scaledRes.scaledWidth / 2f - 31f, scaledRes.scaledHeight / 2f + 25f, scaledRes.scaledWidth / 2f + 31f, scaledRes.scaledHeight / 2f + 29f, -0x60000000)
+        RenderUtils.drawRect(scaledRes.scaledWidth / 2f - 30f, scaledRes.scaledHeight / 2f + 26f, scaledRes.scaledWidth / 2f - 30f + width, scaledRes.scaledHeight / 2f + 28f, statusColor)
     }
 
-    public String getBowStatus() {
-        switch (bowState) {
-            case 0:
-            return "Idle...";
-            case 1:
-            return "Preparing...";
-            case 2:
-            return "Waiting for damage...";
-            case 3:
-            case 4:
-            return "Boost!";
-            default:
-            return "Task completed.";
+    private val bowStatus: String
+        get() = when (bowState) {
+            0 -> "Idle..."
+            1 -> "Preparing..."
+            2 -> "Waiting for damage..."
+            3, 4 -> "Boost!"
+            else -> "Task completed."
         }
-    }
-
-    public Color getStatusColor() {
-        switch (bowState) {
-            case 0:
-            return new Color(21, 21, 21);
-            case 1:
-            return new Color(48, 48, 48);
-            case 2:
-            return Color.yellow;
-            case 3:
-            case 4:
-            return Color.green;
-            default:
-            return new Color(0, 111, 255);
+    private val statusColor: Color
+        get() = when (bowState) {
+            0 -> Color(21, 21, 21)
+            1 -> Color(48, 48, 48)
+            2 -> Color.yellow
+            3, 4 -> Color.green
+            else -> Color(0, 111, 255)
         }
-    }
 }

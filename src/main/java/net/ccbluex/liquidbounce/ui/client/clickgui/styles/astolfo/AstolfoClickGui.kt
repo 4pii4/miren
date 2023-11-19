@@ -30,27 +30,27 @@ import kotlin.math.roundToInt
  * @property scroll scroll amount
  */
 class AstolfoClickGui : GuiScreen() {
-  private var panels = ArrayList<AstolfoCategoryPanel>()
-  private val scale: Float
-    get() = LiquidBounce.moduleManager.getModule(ClickGUI::class.java)!!.scale
-  private val scroll: Float
-    get() = LiquidBounce.moduleManager.getModule(ClickGUI::class.java)!!.scroll
+    private var panels = ArrayList<AstolfoCategoryPanel>()
+    private val scale: Float
+        get() = LiquidBounce.moduleManager.getModule(ClickGUI::class.java)!!.scale
+    private val scroll: Float
+        get() = LiquidBounce.moduleManager.getModule(ClickGUI::class.java)!!.scroll
 
-  private var pressed = mutableMapOf("UP" to false, "DOWN" to false, "LEFT" to false, "RIGHT" to false)
+    private var pressed = mutableMapOf("UP" to false, "DOWN" to false, "LEFT" to false, "RIGHT" to false)
 
-  private fun updatePressed() {
-    pressed["UP"] = Keyboard.isKeyDown(Keyboard.KEY_UP)
-    pressed["DOWN"] = Keyboard.isKeyDown(Keyboard.KEY_DOWN)
-    pressed["LEFT"] = Keyboard.isKeyDown(Keyboard.KEY_LEFT)
-    pressed["RIGHT"] = Keyboard.isKeyDown(Keyboard.KEY_RIGHT)
-  }
+    private fun updatePressed() {
+        pressed["UP"] = Keyboard.isKeyDown(Keyboard.KEY_UP)
+        pressed["DOWN"] = Keyboard.isKeyDown(Keyboard.KEY_DOWN)
+        pressed["LEFT"] = Keyboard.isKeyDown(Keyboard.KEY_LEFT)
+        pressed["RIGHT"] = Keyboard.isKeyDown(Keyboard.KEY_RIGHT)
+    }
 
     private fun init() {
-    var xPos = 4f
-    for (cat in ModuleCategory.values()) {
-      panels.add(AstolfoCategoryPanel(xPos, 4f, cat, Color(cat.color)))
-      xPos += AstolfoConstants.PANEL_WIDTH.toInt() + 10
-    }
+        var xPos = 4f
+        for (cat in ModuleCategory.values()) {
+            panels.add(AstolfoCategoryPanel(xPos, 4f, cat, Color(cat.color)))
+            xPos += AstolfoConstants.PANEL_WIDTH.toInt() + 10
+        }
         loadConfig()
     }
 
@@ -109,70 +109,74 @@ class AstolfoClickGui : GuiScreen() {
     }
 
     override fun onGuiClosed() {
-        saveConfig()
-  }
-
-  override fun drawScreen(mouseXIn: Int, mouseYIn: Int, partialTicks: Float) {
-      if (panels.isEmpty())
-          init()
-    val mouseX = (mouseXIn / scale).roundToInt()
-    val mouseY = (mouseYIn / scale).roundToInt()
-
-    GL11.glPushMatrix()
-    GL11.glScalef(scale, scale, scale)
-
-    drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, Color(0, 0, 0, 50).rgb)
-
-    // vertical scrolling
-    if (Mouse.hasWheel() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-      val wheel = Mouse.getDWheel()
-      if (wheel != 0) {
-        val scrollAmount = scroll * if (wheel > 0) 1 else -1
-        panels.map { it.y += scrollAmount }
-      }
-    }
-    if (Keyboard.isKeyDown(Keyboard.KEY_UP) && !pressed["UP"]!!) panels.map { it.y -= scroll }
-    if (Keyboard.isKeyDown(Keyboard.KEY_DOWN) && !pressed["DOWN"]!!) panels.map { it.y += scroll }
-    if (Keyboard.isKeyDown(Keyboard.KEY_LEFT) && !pressed["LEFT"]!!) panels.map { it.x -= scroll }
-    if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && !pressed["RIGHT"]!!) panels.map { it.x += scroll }
-
-    if (Keyboard.isKeyDown(Keyboard.KEY_F10)) panels.map { it.y = 10f }
-
-    for (catPanel in panels) {
-      catPanel.drawPanel(mouseX, mouseY)
-    }
-
-    GL11.glPopMatrix()
-    updatePressed()
-  }
-
-  private fun mouseAction(mouseXIn: Int, mouseYIn: Int, mouseButton: Int, state: Boolean) {
-    val mouseX = (mouseXIn / scale).roundToInt()
-    val mouseY = (mouseYIn / scale).roundToInt()
-
-    for (panel in panels) {
-      panel.mouseAction(mouseX, mouseY, state, mouseButton)
-      if (panel.open) {
-        for (moduleButton in panel.moduleButtons) {
-          moduleButton.mouseAction(mouseX, mouseY, state, mouseButton)
-          if (moduleButton.open) {
-            for (pan in moduleButton.valueButtons) {
-              pan.mouseAction(mouseX, mouseY, state, mouseButton)
-            }
-          }
+        panels.forEach {
+            it.onClosed()
+            it.moduleButtons.forEach { module -> module.onClosed() }
         }
-      }
+        saveConfig()
     }
-  }
 
-  @Throws(IOException::class)
-  override fun mouseClicked(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
-    mouseAction(mouseXIn, mouseYIn, mouseButton, true)
-  }
+    override fun drawScreen(mouseXIn: Int, mouseYIn: Int, partialTicks: Float) {
+        if (panels.isEmpty())
+            init()
+        val mouseX = (mouseXIn / scale).roundToInt()
+        val mouseY = (mouseYIn / scale).roundToInt()
 
-  override fun mouseReleased(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
-    mouseAction(mouseXIn, mouseYIn, mouseButton, false)
-  }
+        GL11.glPushMatrix()
+        GL11.glScalef(scale, scale, scale)
+
+        drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, Color(0, 0, 0, 50).rgb)
+
+        // vertical scrolling
+        if (Mouse.hasWheel() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+            val wheel = Mouse.getDWheel()
+            if (wheel != 0) {
+                val scrollAmount = scroll * if (wheel > 0) 1 else -1
+                panels.map { it.y += scrollAmount }
+            }
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_UP) && !pressed["UP"]!!) panels.map { it.y -= scroll }
+        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN) && !pressed["DOWN"]!!) panels.map { it.y += scroll }
+        if (Keyboard.isKeyDown(Keyboard.KEY_LEFT) && !pressed["LEFT"]!!) panels.map { it.x -= scroll }
+        if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && !pressed["RIGHT"]!!) panels.map { it.x += scroll }
+
+        if (Keyboard.isKeyDown(Keyboard.KEY_F10)) panels.map { it.y = 10f }
+
+        for (catPanel in panels) {
+            catPanel.drawPanel(mouseX, mouseY)
+        }
+
+        GL11.glPopMatrix()
+        updatePressed()
+    }
+
+    private fun mouseAction(mouseXIn: Int, mouseYIn: Int, mouseButton: Int, state: Boolean) {
+        val mouseX = (mouseXIn / scale).roundToInt()
+        val mouseY = (mouseYIn / scale).roundToInt()
+
+        for (panel in panels) {
+            panel.mouseAction(mouseX, mouseY, state, mouseButton)
+            if (panel.open) {
+                for (moduleButton in panel.moduleButtons) {
+                    moduleButton.mouseAction(mouseX, mouseY, state, mouseButton)
+                    if (moduleButton.open) {
+                        for (pan in moduleButton.valueButtons) {
+                            pan.mouseAction(mouseX, mouseY, state, mouseButton)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    override fun mouseClicked(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
+        mouseAction(mouseXIn, mouseYIn, mouseButton, true)
+    }
+
+    override fun mouseReleased(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
+        mouseAction(mouseXIn, mouseYIn, mouseButton, false)
+    }
 
     companion object {
         private var instance: AstolfoClickGui? = null

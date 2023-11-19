@@ -30,41 +30,51 @@ abstract class Command(val command: String, val alias: Array<String>) : Minecraf
     }
 
     /**
-     * Print [msg] to chat
-     */
-    protected fun chat(msg: String) = ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §f$msg")
-
-    /**
-     * Print [syntax] of command to chat
-     */
-    protected fun chatSyntax(syntax: String) =
-        ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax: §7${LiquidBounce.commandManager.prefix}$syntax")
-
-    /**
      * Print [syntaxes] of command to chat
      */
     protected fun chatSyntax(syntaxes: Array<String>) {
         ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax:")
 
         for (syntax in syntaxes)
-            ClientUtils.displayChatMessage("§8> §f${LiquidBounce.commandManager.prefix}$command ${syntax.lowercase(
-                Locale.getDefault()
-            )}")
+            ClientUtils.displayChatMessage(
+                "§8> §f${LiquidBounce.commandManager.prefix}$command ${
+                    syntax.lowercase(
+                        Locale.getDefault()
+                    )
+                }"
+            )
     }
 
-    /**
-     * Print a syntax error to chat
-     */
-    protected fun chatSyntaxError() =
-        ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax error")
+    companion object {
+        /**
+         * Print [msg] to chat
+         */
+        @JvmStatic
+        protected fun chat(msg: String) = ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §f$msg")
 
-    /**
-     * Play edit sound
-     */
-    protected fun playEdit() {
-        //mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("random.anvil_use"), 1F))
+        /**
+         * Print [syntax] of command to chat
+         */
+        @JvmStatic
+        protected fun chatSyntax(syntax: String) =
+            ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax: §7${LiquidBounce.commandManager.prefix}$syntax")
+
+        /**
+         * Print a syntax error to chat
+         */
+        @JvmStatic
+        protected fun chatSyntaxError() =
+            ClientUtils.displayChatMessage("${LiquidBounce.CLIENT_NAME_COLORED} §cSyntax error")
+
+        /**
+         * Play edit sound
+         */
+        @JvmStatic
+        protected fun playEdit() {
+            //mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("random.anvil_use"), 1F))
+        }
+
+        fun highlightModule(moduleName: String) = "§b§l${moduleName}§r"
+        fun highlightModule(module: Module) = highlightModule(module.name)
     }
-
-    fun highlightModule(moduleName: String) = "§b§l${moduleName}§r"
-    fun highlightModule(module: Module) = highlightModule(module.name)
 }

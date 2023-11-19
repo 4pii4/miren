@@ -175,10 +175,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
             this.jumpTicks = 10;
         }
 
-        final Jesus liquidWalk = LiquidBounce.moduleManager.getModule(Jesus.class);
+        final Jesus jesus = LiquidBounce.moduleManager.getModule(Jesus.class);
 
-        if (liquidWalk.getState() && !isJumping && !isSneaking() && isInWater() &&
-                liquidWalk.modeValue.get().equalsIgnoreCase("Swim")) {
+        if (jesus.getState() && !isJumping && !isSneaking() && isInWater() &&
+                jesus.getModeValue().get().equalsIgnoreCase("Swim")) {
             this.updateAITick();
         }
     }

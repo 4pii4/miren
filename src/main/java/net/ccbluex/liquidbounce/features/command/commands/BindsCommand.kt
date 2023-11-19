@@ -25,10 +25,20 @@ class BindsCommand : Command("binds", emptyArray()) {
             }
         }
 
-        chat("§c§lBinds")
-        LiquidBounce.moduleManager.modules.filter { it.keyBind != Keyboard.KEY_NONE }.forEach {
-            ClientUtils.displayChatMessage("§6> §c${it.name}: §a§l${Keyboard.getKeyName(it.keyBind)}")
+        chat("Binds:")
+        val binds = LiquidBounce.moduleManager.modules
+            .asSequence()
+            .filter { it.keyBind != Keyboard.KEY_NONE }
+            .map { it to Keyboard.getKeyName(it.keyBind) }
+            .groupBy { it.second }
+            .toList()
+            .sortedBy { it.first }
+            .toMap()
+
+        for (bind in binds) {
+            chat("${bind.key}: ${bind.value.joinToString(", ") { highlightModule(it.first.name) }}")
         }
+
         chatSyntax("binds clear")
     }
 }

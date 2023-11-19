@@ -43,10 +43,10 @@ public abstract class MixinRenderItem {
     private void renderEffect(IBakedModel model, CallbackInfo callbackInfo) {
         final EnchantEffect enchantEffect = LiquidBounce.moduleManager.getModule(EnchantEffect.class);
         if (enchantEffect.getState()) {
-            int rainbowColour = RenderUtils.getRainbowOpaque(enchantEffect.rainbowSpeedValue.get(), enchantEffect.rainbowSatValue.get(), enchantEffect.rainbowBrgValue.get(), ((int) Minecraft.getSystemTime() % 2) * (enchantEffect.rainbowDelayValue.get() * 10));
-            int skyColor = RenderUtils.SkyRainbow(0, enchantEffect.rainbowSatValue.get(), enchantEffect.rainbowBrgValue.get());
-            int mixerColor = ColorMixer.getMixedColor(0, enchantEffect.rainbowSpeedValue.get()).getRGB();
-            int currentColor = new Color(enchantEffect.redValue.get(), enchantEffect.greenValue.get(), enchantEffect.blueValue.get()).getRGB();
+            int rainbowColour = RenderUtils.getRainbowOpaque(enchantEffect.getRainbowSpeedValue().get(), enchantEffect.getRainbowSatValue().get(), enchantEffect.getRainbowBrgValue().get(), ((int) Minecraft.getSystemTime() % 2) * (enchantEffect.getRainbowDelayValue().get() * 10));
+            int skyColor = RenderUtils.SkyRainbow(0, enchantEffect.getRainbowSatValue().get(), enchantEffect.getRainbowBrgValue().get());
+            int mixerColor = ColorMixer.getMixedColor(0, enchantEffect.getRainbowSpeedValue().get()).getRGB();
+            int currentColor = new Color(enchantEffect.getRedValue().get(), enchantEffect.getGreenValue().get(), enchantEffect.getBlueValue().get()).getRGB();
             GlStateManager.depthMask(false);
             GlStateManager.depthFunc(514);
             GlStateManager.disableLighting();
@@ -58,7 +58,7 @@ public abstract class MixinRenderItem {
             float f = (float)(Minecraft.getSystemTime() % 3000L) / 3000.0f / 8.0f;
             GlStateManager.translate(f, 0.0f, 0.0f);
             GlStateManager.rotate(-50.0f, 0.0f, 0.0f, 1.0f);
-            switch (enchantEffect.modeValue.get().toLowerCase()) {
+            switch (enchantEffect.getModeValue().get().toLowerCase()) {
                 case "custom":
                     this.renderModel(model, currentColor);
                     break;
@@ -77,7 +77,7 @@ public abstract class MixinRenderItem {
             float f1 = (float)(Minecraft.getSystemTime() % 4873L) / 4873.0f / 8.0f;
             GlStateManager.translate(-f1, 0.0f, 0.0f);
             GlStateManager.rotate(10.0f, 0.0f, 0.0f, 1.0f);
-            switch (enchantEffect.modeValue.get().toLowerCase()) {
+            switch (enchantEffect.getModeValue().get().toLowerCase()) {
                 case "custom":
                     this.renderModel(model, currentColor);
                     break;

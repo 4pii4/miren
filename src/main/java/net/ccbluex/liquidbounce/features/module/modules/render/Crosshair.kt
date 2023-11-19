@@ -5,136 +5,104 @@
  * 
  * This code belongs to WYSI-Foundation. Please give credits when using this in your repository.
  */
-package net.ccbluex.liquidbounce.features.module.modules.render;
+package net.ccbluex.liquidbounce.features.module.modules.render
 
-import net.ccbluex.liquidbounce.LiquidBounce;
-import net.ccbluex.liquidbounce.event.EventTarget;
-import net.ccbluex.liquidbounce.event.Render2DEvent;
-import net.ccbluex.liquidbounce.features.module.Module;
-import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.module.ModuleInfo;
-import net.ccbluex.liquidbounce.features.module.modules.combat.KillAura;
-import net.ccbluex.liquidbounce.utils.MovementUtils;
-import net.ccbluex.liquidbounce.utils.render.ColorUtils;
-import net.ccbluex.liquidbounce.utils.render.RenderUtils;
-import net.ccbluex.liquidbounce.value.BoolValue;
-import net.ccbluex.liquidbounce.value.FloatValue;
-import net.ccbluex.liquidbounce.value.IntegerValue;
-import net.ccbluex.liquidbounce.value.ListValue;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.EntityLivingBase;
-
-import java.awt.*;
-
-import static org.lwjgl.opengl.GL11.*;
+import net.ccbluex.liquidbounce.LiquidBounce
+import net.ccbluex.liquidbounce.event.EventTarget
+import net.ccbluex.liquidbounce.event.Render2DEvent
+import net.ccbluex.liquidbounce.features.module.Module
+import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.features.module.modules.combat.KillAura
+import net.ccbluex.liquidbounce.utils.MovementUtils
+import net.ccbluex.liquidbounce.utils.render.ColorUtils.LiquidSlowly
+import net.ccbluex.liquidbounce.utils.render.ColorUtils.fade
+import net.ccbluex.liquidbounce.utils.render.ColorUtils.reAlpha
+import net.ccbluex.liquidbounce.utils.render.RenderUtils
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
+import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.client.renderer.GlStateManager
+import org.lwjgl.opengl.GL11
+import java.awt.Color
 
 @ModuleInfo(name = "Crosshair", description = "The CS:GO.", category = ModuleCategory.RENDER)
-public class Crosshair extends Module {
-
+class Crosshair : Module() {
     //Color
-    public ListValue colorModeValue = new ListValue("Color", new String[]{ "Custom", "Rainbow", "LiquidSlowly", "Sky", "Fade", "Mixer" }, "Custom");
-    public IntegerValue colorRedValue = new IntegerValue("Red", 0, 0, 255);
-    public IntegerValue colorGreenValue = new IntegerValue("Green", 0, 0, 255);
-    public IntegerValue colorBlueValue = new IntegerValue("Blue", 0, 0, 255);
-    public IntegerValue colorAlphaValue = new IntegerValue("Alpha", 255, 0, 255);
+    var colorModeValue = ListValue("Color", arrayOf("Custom", "Rainbow", "LiquidSlowly", "Sky", "Fade", "Mixer"), "Custom")
+    var colorRedValue = IntegerValue("Red", 0, 0, 255)
+    var colorGreenValue = IntegerValue("Green", 0, 0, 255)
+    var colorBlueValue = IntegerValue("Blue", 0, 0, 255)
+    var colorAlphaValue = IntegerValue("Alpha", 255, 0, 255)
 
     //Rainbow thingy
-    private final FloatValue saturationValue = new FloatValue("Saturation", 1F, 0F, 1F);
-	private final FloatValue brightnessValue = new FloatValue("Brightness", 1F, 0F, 1F);
-	private final IntegerValue mixerSecondsValue = new IntegerValue("Seconds", 2, 1, 10);
+    private val saturationValue = FloatValue("Saturation", 1f, 0f, 1f)
+    private val brightnessValue = FloatValue("Brightness", 1f, 0f, 1f)
+    private val mixerSecondsValue = IntegerValue("Seconds", 2, 1, 10)
 
     //Size, width, hitmarker
-    public FloatValue widthVal = new FloatValue("Width", 2, 0.25F, 10);
-    public FloatValue sizeVal = new FloatValue("Size/Length", 7, 0.25F, 15);
-    public FloatValue gapVal = new FloatValue("Gap", 5, 0.25F, 15);
-    public BoolValue dynamicVal = new BoolValue("Dynamic", true);
-    public BoolValue hitMarkerVal = new BoolValue("HitMarker", true);
-    public BoolValue noVanillaCH = new BoolValue("NoVanillaCrossHair", true);
-
-
+    var widthVal = FloatValue("Width", 2f, 0.25f, 10f)
+    var sizeVal = FloatValue("Size/Length", 7f, 0.25f, 15f)
+    var gapVal = FloatValue("Gap", 5f, 0.25f, 15f)
+    var dynamicVal = BoolValue("Dynamic", true)
+    var hitMarkerVal = BoolValue("HitMarker", true)
+    var noVanillaCH = BoolValue("NoVanillaCrossHair", true)
     @EventTarget
-    public void onRender2D(Render2DEvent event) {
-        final ScaledResolution scaledRes = new ScaledResolution(mc);
-        float width = widthVal.get();
-        float size = sizeVal.get();
-        float gap = gapVal.get();
-
-        glPushMatrix();
-        RenderUtils.drawBorderedRect(scaledRes.getScaledWidth() / 2F - width, scaledRes.getScaledHeight() / 2F - gap - size - (this.isMoving() ? 2 : 0), scaledRes.getScaledWidth() / 2F + 1.0f + width, scaledRes.getScaledHeight() / 2F - gap - (this.isMoving() ? 2 : 0), 0.5F, new Color(0, 0, 0, colorAlphaValue.get()).getRGB(), getCrosshairColor().getRGB());
-        RenderUtils.drawBorderedRect(scaledRes.getScaledWidth() / 2F - width, scaledRes.getScaledHeight() / 2F + gap + 1 + (this.isMoving() ? 2 : 0) - 0.15F, scaledRes.getScaledWidth() / 2F + 1.0f + width, scaledRes.getScaledHeight() / 2F + 1 + gap + size + (this.isMoving() ? 2 : 0) - 0.15F, 0.5F, new Color(0, 0, 0, colorAlphaValue.get()).getRGB(), getCrosshairColor().getRGB());
-        RenderUtils.drawBorderedRect(scaledRes.getScaledWidth() / 2F - gap - size - (this.isMoving() ? 2 : 0) + 0.15F, scaledRes.getScaledHeight() / 2F - width, scaledRes.getScaledWidth() / 2F - gap - (this.isMoving() ? 2 : 0) + 0.15F, scaledRes.getScaledHeight() / 2 + 1.0f + width, 0.5F, new Color(0, 0, 0, colorAlphaValue.get()).getRGB(), getCrosshairColor().getRGB());
-        RenderUtils.drawBorderedRect(scaledRes.getScaledWidth() / 2F + 1 + gap + (this.isMoving() ? 2 : 0), scaledRes.getScaledHeight() / 2F - width, scaledRes.getScaledWidth() / 2F + size + gap + 1.0F + (this.isMoving() ? 2 : 0), scaledRes.getScaledHeight() / 2 + 1.0f + width, 0.5F, new Color(0, 0, 0, colorAlphaValue.get()).getRGB(), getCrosshairColor().getRGB());
-        glPopMatrix();
-
-        GlStateManager.resetColor();
+    fun onRender2D(event: Render2DEvent?) {
+        val scaledRes = ScaledResolution(mc)
+        val width = widthVal.get()
+        val size = sizeVal.get()
+        val gap = gapVal.get()
+        GL11.glPushMatrix()
+        RenderUtils.drawBorderedRect(scaledRes.scaledWidth / 2f - width, scaledRes.scaledHeight / 2f - gap - size - if (isMoving) 2 else 0, scaledRes.scaledWidth / 2f + 1.0f + width, scaledRes.scaledHeight / 2f - gap - if (isMoving) 2 else 0, 0.5f, Color(0, 0, 0, colorAlphaValue.get()).rgb, crosshairColor.rgb)
+        RenderUtils.drawBorderedRect(scaledRes.scaledWidth / 2f - width, scaledRes.scaledHeight / 2f + gap + 1 + (if (isMoving) 2 else 0) - 0.15f, scaledRes.scaledWidth / 2f + 1.0f + width, scaledRes.scaledHeight / 2f + 1 + gap + size + (if (isMoving) 2 else 0) - 0.15f, 0.5f, Color(0, 0, 0, colorAlphaValue.get()).rgb, crosshairColor.rgb)
+        RenderUtils.drawBorderedRect(scaledRes.scaledWidth / 2f - gap - size - (if (isMoving) 2 else 0) + 0.15f, scaledRes.scaledHeight / 2f - width, scaledRes.scaledWidth / 2f - gap - (if (isMoving) 2 else 0) + 0.15f, scaledRes.scaledHeight / 2 + 1.0f + width, 0.5f, Color(0, 0, 0, colorAlphaValue.get()).rgb, crosshairColor.rgb)
+        RenderUtils.drawBorderedRect(scaledRes.scaledWidth / 2f + 1 + gap + if (isMoving) 2 else 0, scaledRes.scaledHeight / 2f - width, scaledRes.scaledWidth / 2f + size + gap + 1.0f + if (isMoving) 2 else 0, scaledRes.scaledHeight / 2 + 1.0f + width, 0.5f, Color(0, 0, 0, colorAlphaValue.get()).rgb, crosshairColor.rgb)
+        GL11.glPopMatrix()
+        GlStateManager.resetColor()
         //glColor4f(0F, 0F, 0F, 0F)
-
-        EntityLivingBase target = LiquidBounce.moduleManager.getModule(KillAura.class).getTarget();
-
+        val target = LiquidBounce.moduleManager.getModule(KillAura::class.java)!!.target
         if (hitMarkerVal.get() && target != null && target.hurtTime > 0) {
-            glPushMatrix();
-            GlStateManager.enableBlend();
-            GlStateManager.disableTexture2D();
-            GlStateManager.tryBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-
-            glColor4f(1, 1, 1, (float)target.hurtTime / (float)target.maxHurtTime);
-            glEnable(GL_LINE_SMOOTH);
-            glLineWidth(1F);
-
-            glBegin(3);
-
-            glVertex2f(scaledRes.getScaledWidth() / 2F + gap, scaledRes.getScaledHeight() / 2F + gap);
-            glVertex2f(scaledRes.getScaledWidth() / 2F + gap + size, scaledRes.getScaledHeight() / 2F + gap + size);
-
-            glEnd();
-
-            glBegin(3);
-
-            glVertex2f(scaledRes.getScaledWidth() / 2F - gap, scaledRes.getScaledHeight() / 2F - gap);
-            glVertex2f(scaledRes.getScaledWidth() / 2F - gap - size, scaledRes.getScaledHeight() / 2F - gap - size);
-
-            glEnd();
-
-            glBegin(3);
-
-            glVertex2f(scaledRes.getScaledWidth() / 2F - gap, scaledRes.getScaledHeight() / 2F + gap);
-            glVertex2f(scaledRes.getScaledWidth() / 2F - gap - size, scaledRes.getScaledHeight() / 2F + gap + size);
-
-            glEnd();
-
-            glBegin(3);
-
-            glVertex2f(scaledRes.getScaledWidth() / 2F + gap, scaledRes.getScaledHeight() / 2F - gap);
-            glVertex2f(scaledRes.getScaledWidth() / 2F + gap + size, scaledRes.getScaledHeight() / 2F - gap - size);
-
-            glEnd();
-
-            GlStateManager.enableTexture2D();
-            GlStateManager.disableBlend();
-            glPopMatrix();
+            GL11.glPushMatrix()
+            GlStateManager.enableBlend()
+            GlStateManager.disableTexture2D()
+            GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
+            GL11.glColor4f(1f, 1f, 1f, target.hurtTime.toFloat() / target.maxHurtTime.toFloat())
+            GL11.glEnable(GL11.GL_LINE_SMOOTH)
+            GL11.glLineWidth(1f)
+            GL11.glBegin(3)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f + gap, scaledRes.scaledHeight / 2f + gap)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f + gap + size, scaledRes.scaledHeight / 2f + gap + size)
+            GL11.glEnd()
+            GL11.glBegin(3)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f - gap, scaledRes.scaledHeight / 2f - gap)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f - gap - size, scaledRes.scaledHeight / 2f - gap - size)
+            GL11.glEnd()
+            GL11.glBegin(3)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f - gap, scaledRes.scaledHeight / 2f + gap)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f - gap - size, scaledRes.scaledHeight / 2f + gap + size)
+            GL11.glEnd()
+            GL11.glBegin(3)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f + gap, scaledRes.scaledHeight / 2f - gap)
+            GL11.glVertex2f(scaledRes.scaledWidth / 2f + gap + size, scaledRes.scaledHeight / 2f - gap - size)
+            GL11.glEnd()
+            GlStateManager.enableTexture2D()
+            GlStateManager.disableBlend()
+            GL11.glPopMatrix()
         }
     }
 
-    private boolean isMoving() {
-        return dynamicVal.get() && MovementUtils.isMoving();
-    }
-
-    private Color getCrosshairColor() {
-        switch (colorModeValue.get()) {
-			case "Custom":
-				return new Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get(), colorAlphaValue.get());
-            case "Rainbow":
-                return new Color(RenderUtils.getRainbowOpaque(mixerSecondsValue.get(), saturationValue.get(), brightnessValue.get(), 0));
-			case "Sky":
-				return ColorUtils.reAlpha(RenderUtils.skyRainbow(0, saturationValue.get(), brightnessValue.get()), colorAlphaValue.get());
-			case "LiquidSlowly":
-				return ColorUtils.reAlpha(ColorUtils.LiquidSlowly(System.nanoTime(), 0, saturationValue.get(), brightnessValue.get()), colorAlphaValue.get());
-			case "Mixer":
-				return ColorUtils.reAlpha(ColorMixer.getMixedColor(0, mixerSecondsValue.get()), colorAlphaValue.get());
-			default:
-				return ColorUtils.reAlpha(ColorUtils.fade(new Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get()), 0, 100), colorAlphaValue.get());
-		}
-    }
-
+    private val isMoving: Boolean
+        private get() = dynamicVal.get() && MovementUtils.isMoving()
+    private val crosshairColor: Color
+        private get() = when (colorModeValue.get()) {
+            "Custom" -> Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get(), colorAlphaValue.get())
+            "Rainbow" -> Color(RenderUtils.getRainbowOpaque(mixerSecondsValue.get(), saturationValue.get(), brightnessValue.get(), 0))
+            "Sky" -> reAlpha(RenderUtils.skyRainbow(0, saturationValue.get(), brightnessValue.get()), colorAlphaValue.get())
+            "LiquidSlowly" -> reAlpha(LiquidSlowly(System.nanoTime(), 0, saturationValue.get(), brightnessValue.get()), colorAlphaValue.get())
+            "Mixer" -> reAlpha(ColorMixer.Companion.getMixedColor(0, mixerSecondsValue.get()), colorAlphaValue.get())
+            else -> reAlpha(fade(Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get()), 0, 100), colorAlphaValue.get())
+        }
 }

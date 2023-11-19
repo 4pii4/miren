@@ -10,7 +10,6 @@ import cc.paimonmc.viamcp.utils.AttackOrder;
 import net.ccbluex.liquidbounce.LiquidBounce;
 import net.ccbluex.liquidbounce.event.*;
 import net.ccbluex.liquidbounce.features.module.modules.combat.AutoClicker;
-import net.ccbluex.liquidbounce.features.module.modules.combat.TimerRange;
 import net.ccbluex.liquidbounce.features.module.modules.exploit.AbortBreaking;
 import net.ccbluex.liquidbounce.features.module.modules.exploit.MultiActions;
 import net.ccbluex.liquidbounce.features.module.modules.render.FreeLook;
@@ -211,13 +210,13 @@ public abstract class MixinMinecraft {
             this.runTick();
         }
     }*/
-
-    @Redirect(method = "runGameLoop", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick()V"))
-    private void skipTicksCheck(Minecraft instance) {
-        LiquidBounce.INSTANCE.getModuleManager().getModule(TimerRange.class);
-        if (TimerRange.handleTick()) return;
-        this.runTick();
-    }
+//
+//    @Redirect(method = "runGameLoop", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick()V"))
+//    private void skipTicksCheck(Minecraft instance) {
+//        LiquidBounce.INSTANCE.getModuleManager().getModule(TimerRange.class);
+//        if (TimerRange.handleTick()) return;
+//        this.runTick();
+//    }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;dispatchKeypresses()V", shift = At.Shift.AFTER))
     private void onKey(CallbackInfo callbackInfo) {

@@ -9,6 +9,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import net.ccbluex.liquidbounce.LiquidBounce
+import net.ccbluex.liquidbounce.features.module.modules.render.ColorMixer
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.FontUtils
@@ -355,4 +356,20 @@ open class NoteValue(name: String) : Value<String>(name, name, { true }) {
     override fun toJson() = null
 
     override fun fromJson(element: JsonElement) {}
+}
+
+
+class ColorElement : IntegerValue {
+    constructor(counter: Int, m: Material, basis: IntegerValue) : super("Color" + counter + "-" + m.colorName, 255, 0, 255, { basis.get() >= counter })
+    constructor(counter: Int, m: Material) : super("Color" + counter + "-" + m.colorName, 255, 0, 255)
+
+    override fun onChanged(oldValue: Int, newValue: Int) {
+        ColorMixer.regenerateColors(true)
+    }
+
+    enum class Material(val colorName: String) {
+        RED("Red"),
+        GREEN("Green"),
+        BLUE("Blue")
+    }
 }

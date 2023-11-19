@@ -9,16 +9,16 @@ import net.ccbluex.liquidbounce.value.TextValue
 import java.awt.Color
 
 class TextValueButton(x: Float, y: Float, width: Float, height: Float, var setting: TextValue, var color: Color) : BaseValueButton(x, y, width, height, setting) {
-  override fun drawPanel(mouseX: Int, mouseY: Int): Rectangle {
-    val background = Rectangle(x, y, width, height)
-    drawRect(background, BACKGROUND_VALUE)
-    FONT.drawHeightCenteredString(setting.name, x + hOffset, y + height / 2, -0x1)
+    override fun drawPanel(mouseX: Int, mouseY: Int): Rectangle {
+        val background = Rectangle(x, y, width, height)
+        drawRect(background, BACKGROUND_VALUE)
+        FONT.drawHeightCenteredString(setting.name, x + hOffset, y + height / 2, -0x1)
 
-    return background
-  }
+        return background
+    }
 
-  // I don't have any good idea on how to put TextValue on astolfo cgui
-  override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int) {
+    // I don't have any good idea on how to put TextValue on astolfo cgui
+    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int) {
 
-  }
+    }
 }
