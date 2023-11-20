@@ -430,7 +430,7 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                                                 rectColor)
                                     }
                                 } else {
-                                    RenderUtils.drawRect(xPos - 3, module.arrayY, 0F, module.arrayY - 1, rectColor)
+                                    RenderUtils.drawRect(xPos - 3, -1f, 0F, 0f, rectColor)
                                 }
                             }
                             rectRightValue.get().equals("special", true) -> {

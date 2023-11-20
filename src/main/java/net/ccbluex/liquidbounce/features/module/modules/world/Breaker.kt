@@ -54,7 +54,7 @@ object Breaker : Module() {
     private val switchValue = IntegerValue("SwitchDelay", 250, 0, 1000, "ms")
     private val coolDownValue = IntegerValue("Cooldown-Seconds", 15, 0, 60)
     private val swingValue = BoolValue("Swing", true)
-    private val rotationsValue = BoolValue("Rotations", true)
+    val rotationsValue = BoolValue("Rotations", true)
     private val surroundingsValue = BoolValue("Surroundings", true)
     private val hypixelValue = BoolValue("Hypixel", false)
     private val noHitValue = BoolValue("NoAura", false)

@@ -33,7 +33,7 @@ class BowAimbot : Module() {
     private val priorityValue = ListValue("Priority", arrayOf("Health", "Distance", "Direction"), "Direction")
     private val markValue = BoolValue("Mark", true)
 
-    private var target: Entity? = null
+    var target: Entity? = null
 
     override fun onDisable() {
         target = null

@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Mixin(GuiChat.class)
 public abstract class MixinGuiChat extends MixinGuiScreen {
@@ -59,15 +60,18 @@ public abstract class MixinGuiChat extends MixinGuiScreen {
 
     @Inject(method = "updateScreen", at = @At("HEAD"))
     private void updateScreen(CallbackInfo callbackInfo) {
-        final int delta = RenderUtils.deltaTime;
+        if (Objects.requireNonNull(LiquidBounce.moduleManager.getModule(HUD.class)).getChatOpenAnimation().get()) {
+            final int delta = RenderUtils.deltaTime;
 
-        if (fade < 14) fade = AnimationUtils.animate(14F, fade, 0.025F * delta);
-        if (fade > 14) fade = 14;
+            if (fade < 14) fade = AnimationUtils.animate(14F, fade, 0.025F * delta);
+            if (fade > 14) fade = 14;
 
-        if (yPosOfInputField > height - 12) yPosOfInputField = AnimationUtils.animate(height - 12, yPosOfInputField, 0.025F * (12F / 14F) * delta);
-        if (yPosOfInputField < height - 12) yPosOfInputField = height - 12;
-
-        inputField.yPosition = (int) yPosOfInputField;
+            if (yPosOfInputField > height - 12) yPosOfInputField = AnimationUtils.animate(height - 12, yPosOfInputField, 0.025F * (12F / 14F) * delta);
+            if (yPosOfInputField < height - 12) yPosOfInputField = height - 12;
+        } else {
+            fade = 14;
+            inputField.yPosition = height - 12;
+        }
     }
 
     @Inject(method = "autocompletePlayerNames", at = @At("HEAD"))

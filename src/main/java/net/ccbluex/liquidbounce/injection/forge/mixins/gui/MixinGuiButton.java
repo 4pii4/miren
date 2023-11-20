@@ -11,12 +11,17 @@ import net.ccbluex.liquidbounce.ui.font.AWTFontRenderer;
 import net.ccbluex.liquidbounce.ui.font.Fonts;
 import net.ccbluex.liquidbounce.ui.font.GameFontRenderer;
 import net.ccbluex.liquidbounce.utils.AnimationUtils;
+import net.ccbluex.liquidbounce.utils.ClientUtils;
+import net.ccbluex.liquidbounce.utils.render.ColorUtils;
+import net.ccbluex.liquidbounce.utils.render.Colors;
 import net.ccbluex.liquidbounce.utils.render.RenderUtils;
+import net.ccbluex.liquidbounce.utils.render.ShaderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,6 +29,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.awt.*;
+import java.util.Objects;
 
 
 @Mixin(GuiButton.class)
@@ -67,6 +73,7 @@ public abstract class MixinGuiButton extends Gui {
    private float moveX = 0F;
    private float cut;
    private float alpha;
+   private float anim = 0f;
 
    public int cs;
 
@@ -96,7 +103,10 @@ public abstract class MixinGuiButton extends Gui {
             if (alpha >= 210) alpha = 210;
 
             // LiquidBounce+
-            moveX = AnimationUtils.animate(this.width - 2.4F, moveX, speedDelta);
+            moveX = AnimationUtils.animate(this.width - 2.4F, moveX, speedDelta / 10f);
+
+            // Miren
+            anim = AnimationUtils.animate(1f, anim, speedDelta);
          } else {
             // LiquidBounce
             cut -= 0.05F * delta;
@@ -106,11 +116,30 @@ public abstract class MixinGuiButton extends Gui {
 
             // LiquidBounce+
             moveX = AnimationUtils.animate(0F, moveX, speedDelta);
+
+            // Miren
+            anim = AnimationUtils.animate(0f, anim, speedDelta / 10f);
          }
 
          float roundCorner = Math.max(0F, 2.4F + moveX - (this.width - 2.4F));
 
          switch (hud.getGuiButtonStyle().get().toLowerCase()) {
+            case "miren":
+               Color color = new Color(255, 255, 255, 255);
+               Color textColor = new Color(0, 0, 0, 255);
+               if (this.enabled) {
+                  if (this.hovered) {
+                     color = ColorUtils.interpolateColorC(new Color(255, 255, 255, 255), new Color(30, 30, 30, 255), anim);
+                     textColor = ColorUtils.interpolateColorC(new Color(0, 0, 0, 255), new Color(255, 255, 255, 255), anim);
+                  } else {
+                  }
+               } else {
+                  color = new Color(180, 180, 180, 255);
+                  textColor = new Color(40, 40, 40, 255);
+               }
+               ShaderUtils.INSTANCE.drawRoundedRect(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height, 3F, color.getRGB());
+               fontRenderer.drawString(displayString, (this.xPosition + (float) this.width / 2) - (float) fontRenderer.getStringWidth(displayString) / 2, (int) (this.yPosition + (this.height - fontRenderer.FONT_HEIGHT) / 2F + 1.5f), textColor.getRGB(), true);
+               break;
             case "minecraft":
                mc.getTextureManager().bindTexture(buttonTextures);
                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -174,14 +203,17 @@ public abstract class MixinGuiButton extends Gui {
          mc.getTextureManager().bindTexture(buttonTextures);
          mouseDragged(mc, mouseX, mouseY);
 
-         AWTFontRenderer.Companion.setAssumeNonVolatile(true);
+         if (!Objects.equals(hud.getGuiButtonStyle().get(), "Miren")) {
 
-         fontRenderer.drawStringWithShadow(displayString,
-                 (float) ((this.xPosition + this.width / 2) -
-                         fontRenderer.getStringWidth(displayString) / 2),
-                 this.yPosition + (this.height - 5) / 2F - 2, 14737632);
+            AWTFontRenderer.Companion.setAssumeNonVolatile(true);
 
-         AWTFontRenderer.Companion.setAssumeNonVolatile(false);
+            fontRenderer.drawStringWithShadow(displayString,
+                    (float) ((this.xPosition + this.width / 2) -
+                            fontRenderer.getStringWidth(displayString) / 2),
+                    this.yPosition + (this.height - 5) / 2F - 2, 14737632);
+
+            AWTFontRenderer.Companion.setAssumeNonVolatile(false);
+         }
 
          GlStateManager.resetColor();
       }

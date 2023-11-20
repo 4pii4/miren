@@ -25,18 +25,17 @@ class HUD : Module() {
     val inventoryParticle = BoolValue("InventoryParticle", false)
     val fontChatValue = BoolValue("FontChat", false)
     val cmdBorderValue = BoolValue("CommandChatBorder", false)
-    val fontType = FontValue("Font", Fonts.font40, { fontChatValue.get() })
+    val fontType = FontValue("Font", Fonts.font40) { fontChatValue.get() }
     val chatRectValue = BoolValue("ChatRect", true)
     val chatCombineValue = BoolValue("ChatCombine", false)
+    val chatOpenAnimation = BoolValue("ChatOpenAnimation", false)
     val chatAnimationValue = BoolValue("ChatAnimation", true)
     val chatAnimationSpeedValue = FloatValue("Chat-AnimationSpeed", 0.1F, 0.01F, 0.1F)
-    val Hudcolor = IntegerValue("OTC-Color", 121,106,229)
-
 
     private val toggleMessageValue = BoolValue("DisplayToggleMessage", false)
     private val toggleSoundValue = ListValue("ToggleSound", arrayOf("None", "Default", "Custom"), "Default")
-    private val toggleVolumeValue = IntegerValue("ToggleVolume", 100, 0, 100, { toggleSoundValue.get().equals("custom", true) })
-    val guiButtonStyle = ListValue("Button-Style", arrayOf("Minecraft", "LiquidBounce", "Rounded", "LiquidBounce+","Line"), "Line")
+    private val toggleVolumeValue = IntegerValue("ToggleVolume", 100, 0, 100) { toggleSoundValue.get().equals("custom", true) }
+    val guiButtonStyle = ListValue("Button-Style", arrayOf("Minecraft", "LiquidBounce", "Rounded", "LiquidBounce+","Line", "Miren"), "Line")
 
     val containerBackground = BoolValue("Container-Background", true)
     val containerButton = ListValue("Container-Button", arrayOf("TopLeft", "TopRight", "Off"), "TopLeft")

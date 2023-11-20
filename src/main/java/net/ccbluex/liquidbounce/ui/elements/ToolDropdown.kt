@@ -11,6 +11,8 @@ import net.ccbluex.liquidbounce.features.special.BungeeCordSpoof
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.AnimationUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
+import net.ccbluex.liquidbounce.utils.render.ShaderUtils
+import net.ccbluex.liquidbounce.utils.render.shader.shaders.RoundedRectShader
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.renderer.GlStateManager.resetColor
 import net.minecraft.util.ResourceLocation
@@ -72,9 +74,9 @@ object ToolDropdown {
         if (dropState && isMouseOver(mouseX, mouseY, bX, bY + 20F, bWidth, fullHeight)) {
             when {
                 isMouseOver(mouseX, mouseY, bX, bY + 20F, bWidth, 20F) -> AntiForge.enabled = !AntiForge.enabled
-                isMouseOver(mouseX, mouseY, bX, bY + 40F, bWidth, 20F) -> AntiForge.blockFML = !AntiForge.blockFML
-                isMouseOver(mouseX, mouseY, bX, bY + 60F, bWidth, 20F) -> AntiForge.blockProxyPacket = !AntiForge.blockProxyPacket
-                isMouseOver(mouseX, mouseY, bX, bY + 80F, bWidth, 20F) -> AntiForge.blockPayloadPackets = !AntiForge.blockPayloadPackets
+                isMouseOver(mouseX, mouseY, bX, bY + 40F, bWidth, 20F) && AntiForge.enabled -> AntiForge.blockFML = !AntiForge.blockFML
+                isMouseOver(mouseX, mouseY, bX, bY + 60F, bWidth, 20F) && AntiForge.enabled -> AntiForge.blockProxyPacket = !AntiForge.blockProxyPacket
+                isMouseOver(mouseX, mouseY, bX, bY + 80F, bWidth, 20F) && AntiForge.enabled -> AntiForge.blockPayloadPackets = !AntiForge.blockPayloadPackets
                 isMouseOver(mouseX, mouseY, bX, bY + 100F, bWidth, 20F) -> BungeeCordSpoof.enabled = !BungeeCordSpoof.enabled
             }
             LiquidBounce.fileManager.saveConfig(LiquidBounce.fileManager.valuesConfig)
@@ -93,19 +95,19 @@ object ToolDropdown {
     fun drawToggleSwitch(x: Float, y: Float, width: Float, height: Float, state: Boolean) {
         val borderColor = if (state) Color(0, 140, 255).rgb else Color(160, 160, 160).rgb
         val mainColor = if (state) borderColor else Color(24, 24, 24).rgb
-        RenderUtils.originalRoundedRect(x - 0.5F, y - 0.5F, x + width + 0.5F, y + height + 0.5F, (height + 1F) / 2F, borderColor)
-        RenderUtils.originalRoundedRect(x, y, x + width, y + height, height / 2F, mainColor)
+        ShaderUtils.drawRoundedRect(x - 0.5F, y - 0.5F, x + width + 0.5F, y + height + 0.5F, (height + 1F) / 2F, borderColor)
+        ShaderUtils.drawRoundedRect(x, y, x + width, y + height, height / 2F, mainColor)
         if (state)
-            RenderUtils.drawFilledCircle(x + width - 2F - (height - 4F) / 2F, y + 2F + (height - 4F) / 2F, (height - 4F) / 2F, Color(24, 24, 24))
+            ShaderUtils.drawFilledCircle(x + width - 2F - (height - 4F) / 2F, y + 2F + (height - 4F) / 2F, (height - 4F) / 2F, Color(24, 24, 24))
         else
-            RenderUtils.drawFilledCircle(x + 2F + (height - 4F) / 2F, y + 2F + (height - 4F) / 2F, (height - 4F) / 2F, Color(160, 160, 160))
+            ShaderUtils.drawFilledCircle(x + 2F + (height - 4F) / 2F, y + 2F + (height - 4F) / 2F, (height - 4F) / 2F, Color(160, 160, 160))
     }
 
     fun drawCheckbox(x: Float, y: Float, width: Float, state: Boolean) {
         val borderColor = if (state) Color(0, 140, 255).rgb else Color(160, 160, 160).rgb
         val mainColor = if (state) borderColor else Color(24, 24, 24).rgb
-        RenderUtils.originalRoundedRect(x - 0.5F, y - 0.5F, x + width + 0.5F, y + width + 0.5F, 3F, borderColor)
-        RenderUtils.originalRoundedRect(x, y, x + width, y + width, 3F, mainColor)
+        ShaderUtils.drawRoundedRect(x - 0.5F, y - 0.5F, x + width + 0.5F, y + width + 0.5F, 3F, borderColor)
+        ShaderUtils.drawRoundedRect(x, y, x + width, y + width, 3F, mainColor)
         if (state) {
             glColor4f(0.094F, 0.094F, 0.094F, 1F)
             RenderUtils.drawLine(x + width / 4F, y + width / 2F, x + width / 2.15F, y + width / 4F * 3F, 2F)
@@ -114,5 +116,4 @@ object ToolDropdown {
             glColor4f(1F, 1F, 1F, 1F)
         }
     }
-
 }

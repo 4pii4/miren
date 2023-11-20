@@ -1,95 +1,81 @@
-#ifdef GL_ES
-precision mediump float;
-#endif
-
-#extension GL_OES_standard_derivatives : enable
-
-#define NUM_OCTAVES 16
-
 uniform float iTime;
 uniform vec2 iResolution;
 
-mat3 rotX(float a) {
-float c = cos(a);
-float s = sin(a);
-return mat3(
-2, 0, 0,
-0, c, -s,
-0, s, c
-);
-}
-mat3 rotY(float a) {
-float c = cos(a);
-float s = sin(a);
-return mat3(
-c, 10, -s,
-0, 1, 0,
-s, 0, c
-);
+float rand(vec2 p){
+    p+=.2127+p.x+.3713*p.y;
+    vec2 r=4.789*sin(789.123*(p));
+    return fract(r.x*r.y);
 }
 
-float random(vec2 pos) {
-return fract(sin(dot(pos, vec2(12.8973, 76.58964))) * (sqrt(47.0)));
+float sn(vec2 p){
+    vec2 i=floor(p-.5);
+    vec2 f=fract(p-.5);
+    f = f*f*f*(f*(f*6.0-15.0)+10.0);
+    float rt=mix(rand(i),rand(i+vec2(1.,0.)),f.x);
+    float rb=mix(rand(i+vec2(0.,1.)),rand(i+vec2(1.,1.)),f.x);
+    return mix(rt,rb,f.y);
 }
 
-float noise(vec2 pos) {
-vec2 i = floor(pos);
-vec2 f = fract(pos);
-float a = random(i + vec2(0.0, 0.0));
-float b = random(i + vec2(1.0, 0.0));
-float c = random(i + vec2(0.0, 1.0));
-float d = random(i + vec2(1.0, 1.0));
-vec2 u = f * f * (3.0 - 2.0 * f);
-return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-}
+void main()
+{
+    vec2 uv = gl_FragCoord.xy / iResolution.y;
 
-float fbm(vec2 pos) {
-float v = 0.0;
-float a = 0.5;
-vec2 shift = vec2(100.0);
-mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
-for (int i=0; i<NUM_OCTAVES; i++) {
-v += a * noise(pos);
-pos = rot * pos * 2.0 + shift;
-a *= 0.5;
-}
-return v;
-}
+    vec2 p=uv.xy*vec2(3.,4.3);
+    float f =
+    .5*sn(p)
+    +.25*sn(2.*p)
+    +.125*sn(4.*p)
+    +.0625*sn(8.*p)
+    +.03125*sn(16.*p)+
+    .015*sn(32.*p)
+    ;
 
-void main(void) {
-vec2 p = (gl_FragCoord.xy * 1.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
+    float newT = iTime*0.4 + sn(vec2(iTime*1.))*0.1;
+    p.x-=iTime*0.2;
 
-float t = 0.0, d;
+    p.y*=1.3;
+    float f2=
+    .5*sn(p)
+    +.25*sn(2.04*p+newT*1.1)
+    -.125*sn(4.03*p-iTime*0.3)
+    +.0625*sn(8.02*p-iTime*0.4)
+    +.03125*sn(16.01*p+iTime*0.5)+
+    .018*sn(24.02*p);
 
-float iTime2 = 0.6 * iTime / 2.0;
+    float f3=
+    .5*sn(p)
+    +.25*sn(2.04*p+newT*1.1)
+    -.125*sn(4.03*p-iTime*0.3)
+    +.0625*sn(8.02*p-iTime*0.5)
+    +.03125*sn(16.01*p+iTime*0.6)+
+    .019*sn(18.02*p);
 
-vec2 q = vec2(0.0);
-q.x = fbm(p + 0.30 * iTime2);
-q.y = fbm(p + vec2(1.0));
-vec2 r = vec2(0.0);
-r.x = fbm(p + 1.0 * q + vec2(1.2, 3.2) + 0.135 * iTime2);
-r.y = fbm(p + 1.0 * q + vec2(8.8, 2.8) + 0.126 * iTime2);
-float f = fbm(p + r);
-vec3 color = mix(
-vec3(0.0, 0.0, 0),
-vec3(1, 0, 0.7),
-clamp((f * f) * 8.0, 0.0, 5.0)
-);
+    float f4 = f2*smoothstep(0.0,1.,uv.y);
 
-color = mix(
-color,
-vec3(0, 0, 1),
-clamp(length(q), 0.0, 1.0)
-);
+    vec3 clouds = mix(vec3(-0.4,-0.3,-0.15),vec3(1.4,1.4,1.3),f4*f);
+    float lightning = sn((f3)+vec2(pow(sn(vec2(iTime*4.5)),6.)));
+
+    lightning *= smoothstep(0.0,1.,uv.y+0.5);
+
+    lightning = smoothstep(0.76,1.,lightning);
+    lightning=lightning*2.;
 
 
-color = mix(
-color,
-vec3(1, 1, 1),
-clamp(length(r.x), 0.0, 1.0)
-);
 
-color = (f * f * f + 0.1 * f * f + 0.1 * f) * color;
+    clouds*=0.8;
+    clouds += lightning +0.2;
 
-gl_FragColor = vec4(color, 1.0);
+
+    vec2 newUV = uv;
+    newUV.x-=iTime*0.3;
+    newUV.y+=iTime*3.;
+    float strength = sin(iTime*0.5+sn(newUV))*0.1+0.15;
+
+
+    vec3 painting = (clouds)+clamp((strength-0.1),0.,1.);
+
+    float r=1.-length(max(abs(gl_FragCoord.xy / iResolution.xy*2.-1.)-.5,0.));
+    painting*=r;
+
+    gl_FragColor = vec4(painting, 1.);
 }

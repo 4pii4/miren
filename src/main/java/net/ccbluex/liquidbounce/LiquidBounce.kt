@@ -35,7 +35,7 @@ object LiquidBounce {
     const val CLIENT_NAME = "Miren"
     val CLIENT_NAME_COLORED = "${darkGray("[")}${red(CLIENT_NAME)}${darkGray("]")}"
     const val CLIENT_VERSION = "b0"
-    const val CLIENT_CREATOR = "CCBlueX,inf,pie"
+    const val CLIENT_CREATOR = "CCBlueX, inf and pie"
     const val CLIENT_CLOUD = "https://mirenclient.github.io/cloud"
     const val CLIENT_REPO = "mirenclient/Miren"
 
@@ -62,8 +62,6 @@ object LiquidBounce {
     // Discord RPC
     lateinit var clientRichPresence: ClientRichPresence
 
-    var lastTick : Long = 0L
-
     var playTimeStart: Long = 0
 
     /**
@@ -73,7 +71,7 @@ object LiquidBounce {
         isStarting = true
 
         ClientUtils.getLogger().info("Starting $CLIENT_NAME version $CLIENT_VERSION")
-        lastTick = System.currentTimeMillis()
+        val startTime = System.currentTimeMillis()
         playTimeStart = System.currentTimeMillis()
 
         // Create file manager
@@ -143,17 +141,17 @@ object LiquidBounce {
         GuiAltManager.loadActiveGenerators()
 
         // Setup Discord RPC
-        if (clientRichPresence.showRichPresenceValue) {
-            thread {
-                try {
-                    clientRichPresence.setup()
-                } catch (throwable: Throwable) {
-                    ClientUtils.getLogger().error("Failed to setup Discord RPC.", throwable)
-                }
-            }
-        }
+//        if (clientRichPresence.showRichPresenceValue) {
+//            thread {
+//                try {
+//                    clientRichPresence.setup()
+//                } catch (throwable: Throwable) {
+//                    ClientUtils.getLogger().error("Failed to setup Discord RPC.", throwable)
+//                }
+//            }
+//        }
 
-        ClientUtils.getLogger().info("Finished loading $CLIENT_NAME version $CLIENT_VERSION in ${System.currentTimeMillis() - lastTick}ms.")
+        ClientUtils.getLogger().info("Finished loading $CLIENT_NAME version $CLIENT_VERSION in ${System.currentTimeMillis() - startTime}ms.")
 
         // Set is starting status
         isStarting = false

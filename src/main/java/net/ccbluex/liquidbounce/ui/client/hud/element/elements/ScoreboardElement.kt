@@ -186,7 +186,7 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
                     GL11.glTranslated(renderX, renderY, 0.0)
                     GL11.glScalef(scale, scale, scale)
                     if (bgRoundedValue.get())
-                        RenderUtils.originalRoundedRect(
+                        ShaderUtils.drawRoundedRect(
                             l1.toFloat() + if (side.horizontal == Side.Horizontal.LEFT) 2F else -2F, 
                             if (rectValue.get()) -2F - rectHeight.get().toFloat() else -2F, 
                             if (side.horizontal == Side.Horizontal.LEFT) -5F else 5F, 

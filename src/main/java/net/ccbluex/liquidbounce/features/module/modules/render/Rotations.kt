@@ -47,12 +47,16 @@ class Rotations : Module() {
         @JvmStatic
         fun shouldRotate(): Boolean {
             val killAura = LiquidBounce.moduleManager.getModule(KillAura::class.java) as KillAura
+            val scaffold = LiquidBounce.moduleManager.getModule(Scaffold::class.java) as Scaffold
             val disabler = LiquidBounce.moduleManager.getModule(Disabler::class.java) as Disabler
-            return getState(Scaffold::class.java) ||
-                    (getState(KillAura::class.java) && killAura.target != null) ||
-                    (getState(Disabler::class.java) && disabler.canRenderInto3D) ||
-                    getState(BowAimbot::class.java) || getState(Breaker::class.java) ||
-                    getState(ChestAura::class.java) || getState(Fly::class.java) || getState(Scaffold::class.java)
+            val breaker = LiquidBounce.moduleManager.getModule(Breaker::class.java) as Breaker
+            val bowAimbot = LiquidBounce.moduleManager.getModule(BowAimbot::class.java) as BowAimbot
+            return (scaffold.state && scaffold.rotationsValue.get()) ||
+                    (killAura.state && killAura.target != null) ||
+                    (disabler.state && disabler.canRenderInto3D) ||
+                    (bowAimbot.state && bowAimbot.target != null) ||
+                    (breaker.state && breaker.rotationsValue.get()) ||
+                    getState(ChestAura::class.java)
         }
     }
 

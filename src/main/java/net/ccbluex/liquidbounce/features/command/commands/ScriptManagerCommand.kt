@@ -8,6 +8,8 @@ package net.ccbluex.liquidbounce.features.command.commands
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.features.command.CommandManager
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.misc.MiscUtils
 import org.apache.commons.io.IOUtils
@@ -120,6 +122,8 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
                         LiquidBounce.isStarting = false
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig)
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
+                        AstolfoClickGui.resetInstance()
+                        NewUi.resetInstance()
                         chat("Successfully reloaded all scripts.")
                     } catch (t: Throwable) {
                         ClientUtils.getLogger().error("Something went wrong while reloading all scripts.", t)

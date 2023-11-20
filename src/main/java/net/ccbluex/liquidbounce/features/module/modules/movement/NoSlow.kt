@@ -23,16 +23,18 @@ import net.minecraft.network.Packet
 import net.minecraft.network.play.INetHandlerPlayServer
 import net.minecraft.network.play.client.*
 import net.minecraft.network.play.client.C03PacketPlayer.*
+import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.util.BlockPos
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.MovingObjectPosition
 import java.util.*
+import kotlin.math.sqrt
 
 
 @ModuleInfo(name = "NoSlow", spacedName = "No Slow", category = ModuleCategory.MOVEMENT, description = "Prevent you from getting slowed down by items (swords, foods, etc.) and liquids.")
 class NoSlow : Module() {
     private val msTimer = MSTimer()
-    private val modeValue = ListValue("PacketMode", arrayOf("Vanilla", "Blink", "Intave", "NCP", "AAC", "AAC5", "Custom","OldIntave","Watchdog","SwitchItem"), "Vanilla")
+    private val modeValue = ListValue("PacketMode", arrayOf("Vanilla", "Blink", "Intave", "NCP", "AAC", "AAC5", "Custom","OldIntave","Watchdog", "Vulcan", "Matrix", "SwitchItem"), "Vanilla")
     private val blockForwardMultiplier = FloatValue("BlockForwardMultiplier", 1.0F, 0.2F, 1.0F, "x")
     private val blockStrafeMultiplier = FloatValue("BlockStrafeMultiplier", 1.0F, 0.2F, 1.0F, "x")
     private val consumeForwardMultiplier = FloatValue("ConsumeForwardMultiplier", 1.0F, 0.2F, 1.0F, "x")
@@ -41,16 +43,23 @@ class NoSlow : Module() {
     private val bowStrafeMultiplier = FloatValue("BowStrafeMultiplier", 1.0F, 0.2F, 1.0F, "x")
     val sneakForwardMultiplier = FloatValue("SneakForwardMultiplier", 1.0F, 0.3F, 1.0F, "x")
     val sneakStrafeMultiplier = FloatValue("SneakStrafeMultiplier", 1.0F, 0.3F, 1.0F, "x")
-    private val customRelease = BoolValue("CustomReleasePacket", false, { modeValue.get().equals("custom", true) })
-    private val customPlace = BoolValue("CustomPlacePacket", false, { modeValue.get().equals("custom", true) })
-    private val customOnGround = BoolValue("CustomOnGround", false, { modeValue.get().equals("custom", true) })
-    private val customDelayValue = IntegerValue("CustomDelay", 60, 0, 1000, "ms", { modeValue.get().equals("custom", true) })
-    private val ciucValue = BoolValue("CheckInUseCount", true, { modeValue.get().equals("blink", true) })
-    private val packetTriggerValue = ListValue("PacketTrigger", arrayOf("PreRelease", "PostRelease"), "PostRelease", { modeValue.get().equals("blink", true) })
+    private val customRelease = BoolValue("CustomReleasePacket", false) { modeValue.get().equals("custom", true) }
+    private val customPlace = BoolValue("CustomPlacePacket", false) { modeValue.get().equals("custom", true) }
+    private val customOnGround = BoolValue("CustomOnGround", false) { modeValue.get().equals("custom", true) }
+    private val customDelayValue = IntegerValue("CustomDelay", 60, 0, 1000, "ms") { modeValue.get().equals("custom", true) }
+    private val ciucValue = BoolValue("CheckInUseCount", true) { modeValue.get().equals("blink", true) }
+    private val packetTriggerValue = ListValue("PacketTrigger", arrayOf("PreRelease", "PostRelease"), "PostRelease") { modeValue.get().equals("blink", true) }
+    // Slowdown on teleport
+    private val teleportValue = BoolValue("Teleport", false)
+    private val teleportModeValue = ListValue("TeleportMode", arrayOf("Vanilla", "VanillaNoSetback", "Custom", "Decrease"), "Vanilla") { teleportValue.get() }
+    private val teleportNoApplyValue = BoolValue("TeleportNoApply", false) { teleportValue.get() }
+    private val teleportCustomSpeedValue = FloatValue("Teleport-CustomSpeed", 0.13f, 0f, 1f) { teleportValue.get() && teleportModeValue.equals("Custom") }
+    private val teleportCustomYValue = BoolValue("Teleport-CustomY", false) { teleportValue.get() && teleportModeValue.equals("Custom") }
+    private val teleportDecreasePercentValue = FloatValue("Teleport-DecreasePercent", 0.13f, 0f, 1f) { teleportValue.get() && teleportModeValue.equals("Decrease") }
     private val sword = BoolValue("Sword", false)
     private val food = BoolValue("Food", false)
     private val bow = BoolValue("Bow", false)
-    private val debugValue = BoolValue("Debug", false, {modeValue.get().equals("blink", true) })
+    private val debugValue = BoolValue("Debug", false) { modeValue.get().equals("blink", true) }
 
     // Soulsand
     val soulsandValue = BoolValue("Soulsand", true)
@@ -65,6 +74,17 @@ class NoSlow : Module() {
     private var fasterDelay = false
     private var placeDelay = 0L
     private val timer = MSTimer()
+
+    // old fdp paste
+    private var packetBuf = LinkedList<Packet<INetHandlerPlayServer>>()
+    private var nextTemp = false
+    private var waitC03 = false
+    private var lastBlockingStat = false
+    private var pendingFlagApplyPacket = false
+    private var lastMotionX = 0.0
+    private var lastMotionY = 0.0
+    private var lastMotionZ = 0.0
+
 
     override fun onEnable() {
         blinkPackets.clear()
@@ -108,6 +128,38 @@ class NoSlow : Module() {
     }
 
     @EventTarget
+    fun onUpdate(event: UpdateEvent) {
+        if((modeValue.equals("Matrix") || modeValue.equals("Vulcan")) && (lastBlockingStat || isBlocking)) {
+            if(msTimer.hasTimePassed(230) && nextTemp) {
+                nextTemp = false
+                PacketUtils.sendPacketNoEvent(C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos(-1, -1, -1), EnumFacing.DOWN))
+                if(packetBuf.isNotEmpty()) {
+                    var canAttack = false
+                    for(packet in packetBuf) {
+                        if(packet is C03PacketPlayer) {
+                            canAttack = true
+                        }
+                        if(!((packet is C02PacketUseEntity || packet is C0APacketAnimation) && !canAttack)) {
+                            PacketUtils.sendPacketNoEvent(packet)
+                        }
+                    }
+                    packetBuf.clear()
+                }
+            }
+            if(!nextTemp) {
+                lastBlockingStat = isBlocking
+                if (!isBlocking) {
+                    return
+                }
+                PacketUtils.sendPacketNoEvent(C08PacketPlayerBlockPlacement(BlockPos(-1, -1, -1), 255, mc.thePlayer.inventory.getCurrentItem(), 0f, 0f, 0f))
+                nextTemp = true
+                waitC03 = modeValue.equals("Vulcan")
+                msTimer.reset()
+            }
+        }
+    }
+
+    @EventTarget
     fun onPacket(event: PacketEvent) {
         mc.thePlayer ?: return
         mc.thePlayer.heldItem ?: return
@@ -117,6 +169,67 @@ class NoSlow : Module() {
 
         val packet = event.packet
         val killAura = LiquidBounce.moduleManager[KillAura::class.java]!!
+
+        if((modeValue.equals("Matrix") || modeValue.equals("Vulcan") || modeValue.equals("GrimAC")) && nextTemp) {
+            if((packet is C07PacketPlayerDigging || packet is C08PacketPlayerBlockPlacement) && isBlocking) {
+                event.cancelEvent()
+            }else if (packet is C03PacketPlayer || packet is C0APacketAnimation || packet is C0BPacketEntityAction || packet is C02PacketUseEntity || packet is C07PacketPlayerDigging || packet is C08PacketPlayerBlockPlacement) {
+                if (modeValue.equals("Vulcan") && waitC03 && packet is C03PacketPlayer) {
+                    waitC03 = false
+                    return
+                }
+                packetBuf.add(packet as Packet<INetHandlerPlayServer>)
+                event.cancelEvent()
+            }
+        } else if (teleportValue.get() && packet is S08PacketPlayerPosLook) {
+            pendingFlagApplyPacket = true
+            lastMotionX = mc.thePlayer.motionX
+            lastMotionY = mc.thePlayer.motionY
+            lastMotionZ = mc.thePlayer.motionZ
+            when (teleportModeValue.get().lowercase()) {
+                "vanillanosetback" -> {
+                    val x = packet.x - mc.thePlayer.posX
+                    val y = packet.y - mc.thePlayer.posY
+                    val z = packet.z - mc.thePlayer.posZ
+                    val diff = sqrt(x * x + y * y + z * z)
+                    if (diff <= 8) {
+                        event.cancelEvent()
+                        pendingFlagApplyPacket = false
+                        PacketUtils.sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, packet.getYaw(), packet.getPitch(), mc.thePlayer.onGround))
+                    }
+                }
+            }
+        } else if (pendingFlagApplyPacket && packet is C06PacketPlayerPosLook) {
+            pendingFlagApplyPacket = false
+            if (teleportNoApplyValue.get()) {
+                event.cancelEvent()
+            }
+            when (teleportModeValue.get().lowercase()) {
+                "vanilla", "vanillanosetback" -> {
+                    mc.thePlayer.motionX = lastMotionX
+                    mc.thePlayer.motionY = lastMotionY
+                    mc.thePlayer.motionZ = lastMotionZ
+                }
+                "custom" -> {
+                    if (MovementUtils.isMoving()) {
+                        MovementUtils.strafe(teleportCustomSpeedValue.get())
+                    }
+
+                    if (teleportCustomYValue.get()) {
+                        if (lastMotionY> 0) {
+                            mc.thePlayer.motionY = teleportCustomSpeedValue.get().toDouble()
+                        } else {
+                            mc.thePlayer.motionY = -teleportCustomSpeedValue.get().toDouble()
+                        }
+                    }
+                }
+                "decrease" -> {
+                    mc.thePlayer.motionX = lastMotionX * teleportDecreasePercentValue.get()
+                    mc.thePlayer.motionY = lastMotionY * teleportDecreasePercentValue.get()
+                    mc.thePlayer.motionZ = lastMotionZ * teleportDecreasePercentValue.get()
+                }
+            }
+        }
 
         if (modeValue.get().equals(
                 "blink",
@@ -328,6 +441,9 @@ class NoSlow : Module() {
         event.forward = getMultiplier(heldItem, true)
         event.strafe = getMultiplier(heldItem, false)
     }
+
+    private val isBlocking: Boolean
+        get() = (mc.thePlayer.isUsingItem || LiquidBounce.moduleManager[KillAura::class.java]!!.blockingStatus) && mc.thePlayer.heldItem != null && mc.thePlayer.heldItem.item is ItemSword
 
     private fun getMultiplier(item: Item?, isForward: Boolean) = when (item) {
         is ItemFood, is ItemPotion, is ItemBucketMilk -> {

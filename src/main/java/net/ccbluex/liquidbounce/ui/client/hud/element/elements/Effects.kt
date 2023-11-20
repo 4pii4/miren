@@ -12,11 +12,12 @@ import net.ccbluex.liquidbounce.ui.client.hud.element.Side
 import net.ccbluex.liquidbounce.ui.font.AWTFontRenderer.Companion.assumeNonVolatile
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.PotionUtils
-import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
 import net.ccbluex.liquidbounce.value.FontValue
 import net.minecraft.client.resources.I18n
 import net.minecraft.potion.Potion
+import org.lwjgl.opengl.GL11
 
 /**
  * CustomHUD effects element
@@ -24,11 +25,12 @@ import net.minecraft.potion.Potion
  * Shows a list of active potion effects
  */
 @ElementInfo(name = "Effects")
-class Effects(x: Double = 2.0, y: Double = 10.0, scale: Float = 1F,
-              side: Side = Side(Side.Horizontal.RIGHT, Side.Vertical.DOWN)) : Element(x, y, scale, side) {
+class Effects(x: Double = 2.0, y: Double = 10.0, scale: Float = 1F, side: Side = Side(Side.Horizontal.RIGHT, Side.Vertical.DOWN)) : Element(x, y, scale, side) {
 
     private val anotherStyle = BoolValue("New", false)
     private val fontValue = FontValue("Font", Fonts.font35)
+    private val icon = BoolValue("DrawIcon", true)
+    private val iconYOffset = FloatValue("IconYOffset", 0F, -10f, 10f) { icon.get() }
     private val shadow = BoolValue("Shadow", true)
 
     /**
@@ -77,15 +79,26 @@ class Effects(x: Double = 2.0, y: Double = 10.0, scale: Float = 1F,
                     width = stringWidth
             }
 
-            val potionIcon = PotionUtils.getPotionIcon(potion)
-
             when (side.horizontal) {
                 Side.Horizontal.RIGHT -> {
                     fontRenderer.drawString(name, -stringWidth, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toFloat() else 0F, potion.liquidColor, shadow.get())
-                    RenderUtils.drawImage(potionIcon, -stringWidth - 16.0, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toDouble() else 0.0, 8.0, 8.0)
+                    if (icon.get()) {
+                        val scale = fontValue.get().FONT_HEIGHT / 18f
+                        GL11.glPushMatrix()
+                        GL11.glScalef(scale, scale, scale)
+                        PotionUtils.drawPotionIcon(potion, 2f / scale, (y + if (side.vertical == Side.Vertical.UP) (-18f - iconYOffset.get()) else iconYOffset.get()) / scale)
+                        GL11.glPopMatrix()
+                    }
                 }
                 Side.Horizontal.LEFT, Side.Horizontal.MIDDLE -> {
                     fontRenderer.drawString(name, 0F, y + if (side.vertical == Side.Vertical.UP) -fontRenderer.FONT_HEIGHT.toFloat() else 0F, potion.liquidColor, shadow.get())
+                    if (icon.get()) {
+                        val scale = fontValue.get().FONT_HEIGHT / 18f
+                        GL11.glPushMatrix()
+                        GL11.glScalef(scale, scale, scale)
+                        PotionUtils.drawPotionIcon(potion, (-12f)  / scale, (y + if (side.vertical == Side.Vertical.UP) (-18f - iconYOffset.get()) else iconYOffset.get()) / scale)
+                        GL11.glPopMatrix()
+                    }
                 }
             }
 
