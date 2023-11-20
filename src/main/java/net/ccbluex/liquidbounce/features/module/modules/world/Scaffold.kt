@@ -190,7 +190,7 @@ class Scaffold : Module() {
     }
 
     // Rotations
-    private val rotationsValue = BoolValue("Rotations", true)
+    val rotationsValue = BoolValue("Rotations", true)
     private val noHitCheckValue = BoolValue("NoHitCheck", false) { rotationsValue.get() }
     private val snapRotation = BoolValue("SnapRot", false) { rotationsValue.get() && (rotationModeValue.isMode("Novoline") || rotationModeValue.isMode("Rise")) }
     private val stabilizedRotation = BoolValue("StabilizedRotation", false) { rotationsValue.get() }
