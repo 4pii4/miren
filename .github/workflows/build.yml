@@ -29,5 +29,5 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: liquidbounceplus
-          path: build/libs/liquidbounceplus-final.jar
+          name: miren
+          path: build/libs/miren-latest.jar
