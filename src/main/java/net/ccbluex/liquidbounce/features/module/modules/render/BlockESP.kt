@@ -49,6 +49,8 @@ class BlockESP : Module() {
                 for (x in -radius until radius) {
                     for (y in radius downTo -radius + 1) {
                         for (z in -radius until radius) {
+                            mc.thePlayer ?: continue
+                            mc.theWorld ?: continue
                             val xPos = mc.thePlayer.posX.toInt() + x
                             val yPos = mc.thePlayer.posY.toInt() + y
                             val zPos = mc.thePlayer.posZ.toInt() + z

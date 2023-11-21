@@ -5,8 +5,8 @@
  */
 package net.ccbluex.liquidbounce.injection.forge.mixins.client;
 
-import cc.paimonmc.viamcp.ViaMCP;
-import cc.paimonmc.viamcp.utils.AttackOrder;
+import de.florianmichael.viamcp.ViaMCP;
+import de.florianmichael.viamcp.fixes.AttackOrder;
 import net.ccbluex.liquidbounce.LiquidBounce;
 import net.ccbluex.liquidbounce.event.*;
 import net.ccbluex.liquidbounce.features.module.modules.combat.AutoClicker;
@@ -17,6 +17,7 @@ import net.ccbluex.liquidbounce.features.module.modules.world.FastPlace;
 import net.ccbluex.liquidbounce.injection.forge.mixins.accessors.MinecraftForgeClientAccessor;
 import net.ccbluex.liquidbounce.ui.client.GuiMainMenu;
 import net.ccbluex.liquidbounce.utils.CPSCounter;
+import net.ccbluex.liquidbounce.utils.ClientUtils;
 import net.ccbluex.liquidbounce.utils.render.IconUtils;
 import net.ccbluex.liquidbounce.utils.render.RenderUtils;
 import net.minecraft.block.material.Material;
@@ -112,7 +113,7 @@ public abstract class MixinMinecraft {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void injectConstructor(GameConfiguration p_i45547_1_, CallbackInfo ci) {
-            ViaMCP.staticInit();
+        ViaMCP.create();
     }
 
     @Inject(method = "run", at = @At("HEAD"))
@@ -257,21 +258,54 @@ public abstract class MixinMinecraft {
             leftClickCounter = 0;
     }
 
-    @Redirect(
-            method = "clickMouse",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;swingItem()V")
-    )
-    private void fixAttackOrder_VanillaSwing() {
-        AttackOrder.sendConditionalSwing(this.objectMouseOver);
-    }
+    /**
+     * @author pie
+     * @reason replace 2 injects with this
+     */
+    @Overwrite
+    public void clickMouse()
+    {
+        if (this.leftClickCounter <= 0)
+        {
+//            this.thePlayer.swingItem();
+            AttackOrder.sendConditionalSwing(this.objectMouseOver);
 
+            if (this.objectMouseOver == null)
+            {
+                ClientUtils.getLogger().error("Null returned as 'hitResult', this shouldn't happen!");
 
-    @Redirect(
-            method = "clickMouse",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;attackEntity(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/Entity;)V")
-    )
-    public void fixAttackOrder_VanillaAttack(PlayerControllerMP controller, EntityPlayer player, Entity e) {
-        AttackOrder.sendFixedAttack(this.thePlayer, this.objectMouseOver.entityHit);
+                if (this.playerController.isNotCreative())
+                {
+                    this.leftClickCounter = 10;
+                }
+            }
+            else
+            {
+                switch (this.objectMouseOver.typeOfHit)
+                {
+                    case ENTITY:
+//                        this.playerController.attackEntity(this.thePlayer, this.objectMouseOver.entityHit);
+                        AttackOrder.sendFixedAttack(this.thePlayer, this.objectMouseOver.entityHit);
+                        break;
+
+                    case BLOCK:
+                        BlockPos blockpos = this.objectMouseOver.getBlockPos();
+
+                        if (this.theWorld.getBlockState(blockpos).getBlock().getMaterial() != Material.air)
+                        {
+                            this.playerController.clickBlock(blockpos, this.objectMouseOver.sideHit);
+                            break;
+                        }
+
+                    case MISS:
+                    default:
+                        if (this.playerController.isNotCreative())
+                        {
+                            this.leftClickCounter = 10;
+                        }
+                }
+            }
+        }
     }
 
     @Inject(method = "middleClickMouse", at = @At("HEAD"))

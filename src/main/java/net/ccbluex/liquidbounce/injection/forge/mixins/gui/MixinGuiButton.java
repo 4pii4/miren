@@ -79,6 +79,7 @@ public abstract class MixinGuiButton extends Gui {
 
    /**
     * @author CCBlueX
+    * @reason custom button
     */
    @Overwrite
    public void drawButton(Minecraft mc, int mouseX, int mouseY) {
@@ -103,10 +104,10 @@ public abstract class MixinGuiButton extends Gui {
             if (alpha >= 210) alpha = 210;
 
             // LiquidBounce+
-            moveX = AnimationUtils.animate(this.width - 2.4F, moveX, speedDelta / 10f);
+            moveX = AnimationUtils.animate(this.width - 2.4F, moveX, speedDelta);
 
             // Miren
-            anim = AnimationUtils.animate(1f, anim, speedDelta);
+            anim = AnimationUtils.animate(1f, anim, speedDelta / 5f);
          } else {
             // LiquidBounce
             cut -= 0.05F * delta;
@@ -118,26 +119,31 @@ public abstract class MixinGuiButton extends Gui {
             moveX = AnimationUtils.animate(0F, moveX, speedDelta);
 
             // Miren
-            anim = AnimationUtils.animate(0f, anim, speedDelta / 10f);
+            anim = AnimationUtils.animate(0f, anim, speedDelta / 5f);
          }
 
          float roundCorner = Math.max(0F, 2.4F + moveX - (this.width - 2.4F));
 
          switch (hud.getGuiButtonStyle().get().toLowerCase()) {
             case "miren":
-               Color color = new Color(255, 255, 255, 255);
-               Color textColor = new Color(0, 0, 0, 255);
+               new Color(255, 255, 255, 255);
+               Color backgroundColor;
+               Color textColor;
+               Color black = new Color(30, 30, 30, 255);
+               Color white = new Color(255, 255, 255, 255);
                if (this.enabled) {
-                  if (this.hovered) {
-                     color = ColorUtils.interpolateColorC(new Color(255, 255, 255, 255), new Color(30, 30, 30, 255), anim);
-                     textColor = ColorUtils.interpolateColorC(new Color(0, 0, 0, 255), new Color(255, 255, 255, 255), anim);
-                  } else {
-                  }
+//                  if (this.hovered) {
+                     backgroundColor = ColorUtils.interpolateColorC(white, black, anim);
+                     textColor = ColorUtils.interpolateColorC(black, white, anim);
+//                  } else {
+//                     backgroundColor = ColorUtils.interpolateColorC(black, white,  anim);
+//                     textColor = ColorUtils.interpolateColorC(white, black, anim);
+//                  }
                } else {
-                  color = new Color(180, 180, 180, 255);
+                  backgroundColor = new Color(180, 180, 180, 255);
                   textColor = new Color(40, 40, 40, 255);
                }
-               ShaderUtils.INSTANCE.drawRoundedRect(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height, 3F, color.getRGB());
+               ShaderUtils.INSTANCE.drawRoundedRect(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height, 3F, backgroundColor.getRGB());
                fontRenderer.drawString(displayString, (this.xPosition + (float) this.width / 2) - (float) fontRenderer.getStringWidth(displayString) / 2, (int) (this.yPosition + (this.height - fontRenderer.FONT_HEIGHT) / 2F + 1.5f), textColor.getRGB(), true);
                break;
             case "minecraft":

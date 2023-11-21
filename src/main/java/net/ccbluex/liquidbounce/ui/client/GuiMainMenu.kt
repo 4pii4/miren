@@ -47,27 +47,14 @@ class GuiMainMenu : GuiScreen(), GuiYesNoCallback {
         super.drawScreen(mouseX, mouseY, partialTicks)
 
         val font = Fonts.fontSFUI35
-        val maxBuildIDLength = font.getStringWidth(ChangelogUtils.changes.map { it.first }.maxByOrNull { font.getStringWidth(it) } ?: return)
-        val maxLength = font.getStringWidth(ChangelogUtils.changes.map { it.second }.maxByOrNull { font.getStringWidth(it) } ?: return) + maxBuildIDLength + 10f
+        val maxLength = font.getStringWidth(ChangelogUtils.changes.map { it }.maxByOrNull { font.getStringWidth(it) } ?: return)
         val fontHeight = font.FONT_HEIGHT
 
         if (maxLength <= width * 0.45f) {
-            Fonts.fontSFUI40.drawStringWithShadow("Changelog:", 5f, 5f, Color(255, 255, 255, 220).rgb)
+            Fonts.fontSFUI40.drawStringWithShadow(ChangelogUtils.buildMsg, 5f, 5f, Color(255, 255, 255, 220).rgb)
             for (i in ChangelogUtils.changes.indices) {
-                val buildID = ChangelogUtils.changes[i].first
-                val buildMsg = ChangelogUtils.changes[i].second
-                font.drawStringWithShadow(
-                    buildID,
-                    3f + 5f,
-                    17f + i * fontHeight,
-                    Color(255, 255, 255, 220).rgb
-                )
-                font.drawStringWithShadow(
-                    buildMsg,
-                    3f + 10f + maxBuildIDLength,
-                    17f + i * fontHeight,
-                    Color(255, 255, 255, 220).rgb
-                )
+                val change = ChangelogUtils.changes[i]
+                font.drawStringWithShadow(change, 8f, 17f + i * fontHeight, -1)
             }
         }
 

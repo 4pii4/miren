@@ -12,6 +12,7 @@ import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.extensions.darker
 import net.ccbluex.liquidbounce.utils.extensions.getDistanceToEntityBox
 import net.ccbluex.liquidbounce.utils.render.BlendUtils
+import net.ccbluex.liquidbounce.utils.render.GLUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
@@ -47,10 +48,12 @@ class Exhibition(inst: Target): TargetStyle("Exhibition", inst, true) {
 
         GlStateManager.resetColor()
         GL11.glPushMatrix()
-//        GL11.glColor4f(1f, 1f, 1f, 1f - targetInstance.getFadeProgress())
-        RenderHelper.enableGUIStandardItemLighting()
-
-        val renderItem = mc.renderItem
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
+        if (mc.theWorld != null) GLUtils.enableGUIStandardItemLighting()
+        GlStateManager.pushMatrix()
+        GlStateManager.disableAlpha()
+        mc.renderItem.zLevel = 100f
+//        GlStateManager.clear(256)
 
         var x = 45
         val y = 28
@@ -61,21 +64,24 @@ class Exhibition(inst: Target): TargetStyle("Exhibition", inst, true) {
             if (stack.item == null)
                 continue
 
-            renderItem.renderItemIntoGUI(stack, x, y)
-            renderItem.renderItemOverlays(mc.fontRendererObj, stack, x, y)
-            RenderUtils.drawExhiEnchants(stack, x.toFloat(), y.toFloat(), 5)
+            mc.renderItem.renderItemIntoGUI(stack, x, y)
+            mc.renderItem.renderItemOverlays(mc.fontRendererObj, stack, x, y)
+//            RenderUtils.drawExhiEnchants(stack, x.toFloat(), y.toFloat(), 5)
 
             x += 16
         }
 
         val mainStack = entity.heldItem
         if (mainStack != null && mainStack.item != null) {
-            renderItem.renderItemIntoGUI(mainStack, x, y)
-            renderItem.renderItemOverlays(mc.fontRendererObj, mainStack, x, y)
-            RenderUtils.drawExhiEnchants(mainStack, x.toFloat(), y.toFloat(), 5)
+            mc.renderItem.renderItemIntoGUI(mainStack, x, y)
+            mc.renderItem.renderItemOverlays(mc.fontRendererObj, mainStack, x, y)
+//            RenderUtils.drawExhiEnchants(mainStack, x.toFloat(), y.toFloat(), 5)
         }
 
-        RenderHelper.disableStandardItemLighting()
+        mc.renderItem.zLevel = 0f
+        if (mc.theWorld != null) GLUtils.disableStandardItemLighting()
+        GlStateManager.enableAlpha()
+        GlStateManager.popMatrix()
         GL11.glPopMatrix()
     }
 

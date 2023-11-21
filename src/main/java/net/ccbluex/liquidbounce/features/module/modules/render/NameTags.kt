@@ -1,6 +1,7 @@
 package net.ccbluex.liquidbounce.features.module.modules.render
 
 import net.ccbluex.liquidbounce.event.EventTarget
+import net.ccbluex.liquidbounce.event.Render2DEvent
 import net.ccbluex.liquidbounce.event.Render3DEvent
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
@@ -12,15 +13,27 @@ import net.ccbluex.liquidbounce.utils.EntityUtils
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.value.*
+import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.client.renderer.GLAllocation
 import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.potion.Potion
 import net.minecraft.potion.PotionEffect
+import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.ResourceLocation
+import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL11.*
+import org.lwjgl.util.glu.GLU
 import java.awt.Color
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
+import java.util.*
+import javax.vecmath.Vector3d
+import javax.vecmath.Vector4d
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 
@@ -41,16 +54,17 @@ class NameTags : Module() {
     private val pingValue = BoolValue("Ping", true)
 
     private val settingsNote = NoteValue("Settings")
-    private val scaleValue = FloatValue("Scale", 1.0F, 0.5F, 2.0F)
-    private val translateY = FloatValue("TranslateY", 0.55F, -2F, 2F)
-    private val clearNamesValue = BoolValue("ClearNames", false)
+    private val positionMode = ListValue("PositionMode", arrayOf("2D", "3D"), "3D")
+    private val scale3DValue = FloatValue("Scale3D", 2F, 0.5F, 2.0F) { positionMode.get() == "3D" }
+    private val scale2DValue = FloatValue("Scale2D", 1F, 0.5F, 2.0F) { positionMode.get() == "2D" }
+    private val translateY = FloatValue("TranslateY", 0.55F, -2F, 2F) { positionMode.get() == "3D" }
+    private val nameMode = ListValue("NameMode", arrayOf("EntityName", "DisplayName", "DisplayNameNoColor"), "DisplayName")
     private val fontValue = FontValue("Font", Fonts.font40)
-    private val fontShadowValue = BoolValue("Shadow", true)
+    private val fontShadowValue = BoolValue("FontShadow", true)
+    private val outlineValue = BoolValue("FontOutline", false)
 
     val localValue = BoolValue("LocalPlayer", true)
     val nfpValue = BoolValue("NoFirstPerson", true) { localValue.get() }
-
-    private val outlineValue = BoolValue("Outline", true)
 
     private val background = BoolValue("Background", false)
     private val bgRed = IntegerValue("Background-R", 0, 0, 255) { background.get() }
@@ -66,8 +80,16 @@ class NameTags : Module() {
 
     private val inventoryBackground = ResourceLocation("textures/gui/container/inventory.png")
 
+    private val viewport: IntBuffer = GLAllocation.createDirectIntBuffer(16)
+    private val modelview: FloatBuffer = GLAllocation.createDirectFloatBuffer(16)
+    private val projection: FloatBuffer = GLAllocation.createDirectFloatBuffer(16)
+    private val vector: FloatBuffer = GLAllocation.createDirectFloatBuffer(4)
+
     @EventTarget
     fun onRender3D(event: Render3DEvent) {
+        if (!positionMode.isMode("3D"))
+            return
+
         glPushAttrib(GL_ENABLE_BIT)
         glPushMatrix()
         glDisable(GL_LIGHTING)
@@ -80,7 +102,7 @@ class NameTags : Module() {
             if (!EntityUtils.isSelected(entity, false) && (!localValue.get() || entity != mc.thePlayer || (nfpValue.get() && mc.gameSettings.thirdPersonView == 0)))
                 continue
 
-            renderNameTags3D(entity)
+            renderNameTags(entity)
         }
 
         glPopMatrix()
@@ -89,11 +111,46 @@ class NameTags : Module() {
         glColor4f(1F, 1F, 1F, 1F)
     }
 
-    private fun getTag(entity: EntityLivingBase): String? {
-        val tag = if (clearNamesValue.get())
-            ColorUtils.stripColor(entity.displayName.unformattedText) ?: return null
-        else
-            entity.displayName.unformattedText
+    @EventTarget
+    fun onRender2D(event: Render2DEvent) {
+        if (!positionMode.isMode("2D"))
+            return
+
+        for (entity in RenderConfig.entities()) {
+            if (!EntityUtils.isSelected(entity, false) && (!localValue.get() || entity != mc.thePlayer || (nfpValue.get() && mc.gameSettings.thirdPersonView == 0)))
+                continue
+
+            renderNameTags(entity, false, event)
+        }
+    }
+
+    private fun project2D(scaleFactor: Int, x: Double, y: Double, z: Double): Vector3d? {
+        glGetFloat(2982, modelview)
+        glGetFloat(2983, projection)
+        glGetInteger(2978, viewport)
+        return if (GLU.gluProject(
+                x.toFloat(),
+                y.toFloat(),
+                z.toFloat(),
+                modelview,
+                projection,
+                viewport,
+                vector
+            )
+        ) Vector3d(
+            (vector[0] / scaleFactor.toFloat()).toDouble(),
+            ((Display.getHeight().toFloat() - vector[1]) / scaleFactor.toFloat()).toDouble(),
+            vector[2].toDouble()
+        ) else null
+    }
+
+    private fun getTag(entity: EntityLivingBase): String {
+        val tag = when (nameMode.get()) {
+            "DisplayName" -> entity.displayName.formattedText
+            "DisplayNameNoColor" -> ColorUtils.stripColor(entity.displayName.unformattedText)
+            else -> entity.name
+        }
+
         val bot = AntiBot.isBot(entity)
         val ping = if (entity is EntityPlayer) EntityUtils.getPing(entity) else 0
 
@@ -105,9 +162,11 @@ class NameTags : Module() {
         return "$tag$healthText$distanceText$pingText$botText"
     }
 
-    private fun renderNameTags3D(entity: EntityLivingBase) {
+    private fun renderNameTags(entity: EntityLivingBase, threeDMode: Boolean = true, event2D: Render2DEvent? = null) {
+        if (!threeDMode && !RenderUtils.isInViewFrustrum(entity))
+            return
         val fontRenderer = fontValue.get()
-        val text = getTag(entity) ?: return
+        val text = getTag(entity)
 
         glPushMatrix()
 
@@ -115,25 +174,84 @@ class NameTags : Module() {
         val renderManager = mc.renderManager
 
 
-        glTranslated( // Translate to player position with render pos and interpolate it
-            entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * timer.renderPartialTicks - renderManager.renderPosX,
-            entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * timer.renderPartialTicks - renderManager.renderPosY +
-                    entity.height + translateY.get().toDouble(),
-            entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * timer.renderPartialTicks - renderManager.renderPosZ
-        )
+        if (threeDMode){
+            glTranslated( // Translate to player position with render pos and interpolate it
+                entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * timer.renderPartialTicks - renderManager.renderPosX,
+                entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * timer.renderPartialTicks - renderManager.renderPosY +
+                        entity.height + translateY.get().toDouble(),
+                entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * timer.renderPartialTicks - renderManager.renderPosZ
+            )
 
-        glRotatef(-mc.renderManager.playerViewY, 0F, 1F, 0F)
-        glRotatef(mc.renderManager.playerViewX, 1F, 0F, 0F)
+            glRotatef(-mc.renderManager.playerViewY, 0F, 1F, 0F)
+            glRotatef(mc.renderManager.playerViewX, 1F, 0F, 0F)
+        } else {
+            event2D ?: return
+            val partialTicks = event2D.partialTicks
+            val scaledResolution = ScaledResolution(mc)
+            val scaleFactor = scaledResolution.scaleFactor
+            val renderMng = mc.renderManager
+            val entityRenderer = mc.entityRenderer
+            val x = RenderUtils.interpolate(entity.posX, entity.lastTickPosX, partialTicks.toDouble())
+            val y = RenderUtils.interpolate(entity.posY, entity.lastTickPosY, partialTicks.toDouble())
+            val z = RenderUtils.interpolate(entity.posZ, entity.lastTickPosZ, partialTicks.toDouble())
+            val width = entity.width.toDouble() / 1.5
+            val height = entity.height.toDouble() + if (entity.isSneaking) -0.3 else 0.2
+            val aabb = AxisAlignedBB(x - width, y, z - width, x + width, y + height, z + width)
+            val vectors: List<*> = Arrays.asList(
+                Vector3d(aabb.minX, aabb.minY, aabb.minZ),
+                Vector3d(aabb.minX, aabb.maxY, aabb.minZ),
+                Vector3d(aabb.maxX, aabb.minY, aabb.minZ),
+                Vector3d(aabb.maxX, aabb.maxY, aabb.minZ),
+                Vector3d(aabb.minX, aabb.minY, aabb.maxZ),
+                Vector3d(aabb.minX, aabb.maxY, aabb.maxZ),
+                Vector3d(aabb.maxX, aabb.minY, aabb.maxZ),
+                Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ)
+            )
 
+            mc.entityRenderer.setupCameraTransform(partialTicks, 0)
+
+            var position: Vector4d? = null
+            val var38 = vectors.iterator()
+            while (var38.hasNext()) {
+                var vector = var38.next() as Vector3d?
+                vector = project2D(
+                    scaleFactor,
+                    vector!!.x - renderMng.viewerPosX,
+                    vector.y - renderMng.viewerPosY,
+                    vector.z - renderMng.viewerPosZ
+                )
+                if (vector != null && vector.z >= 0.0 && vector.z < 1.0) {
+                    if (position == null) {
+                        position = Vector4d(vector.x, vector.y, vector.z, 0.0)
+                    }
+                    position.x = min(vector.x, position.x)
+                    position.y = min(vector.y, position.y)
+                    position.z = max(vector.x, position.z)
+                    position.w = max(vector.y, position.w)
+                }
+            }
+
+            position ?: return
+
+            entityRenderer.setupOverlayRendering()
+            val posX = position.x
+            val posY = position.y
+            val endPosX = position.z
+            val endPosY = position.w
+            glTranslated(posX + (endPosX - posX) / 2, posY, 0.0)
+        }
 
         // Scale
         var distance = mc.thePlayer.getDistanceToEntity(entity) / 4F
-
         distance = distance.coerceAtLeast(1F)
 
-        val scale = (distance / 150F) * scaleValue.get()
-
-        glScalef(-scale, -scale, scale)
+        if (threeDMode) {
+            val scale = (distance / 150F) * scale3DValue.get()
+            glScalef(-scale, -scale, scale)
+            glDisable(GL_TEXTURE_2D)
+        } else {
+            glScalef(scale2DValue.get(), scale2DValue.get(), 1f)
+        }
 
         //AWTFontRenderer.assumeNonVolatile = true
 
@@ -143,7 +261,7 @@ class NameTags : Module() {
 
         val dist = width + 4F - (-width - 2F)
 
-        glDisable(GL_TEXTURE_2D)
+
         glEnable(GL_BLEND)
 
         val bgColor = Color(

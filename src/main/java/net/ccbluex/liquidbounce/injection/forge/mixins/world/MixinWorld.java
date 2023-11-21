@@ -5,6 +5,7 @@
  */
 package net.ccbluex.liquidbounce.injection.forge.mixins.world;
 
+import de.florianmichael.viamcp.fixes.FixedSoundEngine;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
@@ -16,6 +17,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,6 +32,9 @@ public abstract class MixinWorld {
     @Shadow
     public abstract IBlockState getBlockState(BlockPos pos);
 
+    @Shadow
+    public abstract World init();
+
     @Shadow @Final public boolean isRemote;
 
     @ModifyVariable(method = "updateEntityWithOptionalForce", at = @At("STORE"), ordinal = 1)
@@ -41,5 +46,14 @@ public abstract class MixinWorld {
     private void filterEntities(Entity entityIn, AxisAlignedBB bb, CallbackInfoReturnable<List<AxisAlignedBB>> cir, List<AxisAlignedBB> list) {
         if (entityIn instanceof EntityTNTPrimed || entityIn instanceof EntityFallingBlock || entityIn instanceof EntityItem || entityIn instanceof EntityFX) 
             cir.setReturnValue(list);
+    }
+
+    /**
+     * @author pie
+     * @reason fix sound
+     */
+    @Overwrite
+    public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
+        return FixedSoundEngine.destroyBlock(init(), pos, dropBlock);
     }
 }

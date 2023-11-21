@@ -5,7 +5,8 @@
  */
 package net.ccbluex.liquidbounce.features.module.modules.combat
 
-import cc.paimonmc.viamcp.ViaMCP
+import de.florianmichael.vialoadingbase.ViaLoadingBase
+import de.florianmichael.viamcp.ViaMCP
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.event.*
 import net.ccbluex.liquidbounce.features.module.Module
@@ -738,12 +739,12 @@ class KillAura : Module() {
             markEntity = entity
 
             // Attack target
-            if (swing && (!swingOrder || ViaMCP.getInstance().version <= 47)) // version fix
+            if (swing && (!swingOrder || ViaLoadingBase.getInstance().targetVersion.version <= 47)) // version fix
                 mc.thePlayer.swingItem()
 
             mc.netHandler.addToSendQueue(C02PacketUseEntity(entity, C02PacketUseEntity.Action.ATTACK))
 
-            if (swing && swingOrder && ViaMCP.getInstance().version > 47)
+            if (swing && swingOrder && ViaLoadingBase.getInstance().targetVersion.version > 47)
                 mc.thePlayer.swingItem()
 
             if (keepSprint) {

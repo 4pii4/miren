@@ -5,8 +5,7 @@
  */
 package net.ccbluex.liquidbounce.ui.client.hud.element.elements
 
-import cc.paimonmc.viamcp.ViaMCP
-import cc.paimonmc.viamcp.protocols.ProtocolCollection
+import de.florianmichael.vialoadingbase.ViaLoadingBase
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.module.modules.render.ColorMixer
 import net.ccbluex.liquidbounce.features.module.modules.world.BanChecker
@@ -147,7 +146,7 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F,
         return when (str) {
             "userName" -> mc.session.username
             "clientName" -> LiquidBounce.CLIENT_NAME
-            "clientVersion" -> LiquidBounce.CLIENT_VERSION.toString()
+            "clientVersion" -> LiquidBounce.CLIENT_VERSION
             "clientCreator" -> LiquidBounce.CLIENT_CREATOR
             "fps" -> Minecraft.getDebugFPS().toString()
             "date" -> DATE_FORMAT.format(System.currentTimeMillis())
@@ -156,7 +155,7 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F,
             "cps", "lcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.LEFT).toString()
             "mcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.MIDDLE).toString()
             "rcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.RIGHT).toString()
-            "portalVersion" -> ProtocolCollection.getProtocolById(ViaMCP.getInstance().version).name
+            "portalVersion" -> ViaLoadingBase.getInstance().targetVersion.name
             "watchdogLastMin" -> LiquidBounce.moduleManager.getModule(BanChecker::class.java)!!.watchdogLastMin.toString()
             "staffLastMin" -> LiquidBounce.moduleManager.getModule(BanChecker::class.java)!!.staffLastMin.toString()
             "wdStatus" -> return if (PacketUtils.isWatchdogActive) "Inactive" else "Active"

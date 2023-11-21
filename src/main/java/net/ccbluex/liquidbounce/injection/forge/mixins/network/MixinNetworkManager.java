@@ -5,6 +5,7 @@
  */
 package net.ccbluex.liquidbounce.injection.forge.mixins.network;
 
+import de.florianmichael.vialoadingbase.netty.event.CompressionReorderEvent;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import net.ccbluex.liquidbounce.LiquidBounce;
@@ -94,4 +95,8 @@ public class MixinNetworkManager {
         }
     }
 
+    @Inject(method = "setCompressionTreshold", at = @At("TAIL"))
+    private void setCompressionTreshold(int p_setCompressionTreshold_1_, CallbackInfo ci) {
+        this.channel.pipeline().fireUserEventTriggered(new CompressionReorderEvent());
+    }
 }

@@ -5,11 +5,10 @@
  */
 package net.ccbluex.liquidbounce.injection.forge.mixins.gui;
 
-import cc.paimonmc.viamcp.gui.AsyncVersionSlider;
+import de.florianmichael.viamcp.ViaMCP;
 import net.ccbluex.liquidbounce.ui.elements.ToolDropdown;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMultiplayer;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ServerSelectionList;
 import net.minecraft.client.resources.I18n;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,7 +61,9 @@ public abstract class MixinGuiMultiplayer extends MixinGuiScreen {
 
         this.selectServer(this.serverListSelector.func_148193_k());
 
-        this.buttonList.add(new AsyncVersionSlider(-1, this.width - 116, 8, 98, 20));
+        ViaMCP.INSTANCE.initAsyncSlider(this.width - 116, 8, 98, 20);
+//        this.buttonList.add(new AsyncVersionSlider(-1, this.width - 116, 8, 98, 20));
+        this.buttonList.add(ViaMCP.INSTANCE.getAsyncVersionSlider());
     }
 
 

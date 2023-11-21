@@ -5,13 +5,13 @@
  */
 package net.ccbluex.liquidbounce.injection.forge.mixins.network;
 
-import cc.paimonmc.viamcp.ViaMCP;
-import cc.paimonmc.viamcp.handler.CommonTransformer;
-import cc.paimonmc.viamcp.handler.MCPDecodeHandler;
-import cc.paimonmc.viamcp.handler.MCPEncodeHandler;
 import com.viaversion.viaversion.api.connection.UserConnection;
+
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
+import de.florianmichael.vialoadingbase.ViaLoadingBase;
+import de.florianmichael.viamcp.MCPVLBPipeline;
+import de.florianmichael.viamcp.ViaMCP;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,10 +24,11 @@ public abstract class MixinNetworkManagerChInit {
 
     @Inject(method={"initChannel"}, at={@At(value="TAIL")}, remap=false)
     private void onInitChannel(Channel p_initChannel_1_, CallbackInfo callbackInfo) {
-        if (p_initChannel_1_ instanceof SocketChannel && ViaMCP.getInstance().getVersion() != ViaMCP.PROTOCOL_VERSION) {
-            UserConnection user = new UserConnectionImpl(p_initChannel_1_, true);
+        if (p_initChannel_1_ instanceof SocketChannel && ViaLoadingBase.getInstance().getTargetVersion().getVersion() != ViaMCP.NATIVE_VERSION) {
+            final UserConnection user = new UserConnectionImpl(p_initChannel_1_, true);
             new ProtocolPipelineImpl(user);
-            p_initChannel_1_.pipeline().addBefore("encoder", CommonTransformer.HANDLER_ENCODER_NAME, new MCPEncodeHandler(user)).addBefore("decoder", CommonTransformer.HANDLER_DECODER_NAME, new MCPDecodeHandler(user));
+
+            p_initChannel_1_.pipeline().addLast(new MCPVLBPipeline(user));
         }
     }
 }
