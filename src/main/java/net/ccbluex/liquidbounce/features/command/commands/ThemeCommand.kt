@@ -57,7 +57,7 @@ class ThemeCommand : Command("theme", arrayOf("thememanager", "tm", "themes")) {
                         LiquidBounce.hud = Config(theme).toHUD()
                         LiquidBounce.isStarting = false
                         chat("§6Theme applied successfully.")
-                        LiquidBounce.hud.addNotification(Notification("Updated HUD Theme.", Type.SUCCESS))
+                        LiquidBounce.hud.addNotification(Notification("Updated HUD Theme.", Type.SUCCESS, title = "Themes"))
                         playEdit()
                     } catch (exception: Exception) {
                         exception.printStackTrace()

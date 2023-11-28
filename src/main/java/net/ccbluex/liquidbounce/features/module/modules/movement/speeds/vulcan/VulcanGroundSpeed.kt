@@ -37,7 +37,7 @@ class VulcanGroundSpeed : SpeedMode("VulcanGroundSpeed") {
             yMotion = 0.0
         }
         mc.thePlayer.jumpMovementFactor = 0.025f
-        if (mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (mc.thePlayer.onGround && MovementUtils.isMoving) {
             if (mc.thePlayer.isCollidedHorizontally || mc.gameSettings.keyBindJump.pressed) {
                 if (!mc.gameSettings.keyBindJump.pressed) {
                     mc.thePlayer.jump()
@@ -50,7 +50,7 @@ class VulcanGroundSpeed : SpeedMode("VulcanGroundSpeed") {
             MovementUtils.strafe(0.48f + jumpCount * 0.001f)
             jumpCount++
             jumped = true
-        } else if (MovementUtils.isMoving()) {
+        } else if (MovementUtils.isMoving) {
             MovementUtils.strafe(0.27f + jumpCount * 0.0018f)
         } else {
             MovementUtils.resetMotion(false)

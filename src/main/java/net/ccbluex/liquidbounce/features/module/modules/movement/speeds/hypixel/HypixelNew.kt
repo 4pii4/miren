@@ -24,12 +24,12 @@ class HypixelNew : SpeedMode("HypixelNew") {
 
             oldMotionX = mc.thePlayer.motionX
             oldMotionZ = mc.thePlayer.motionZ
-            MovementUtils.strafe(MovementUtils.getSpeed() * 1.01f)
+            MovementUtils.strafe(MovementUtils.speed * 1.01f)
             mc.thePlayer.motionX = (mc.thePlayer.motionX * 1 + oldMotionX * 2) / 3
             mc.thePlayer.motionZ = (mc.thePlayer.motionZ * 1 + oldMotionZ * 2) / 3
 
-            if (MovementUtils.getSpeed() < 0.47) {
-                watchdogMultiplier = 0.47 / (MovementUtils.getSpeed().toDouble() + 0.001)
+            if (MovementUtils.speed < 0.47) {
+                watchdogMultiplier = 0.47 / (MovementUtils.speed.toDouble() + 0.001)
                 mc.thePlayer.motionX *= watchdogMultiplier
                 mc.thePlayer.motionZ *= watchdogMultiplier
             }

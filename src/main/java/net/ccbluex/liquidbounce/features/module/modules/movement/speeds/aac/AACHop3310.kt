@@ -21,7 +21,7 @@ class AACHop3310 : SpeedMode("AACHop3.3.10") {
         val speed = LiquidBounce.moduleManager.getModule(Speed::class.java) ?: return
         val player = mc.thePlayer
         mc.gameSettings.keyBindJump.pressed = false
-        MovementUtils.strafe((MovementUtils.getBaseMoveSpeed() * 1.0164f).toFloat())
+        MovementUtils.strafe((MovementUtils.baseMoveSpeed * 1.0164f).toFloat())
         if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && GameSettings.isKeyDown(mc.gameSettings.keyBindSneak)) {
             player.motionY = MovementUtils.getJumpBoostModifier(0.41999998688697815)
             event.y = player.motionY
@@ -35,7 +35,7 @@ class AACHop3310 : SpeedMode("AACHop3.3.10") {
     
     override fun onPacket(event: PacketEvent) {
         if (event.packet is S12PacketEntityVelocity) {
-            if (mc.thePlayer.onGround && mc.thePlayer.isSneaking && MovementUtils.isMoving()) return
+            if (mc.thePlayer.onGround && mc.thePlayer.isSneaking && MovementUtils.isMoving) return
             event.cancelEvent()
         }
     }

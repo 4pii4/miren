@@ -12,11 +12,11 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 class SlowHop : SpeedMode("SlowHop") {
     override fun onMotion() {
         if (mc.thePlayer.isInWater) return
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             if (mc.thePlayer.onGround && mc.thePlayer.jumpTicks == 0) {
                 mc.thePlayer.jump()
                 mc.thePlayer.jumpTicks = 10
-            } else MovementUtils.strafe(MovementUtils.getSpeed() * 1.011f)
+            } else MovementUtils.strafe(MovementUtils.speed * 1.011f)
         } else {
             mc.thePlayer.motionX = 0.0
             mc.thePlayer.motionZ = 0.0

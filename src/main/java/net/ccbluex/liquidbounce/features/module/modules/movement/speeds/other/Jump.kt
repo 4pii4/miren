@@ -15,11 +15,11 @@ class Jump : SpeedMode("Jump") {
     
     override fun onUpdate() {
         val speed = LiquidBounce.moduleManager.getModule(Speed::class.java) ?: return
-        if (MovementUtils.isMoving() && mc.thePlayer.onGround && !mc.gameSettings.keyBindJump.isKeyDown && !(mc.thePlayer.isInWater || mc.thePlayer.isInLava) && mc.thePlayer.jumpTicks == 0) {
+        if (MovementUtils.isMoving && mc.thePlayer.onGround && !mc.gameSettings.keyBindJump.isKeyDown && !(mc.thePlayer.isInWater || mc.thePlayer.isInLava) && mc.thePlayer.jumpTicks == 0) {
             mc.thePlayer.jump()
             mc.thePlayer.jumpTicks = 10
         }
-        if (speed.jumpStrafe.get() && MovementUtils.isMoving() && !mc.thePlayer.onGround && !(mc.thePlayer.isInWater || mc.thePlayer.isInLava)) MovementUtils.strafe()
+        if (speed.jumpStrafe.get() && MovementUtils.isMoving && !mc.thePlayer.onGround && !(mc.thePlayer.isInWater || mc.thePlayer.isInLava)) MovementUtils.strafe()
     }
 
     

@@ -17,7 +17,7 @@ import net.minecraft.util.MathHelper
 class AACHop3313 : SpeedMode("AACHop3.3.13") {
     
     override fun onUpdate() {
-        if (!MovementUtils.isMoving() || mc.thePlayer.isInWater || mc.thePlayer.isInLava ||
+        if (!MovementUtils.isMoving || mc.thePlayer.isInWater || mc.thePlayer.isInLava ||
             mc.thePlayer.isOnLadder || mc.thePlayer.isRiding || mc.thePlayer.hurtTime > 0
         ) return
         if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {

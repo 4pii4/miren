@@ -12,7 +12,7 @@ import net.ccbluex.liquidbounce.event.Render3DEvent
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
-import net.ccbluex.liquidbounce.features.module.modules.render.ColorMixer.Companion.getMixedColor
+import net.ccbluex.liquidbounce.features.module.modules.render.ColorMixer.getMixedColor
 import net.ccbluex.liquidbounce.features.module.modules.world.ChestAura.clickedBlocks
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.render.ColorUtils.LiquidSlowly
@@ -197,7 +197,7 @@ class StorageESP : Module() {
                 renderManager.renderEntityStatic(entity, event.partialTicks, true)
             }
         } catch (ex: Exception) {
-            ClientUtils.getLogger().error("An error occurred while rendering all storages for shader esp", ex)
+            ClientUtils.logger.error("An error occurred while rendering all storages for shader esp", ex)
         }
         shader.stopDraw(Color(colorRedValue.get(), colorBlueValue.get(), colorGreenValue.get()), if (mode.equals("shaderglow", ignoreCase = true)) 2.5f else 1.5f, 1f)
     }

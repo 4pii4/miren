@@ -39,7 +39,7 @@ class VulcanYPort2Speed : SpeedMode("YPort2Speed") {
                 portSwitcher = 0
             }
         }
-        if (mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (mc.thePlayer.onGround && MovementUtils.isMoving) {
             mc.thePlayer.jump()
             MovementUtils.strafe()
             if(portSwitcher >= 1) {
@@ -47,7 +47,7 @@ class VulcanYPort2Speed : SpeedMode("YPort2Speed") {
                 mc.timer.timerSpeed = 1.5f
             }
             portSwitcher++
-        }else if(MovementUtils.getSpeed() < 0.225){
+        }else if(MovementUtils.speed < 0.225){
             MovementUtils.strafe(0.225f)
         }
     }

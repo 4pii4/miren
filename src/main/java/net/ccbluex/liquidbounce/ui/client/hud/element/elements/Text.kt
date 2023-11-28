@@ -151,7 +151,7 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F,
             "fps" -> Minecraft.getDebugFPS().toString()
             "date" -> DATE_FORMAT.format(System.currentTimeMillis())
             "time" -> HOUR_FORMAT.format(System.currentTimeMillis())
-            "serverIp" -> ServerUtils.getRemoteIp()
+            "serverIp" -> ServerUtils.remoteIp
             "cps", "lcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.LEFT).toString()
             "mcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.MIDDLE).toString()
             "rcps" -> return CPSCounter.getCPS(CPSCounter.MouseButton.RIGHT).toString()
@@ -159,8 +159,8 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F,
             "watchdogLastMin" -> LiquidBounce.moduleManager.getModule(BanChecker::class.java)!!.watchdogLastMin.toString()
             "staffLastMin" -> LiquidBounce.moduleManager.getModule(BanChecker::class.java)!!.staffLastMin.toString()
             "wdStatus" -> return if (PacketUtils.isWatchdogActive) "Inactive" else "Active"
-            "sessionTime" -> return SessionUtils.getFormatSessionTime()
-            "worldTime" -> return SessionUtils.getFormatWorldTime()
+            "sessionTime" -> return SessionUtils.formatSessionTime
+            "worldTime" -> return SessionUtils.formatWorldTime
             else -> null // Null = don't replace
         }
     }

@@ -59,14 +59,14 @@ abstract class Element(var x: Double = 2.0, var y: Double = 2.0, scale: Float = 
     var renderY: Double
         get() = when (side.vertical) {
             Side.Vertical.UP -> y
-            Side.Vertical.MIDDLE -> (ScaledResolution(mc).scaledHeight / 2) - y
+//            Side.Vertical.MIDDLE -> (ScaledResolution(mc).scaledHeight / 2) - y
             Side.Vertical.DOWN -> ScaledResolution(mc).scaledHeight - y
         }
         set(value) = when (side.vertical) {
             Side.Vertical.UP -> {
                 y += value
             }
-            Side.Vertical.MIDDLE, Side.Vertical.DOWN -> {
+            Side.Vertical.DOWN -> {
                 y -= value
             }
         }
@@ -184,7 +184,6 @@ class Side(var horizontal: Horizontal, var vertical: Vertical) {
     enum class Vertical(val sideName: String) {
 
         UP("Up"),
-        MIDDLE("Middle"),
         DOWN("Down");
 
         companion object {

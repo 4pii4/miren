@@ -560,7 +560,8 @@ class BackTrack : Module() {
                     LiquidBounce.hud.addNotification(
                         Notification(
                             "Something went wrong when sending packet reversing",
-                            Type.ERROR
+                            Type.ERROR,
+                            title = "Backtrack"
                         )
                     )
                 }

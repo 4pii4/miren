@@ -76,7 +76,7 @@ public abstract class MixinGuiDisconnected extends MixinGuiScreen {
     private void actionPerformed(GuiButton button, CallbackInfo callbackInfo) {
         switch (button.id) {
             case 1:
-                ServerUtils.connectToLastServer();
+                ServerUtils.INSTANCE.connectToLastServer();
                 break;
             case 3:
                 if (!GuiTheAltening.Companion.getApiKey().isEmpty()) {
@@ -94,10 +94,10 @@ public abstract class MixinGuiDisconnected extends MixinGuiScreen {
 
                         mc.session = new Session(yggdrasilUserAuthentication.getSelectedProfile().getName(), yggdrasilUserAuthentication.getSelectedProfile().getId().toString(), yggdrasilUserAuthentication.getAuthenticatedToken(), "mojang");
                         LiquidBounce.eventManager.callEvent(new SessionEvent());
-                        ServerUtils.connectToLastServer();
+                        ServerUtils.INSTANCE.connectToLastServer();
                         break;
                     } catch (final Throwable throwable) {
-                        ClientUtils.getLogger().error("Failed to login into random account from TheAltening.", throwable);
+                        ClientUtils.logger.error("Failed to login into random account from TheAltening.", throwable);
                     }
                 }
 
@@ -109,7 +109,7 @@ public abstract class MixinGuiDisconnected extends MixinGuiScreen {
                 mc.displayGuiScreen(new GuiLoginProgress(minecraftAccount, () -> {
                     mc.addScheduledTask(() -> {
                         LiquidBounce.eventManager.callEvent(new SessionEvent());
-                        ServerUtils.connectToLastServer();
+                        ServerUtils.INSTANCE.connectToLastServer();
                     });
                     return null;
                 }, e -> {
@@ -131,7 +131,7 @@ public abstract class MixinGuiDisconnected extends MixinGuiScreen {
                 mc.session = new Session(crackedAccount.getSession().getUsername(), crackedAccount.getSession().getUuid(),
                         crackedAccount.getSession().getToken(), crackedAccount.getSession().getType());
                 LiquidBounce.eventManager.callEvent(new SessionEvent());
-                ServerUtils.connectToLastServer();
+                ServerUtils.INSTANCE.connectToLastServer();
                 break;
             case 5:
                 AntiForge.enabled = !AntiForge.enabled;
@@ -146,7 +146,7 @@ public abstract class MixinGuiDisconnected extends MixinGuiScreen {
         if (AutoReconnect.INSTANCE.isEnabled()) {
             reconnectTimer++;
             if (reconnectTimer > AutoReconnect.INSTANCE.getDelay() / 50)
-                ServerUtils.connectToLastServer();
+                ServerUtils.INSTANCE.connectToLastServer();
         }
     }
 
@@ -155,7 +155,7 @@ public abstract class MixinGuiDisconnected extends MixinGuiScreen {
         if (AutoReconnect.INSTANCE.isEnabled()) {
             this.updateReconnectButton();
         }
-        Fonts.fontSFUI40.drawCenteredString("Player: §7"+ this.mc.session.getUsername() +"§r, IP: §7"+ServerUtils.serverData.serverIP, this.width / 2F, this.height / 2F + field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 96, -1, true);
+        Fonts.fontSFUI40.drawCenteredString("Player: §7"+ this.mc.session.getUsername() +"§r, IP: §7"+ ServerUtils.INSTANCE.getServerData().serverIP, this.width / 2F, this.height / 2F + field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 96, -1, true);
         Fonts.fontSFUI40.drawCenteredString("Play time before kick: §7" + SessionUtils.getFormatLastSessionTime(), this.width / 2F, this.height / 2F + field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT * 2F + 98, -1, true);
     }
 

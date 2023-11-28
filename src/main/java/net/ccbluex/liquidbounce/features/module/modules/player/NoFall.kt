@@ -164,7 +164,7 @@ class NoFall : Module() {
             || mc.thePlayer.isSpectator || mc.thePlayer.capabilities.allowFlying || mc.thePlayer.capabilities.disableDamage)
             return
 
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder) return
 
         if (BlockUtils.collideBlock(mc.thePlayer.entityBoundingBox) { it is BlockLiquid } || BlockUtils.collideBlock(AxisAlignedBB(mc.thePlayer.entityBoundingBox.maxX, mc.thePlayer.entityBoundingBox.maxY, mc.thePlayer.entityBoundingBox.maxZ, mc.thePlayer.entityBoundingBox.minX, mc.thePlayer.entityBoundingBox.minY - 0.01, mc.thePlayer.entityBoundingBox.minZ)) { it is BlockLiquid })
             return
@@ -392,7 +392,7 @@ class NoFall : Module() {
 
     @EventTarget
     fun onMotion(event: MotionEvent) {
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder) return
 
         if (typeValue.equals("aac", true) && aacMode.equals("4.x", true) && event.eventState == EventState.PRE) {
             if (!inVoid()) {
@@ -490,7 +490,7 @@ class NoFall : Module() {
     fun onPacket(event: PacketEvent) {
         mc.thePlayer ?: return
 
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder) return
 
         val packet = event.packet
         if (packet is S12PacketEntityVelocity && typeValue.equals("aac", true) && aacMode.equals("4.4.x", true) && mc.thePlayer.fallDistance > 1.8)
@@ -614,7 +614,7 @@ class NoFall : Module() {
 
     @EventTarget
     fun onMove(event: MoveEvent) {
-        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder()) return
+        if (!LiquidBounce.moduleManager[Fly::class.java]!!.state && voidCheckValue && !MovementUtils.isBlockUnder) return
 
         if (BlockUtils.collideBlock(mc.thePlayer.entityBoundingBox) { it is BlockLiquid } || BlockUtils.collideBlock(AxisAlignedBB(mc.thePlayer.entityBoundingBox.maxX, mc.thePlayer.entityBoundingBox.maxY, mc.thePlayer.entityBoundingBox.maxZ, mc.thePlayer.entityBoundingBox.minX, mc.thePlayer.entityBoundingBox.minY - 0.01, mc.thePlayer.entityBoundingBox.minZ)) { it is BlockLiquid })
             return

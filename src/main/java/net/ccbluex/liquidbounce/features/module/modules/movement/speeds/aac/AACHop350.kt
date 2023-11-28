@@ -20,7 +20,7 @@ class AACHop350 : SpeedMode("AACHop3.5.0"), Listenable {
     
     @EventTarget
     override fun onMotion(event: MotionEvent) {
-        if (event.eventState === EventState.POST && MovementUtils.isMoving() && !mc.thePlayer.isInWater && !mc.thePlayer.isInLava) {
+        if (event.eventState === EventState.POST && MovementUtils.isMoving && !mc.thePlayer.isInWater && !mc.thePlayer.isInLava) {
             mc.thePlayer.jumpMovementFactor += 0.00208f
             if (mc.thePlayer.fallDistance <= 1f) {
                 if (mc.thePlayer.onGround) {

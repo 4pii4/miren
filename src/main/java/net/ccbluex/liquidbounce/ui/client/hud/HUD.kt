@@ -26,23 +26,22 @@ open class HUD : MinecraftInstance() {
 
         val elements = arrayOf(
                 Armor::class.java,
-                SessionInfo::class.java,
                 Arraylist::class.java,
-                Indicators::class.java,
                 Effects::class.java,
+                Graph::class.java,
                 Image::class.java,
-                Model::class.java,
-                Notifications::class.java,
-                TabGUI::class.java,
-                Text::class.java,
-                ScoreboardElement::class.java,
-                Target::class.java,
                 Inventory::class.java,
-                SpeedGraph::class.java,
+                Model::class.java,
+                ModuleInfo::class.java,
+                Notifications::class.java,
                 PlayerList::class.java,
                 Radar::class.java,
-                Graph::class.java,
-                KeyBinds::class.java,
+                ScoreboardElement::class.java,
+                SessionInfo::class.java,
+                SpeedGraph::class.java,
+                TabGUI::class.java,
+                Target::class.java,
+                Text::class.java,
         )
 
         /**
@@ -88,7 +87,7 @@ open class HUD : MinecraftInstance() {
                 if (designer)
                     element.border?.draw()
             } catch (ex: Exception) {
-                ClientUtils.getLogger()
+                ClientUtils.logger
                         .error("Something went wrong while drawing ${element.name} element in HUD.", ex)
             }
 

@@ -13,7 +13,7 @@ import net.minecraft.util.MathHelper
 class AACBHop : SpeedMode("AACBHop") {
     override fun onMotion() {
         if (mc.thePlayer.isInWater) return
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             mc.timer.timerSpeed = 1.08f
             if (mc.thePlayer.onGround) {
                 mc.thePlayer.motionY = 0.399

@@ -117,7 +117,7 @@ class GuiLoginIntoAccount(private val prevGui: GuiAltManager, val directLogin: B
                 checkAndAddAccount(accountData[0], accountData[1])
             } catch (e: UnsupportedFlavorException) {
                 status = "§cClipboard flavor unsupported!"
-                ClientUtils.getLogger().error("Failed to read data from clipboard.", e)
+                ClientUtils.logger.error("Failed to read data from clipboard.", e)
             }
 
             3 -> {

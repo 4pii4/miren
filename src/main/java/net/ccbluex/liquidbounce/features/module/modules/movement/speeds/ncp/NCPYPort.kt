@@ -13,7 +13,7 @@ import net.minecraft.util.MathHelper
 class NCPYPort : SpeedMode("NCPYPort") {
     private var jumps = 0
     override fun onMotion() {
-        if (mc.thePlayer.isOnLadder || mc.thePlayer.isInWater || mc.thePlayer.isInLava || mc.thePlayer.isInWeb || !MovementUtils.isMoving() || mc.thePlayer.isInWater) return
+        if (mc.thePlayer.isOnLadder || mc.thePlayer.isInWater || mc.thePlayer.isInLava || mc.thePlayer.isInWeb || !MovementUtils.isMoving || mc.thePlayer.isInWater) return
         if (jumps >= 4 && mc.thePlayer.onGround) jumps = 0
         if (mc.thePlayer.onGround) {
             mc.thePlayer.motionY = (if (jumps <= 1) 0.42f else 0.4f).toDouble()

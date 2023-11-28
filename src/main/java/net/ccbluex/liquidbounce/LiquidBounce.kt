@@ -17,7 +17,6 @@ import net.ccbluex.liquidbounce.features.special.MacroManager
 import net.ccbluex.liquidbounce.file.FileManager
 import net.ccbluex.liquidbounce.script.ScriptManager
 import net.ccbluex.liquidbounce.script.remapper.Remapper.loadSrg
-import net.ccbluex.liquidbounce.ui.client.altmanager.GuiAltManager
 import net.ccbluex.liquidbounce.ui.client.hud.HUD
 import net.ccbluex.liquidbounce.ui.client.hud.HUD.Companion.createDefault
 import net.ccbluex.liquidbounce.ui.font.Fonts
@@ -25,16 +24,15 @@ import net.ccbluex.liquidbounce.utils.*
 import net.ccbluex.liquidbounce.utils.TextColorUtils.darkGray
 import net.ccbluex.liquidbounce.utils.TextColorUtils.red
 import net.ccbluex.liquidbounce.utils.misc.sound.TipSoundManager
-import net.minecraft.potion.Potion
+import net.ccbluex.liquidbounce.utils.render.ShaderUtils
 import net.minecraft.util.ResourceLocation
-import kotlin.concurrent.thread
 
 object LiquidBounce {
 
     // Client information
     const val CLIENT_NAME = "Miren"
     val CLIENT_NAME_COLORED = "${darkGray("[")}${red(CLIENT_NAME)}${darkGray("]")}"
-    const val CLIENT_VERSION = "b0"
+    const val CLIENT_VERSION = "b28112023"
     const val CLIENT_CREATOR = "CCBlueX, inf and pie"
     const val CLIENT_CLOUD = "https://mirenclient.github.io/cloud"
     const val CLIENT_REPO = "mirenclient/Miren"
@@ -70,12 +68,16 @@ object LiquidBounce {
     fun startClient() {
         isStarting = true
 
-        ClientUtils.getLogger().info("Starting $CLIENT_NAME version $CLIENT_VERSION")
+        ClientUtils.logger.info("Starting $CLIENT_NAME version $CLIENT_VERSION")
         val startTime = System.currentTimeMillis()
         playTimeStart = System.currentTimeMillis()
 
         // Create file manager
         fileManager = FileManager()
+
+        ShaderUtils.init()
+        DictUtils.init()
+        ChangelogUtils.update()
 
         // Crate event manager
         eventManager = EventManager()
@@ -109,10 +111,7 @@ object LiquidBounce {
         moduleManager = ModuleManager()
         moduleManager.registerModules()
 
-        DictUtils.init()
-        ChangelogUtils.update()
-
-        // Remapper
+//         Remapper
         try {
             loadSrg()
 
@@ -121,7 +120,7 @@ object LiquidBounce {
             scriptManager.loadScripts()
             scriptManager.enableScripts()
         } catch (throwable: Throwable) {
-            ClientUtils.getLogger().error("Failed to load scripts.", throwable)
+            ClientUtils.logger.error("Failed to load scripts.", throwable)
         }
 
         // Register commands
@@ -137,9 +136,6 @@ object LiquidBounce {
         hud = createDefault()
         fileManager.loadConfig(fileManager.hudConfig)
 
-        // Load generators
-        GuiAltManager.loadActiveGenerators()
-
         // Setup Discord RPC
 //        if (clientRichPresence.showRichPresenceValue) {
 //            thread {
@@ -151,7 +147,7 @@ object LiquidBounce {
 //            }
 //        }
 
-        ClientUtils.getLogger().info("Finished loading $CLIENT_NAME version $CLIENT_VERSION in ${System.currentTimeMillis() - startTime}ms.")
+        ClientUtils.logger.info("Finished loading $CLIENT_NAME version $CLIENT_VERSION in ${System.currentTimeMillis() - startTime}ms.")
 
         // Set is starting status
         isStarting = false

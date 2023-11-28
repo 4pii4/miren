@@ -5,6 +5,7 @@
  */
 package net.ccbluex.liquidbounce.features.module.modules.movement
 
+import de.gerrygames.viarewind.utils.PacketUtil
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.event.*
 import net.ccbluex.liquidbounce.features.module.Module
@@ -14,6 +15,7 @@ import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.MovementUtils
+import net.ccbluex.liquidbounce.utils.PacketUtils
 import net.ccbluex.liquidbounce.utils.PacketUtils.sendPacketNoEvent
 import net.ccbluex.liquidbounce.utils.PosLookInstance
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
@@ -33,10 +35,12 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
+
 @ModuleInfo(name = "LongJump", spacedName = "Long Jump", description = "Allows you to jump further.", category = ModuleCategory.MOVEMENT)
 class LongJump : Module() {
-    private val modeValue = ListValue("Mode", arrayOf("NCP", "Damage", "AACv1", "AACv2", "AACv3", "AACv4", "Mineplex", "Mineplex2", "Mineplex3", "RedeskyMaki", "Redesky", "InfiniteRedesky", "MatrixFlag", "VerusDmg", "Pearl"), "NCP")
+    private val modeValue = ListValue("Mode", arrayOf("NCP", "Damage", "AACv1", "AACv2", "AACv3", "AACv4", "Mineplex", "Mineplex2", "Mineplex3", "RedeskyMaki", "Redesky", "InfiniteRedesky", "MatrixFlag", "VerusDmg", "Pearl", "BlocksMC"), "NCP")
     private val autoJumpValue = BoolValue("AutoJump", false)
+    private val resetOnDisable = BoolValue("ResetOnDisable", true)
     private val ncpBoostValue = FloatValue("NCPBoost", 4.25f, 1f, 10f) { modeValue.get().equals("ncp", ignoreCase = true) }
     private val matrixBoostValue = FloatValue("MatrixFlag-Boost", 1.95f, 0f, 3f) { modeValue.get().equals("matrixflag", ignoreCase = true) }
     private val matrixHeightValue = FloatValue("MatrixFlag-Height", 5f, 0f, 10f) { modeValue.get().equals("matrixflag", ignoreCase = true) }
@@ -63,6 +67,8 @@ class LongJump : Module() {
     private val damageTimerValue = FloatValue("Damage-Timer", 1f, 0.05f, 10f) { modeValue.get().equals("damage", ignoreCase = true) }
     private val damageNoMoveValue = BoolValue("Damage-NoMove", false) { modeValue.get().equals("damage", ignoreCase = true) }
     private val damageARValue = BoolValue("Damage-AutoReset", false) { modeValue.get().equals("damage", ignoreCase = true) }
+    private val bmcInitialSpeed = FloatValue("BlocksMCSpeed", 9.5f, 0f, 10f) { modeValue.get().equals("blocksmc", ignoreCase = true) }
+    private val bmcMultiplier = FloatValue("BlocksMCMultiplier", 0.95f, 0f, 1f) { modeValue.get().equals("blocksmc", ignoreCase = true) }
     val fakeValue = BoolValue("SpoofY", false)
     private val autoDisableValue = BoolValue("AutoDisable", false)
     private var hasJumped = false
@@ -85,11 +91,15 @@ class LongJump : Module() {
     private var lastMotZ = 0.0
     private var flagged = false
     private var hasFell = false
+    private var bmcStarted = false
+    private var bmcSpeed = 9.5f
+    private var bmcBoost = false
     private val dmgTimer = MSTimer()
     private val posLookInstance = PosLookInstance()
     private fun debug(message: String) {
         if (matrixDebugValue.get()) ClientUtils.displayChatMessage(message)
     }
+
 
     override fun onEnable() {
         if (mc.thePlayer == null) return
@@ -104,6 +114,8 @@ class LongJump : Module() {
         damaged = false
         flagged = false
         hasFell = false
+        bmcStarted = false
+        bmcBoost = false
         pearlState = 0
         verusJumpTimes = 0
         dmgTimer.reset()
@@ -153,11 +165,12 @@ class LongJump : Module() {
                 debug("falling detected")
             }
         }
+
     }
 
     @EventTarget
     fun onUpdate(event: UpdateEvent?) {
-        if (!no && autoJumpValue.get() && mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (!no && autoJumpValue.get() && mc.thePlayer.onGround && MovementUtils.isMoving) {
             jumped = true
             if (hasJumped && autoDisableValue.get()) {
                 jumpState = 0
@@ -166,6 +179,36 @@ class LongJump : Module() {
             }
             mc.thePlayer.jump()
             hasJumped = true
+        }
+
+        if (modeValue.get().equals("blocksmc", ignoreCase = true)) {
+            val check = mc.thePlayer.entityBoundingBox.offset(0.0, 1.0, 0.0)
+
+            if (bmcStarted) {
+                if (mc.thePlayer.onGround) {
+                    mc.timer.timerSpeed = 1f
+                    state = false
+                    return
+                }
+
+                mc.thePlayer.motionY += 0.025
+                bmcSpeed *= bmcMultiplier.get()
+                MovementUtils.strafe(bmcSpeed)
+                mc.timer.timerSpeed = 0.5f
+            }
+
+            if(mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, check).isEmpty() && !bmcStarted && bmcBoost) {
+                bmcStarted = true;
+                bmcSpeed = bmcInitialSpeed.get()
+                PacketUtils.sendPacket(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                PacketUtils.sendPacket(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                PacketUtils.sendPacket(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
+                mc.thePlayer.jump();
+                MovementUtils.strafe(bmcSpeed);
+            } else if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, check).isNotEmpty()) {
+                bmcBoost = true;
+            }
+
         }
         if (modeValue.get().equals("matrixflag", ignoreCase = true)) {
             if (hasFell) {
@@ -226,7 +269,7 @@ class LongJump : Module() {
             val enderPearlSlot = pearlSlot
             if (pearlState == 0) {
                 if (enderPearlSlot == -1) {
-                    LiquidBounce.hud.addNotification(Notification("You don't have any ender pearl!", Type.ERROR, 500))
+                    LiquidBounce.hud.addNotification(Notification("You don't have any ender pearl!", Type.ERROR, 500, "Long Jump"))
                     pearlState = -1
                     state = false
                     return
@@ -263,13 +306,13 @@ class LongJump : Module() {
             for (duh in arrayOf(mode))
             when (mode.lowercase(Locale.getDefault())) {
                 "ncp" -> {
-                    MovementUtils.strafe(MovementUtils.getSpeed() * if (canBoost) ncpBoostValue.get() else 1f)
+                    MovementUtils.strafe(MovementUtils.speed * if (canBoost) ncpBoostValue.get() else 1f)
                     canBoost = false
                 }
 
                 "aacv1" -> {
                     mc.thePlayer.motionY += 0.05999
-                    MovementUtils.strafe(MovementUtils.getSpeed() * 1.08f)
+                    MovementUtils.strafe(MovementUtils.speed * 1.08f)
                 }
 
                 "aacv2", "mineplex3" -> {
@@ -291,6 +334,7 @@ class LongJump : Module() {
                             EnumFacing.EAST -> x = value
                             EnumFacing.SOUTH -> z = value
                             EnumFacing.WEST -> x = -value
+                            else -> { }
                         }
                         player.setPosition(player.posX + x, player.posY, player.posZ + z)
                         teleported = true
@@ -345,11 +389,11 @@ class LongJump : Module() {
 
                 "infiniteredesky" -> {
                     if (mc.thePlayer.fallDistance > 0.6f) mc.thePlayer.motionY += 0.02
-                    MovementUtils.strafe(min(0.85, max(0.25, MovementUtils.getSpeed() * 1.05878)).toFloat())
+                    MovementUtils.strafe(min(0.85, max(0.25, MovementUtils.speed * 1.05878)).toFloat())
                 }
             }
         }
-        if (autoJumpValue.get() && mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (autoJumpValue.get() && mc.thePlayer.onGround && MovementUtils.isMoving) {
             jumped = true
             mc.thePlayer.jump()
         }
@@ -360,7 +404,7 @@ class LongJump : Module() {
         val mode = modeValue.get()
         if (mode.equals("mineplex3", ignoreCase = true)) {
             if (mc.thePlayer.fallDistance != 0f) mc.thePlayer.motionY += 0.037
-        } else if (mode.equals("ncp", ignoreCase = true) && !MovementUtils.isMoving() && jumped) {
+        } else if (mode.equals("ncp", ignoreCase = true) && !MovementUtils.isMoving && jumped) {
             mc.thePlayer.motionX = 0.0
             mc.thePlayer.motionZ = 0.0
             event.zeroXZ()
@@ -447,6 +491,10 @@ class LongJump : Module() {
 
     override fun onDisable() {
         mc.timer.timerSpeed = 1.0f
+        if (resetOnDisable.get()) {
+            mc.thePlayer.motionX = 0.0
+            mc.thePlayer.motionZ = 0.0
+        }
     }
 
     override val tag: String

@@ -110,6 +110,9 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
         // Slide animation - update every render
         val delta = RenderUtils.deltaTime
 
+        val renderX = renderX * scale
+        val renderY = renderY * scale
+
         // Draw arraylist
         val colorMode = colorModeValue.get()
         val rectColorMode = colorModeValue.get()

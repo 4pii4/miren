@@ -12,7 +12,7 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 class AAC2BHop : SpeedMode("AAC2BHop") {
     override fun onMotion() {
         if (mc.thePlayer.isInWater) return
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             if (mc.thePlayer.onGround) {
                 mc.thePlayer.jump()
                 mc.thePlayer.motionX *= 1.02

@@ -14,7 +14,7 @@ class VerusLowHop : SpeedMode("VerusLowHop") {
     
     override fun onMove(event: MoveEvent) {
         if (!mc.thePlayer.isInWeb && !mc.thePlayer.isInLava && !mc.thePlayer.isInWater && !mc.thePlayer.isOnLadder && mc.thePlayer.ridingEntity == null) {
-            if (MovementUtils.isMoving()) {
+            if (MovementUtils.isMoving) {
                 mc.gameSettings.keyBindJump.pressed = false
                 if (mc.thePlayer.onGround) {
                     mc.thePlayer.jump()

@@ -20,7 +20,7 @@ class MatrixDynamic : SpeedMode("MatrixDynamic") {
 
     override fun onMotion() {
         if (!ka!!.hitable) {
-            if (!MovementUtils.isMoving()) {
+            if (!MovementUtils.isMoving) {
                 return
             }
             if (mc.thePlayer.onGround) {
@@ -33,7 +33,7 @@ class MatrixDynamic : SpeedMode("MatrixDynamic") {
                 mc.timer.timerSpeed = 1.05f
             }
         } else {
-            if (MovementUtils.isMoving() && mc.thePlayer.onGround) {
+            if (MovementUtils.isMoving && mc.thePlayer.onGround) {
                 mc.thePlayer.jump()
                 MovementUtils.strafe(0.3f)
             }

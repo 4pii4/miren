@@ -36,7 +36,7 @@ class AutoDisable : Module() {
         LiquidBounce.hud.addNotification(Notification("Disabled $moduleNames ${if (moduleNames > 1) "modules" else "module"} due to ${ when (enumDisable) {
                 DisableEvent.FLAG -> "unexpected teleport"
                 DisableEvent.WORLD_CHANGE -> "world change"
-                else -> "game ended"}}.", Type.INFO, 1000))
+                else -> "game ended"}}.", Type.INFO, 1000, title = "Auto Disable"))
     }
 
     companion object {

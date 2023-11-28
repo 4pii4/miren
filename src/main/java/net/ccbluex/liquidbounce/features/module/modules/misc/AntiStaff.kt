@@ -46,15 +46,15 @@ class AntiStaff : Module() {
     private val leave = BoolValue("Leave", true)
 
     private val onBMC: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("blocksmc.com", true)
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData!!.serverIP.contains("blocksmc.com", true)
     private val onMushMC: Boolean
-        get() = !mc.isSingleplayer && (ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("jogar.mush.com.br", true) || ServerUtils.serverData.serverIP.contains("mush.com.br", true))
+        get() = !mc.isSingleplayer && (ServerUtils.serverData != null && ServerUtils.serverData!!.serverIP.contains("jogar.mush.com.br", true) || ServerUtils.serverData!!.serverIP.contains("mush.com.br", true))
     private val onHypixel: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("hypixel.net", true)
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData!!.serverIP.contains("hypixel.net", true)
     private val onGommeHD: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("GoomeHD.net", true)
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData!!.serverIP.contains("GoomeHD.net", true)
     private val onGamster: Boolean
-        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData.serverIP.contains("mc.gamster.org", true)
+        get() = !mc.isSingleplayer && ServerUtils.serverData != null && ServerUtils.serverData!!.serverIP.contains("mc.gamster.org", true)
 
     fun init() {
         thread {
@@ -97,7 +97,8 @@ class AntiStaff : Module() {
                 Notification(
                     "Detected staff: $name$msg",
                     Type.ERROR,
-                    4000
+                    4000,
+                    title = "Anti Staff"
                 )
             )
         if (leave.get())

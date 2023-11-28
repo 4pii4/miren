@@ -125,7 +125,7 @@ class AutoPlay : Module() {
                 }
                 "blocksmc" -> {
                     if (clickState == 1 && text.contains("Only VIP players can join full servers!", true)) {
-                        LiquidBounce.hud.addNotification(Notification("Join failed! trying again", Type.WARNING, 3000))
+                        LiquidBounce.hud.addNotification(Notification("Join failed! trying again", Type.WARNING, 3000, title = "Auto Play"))
                         // connect failed so try to join again
                         Timer().schedule(1500L) {
                             mc.netHandler.addToSendQueue(C09PacketHeldItemChange(7))
@@ -177,7 +177,7 @@ class AutoPlay : Module() {
                         waitForLobby = false
                     }
                     if (showGuiWhenFailedValue.get() && text.contains("giây", false) && text.contains("thất bại", false)) {
-                        LiquidBounce.hud.addNotification(Notification("Failed to join, showing GUI", Type.ERROR, 1000))
+                        LiquidBounce.hud.addNotification(Notification("Failed to join, showing GUI", Type.ERROR, 1000, title = "Auto Play"))
                         mc.thePlayer.sendChatMessage("/bw gui ${bwModeValue.get()}")
                     }
                 }

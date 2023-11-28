@@ -3,6 +3,7 @@ package net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.buttons
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.BACKGROUND_CATEGORY
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.BACKGROUND_MODULE
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.FONT
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.PANEL_HEIGHT
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.PANEL_WIDTH
@@ -33,7 +34,7 @@ class AstolfoCategoryPanel(x: Float, y: Float, var category: ModuleCategory, var
             y = (mouseY2 + mouseY).toFloat()
         }
         drawRect(x, y, x + width, y + height, BACKGROUND_CATEGORY)
-        FONT.drawHeightCenteredString(category.displayName.lowercase(), x + 4, y + height / 2, -0x1)
+        FONT.drawHeightCenteredString(category.displayName.lowercase(), x + 8, y + height / 2, -0x1)
 
         var used = 0f
         if (open) {
@@ -44,9 +45,12 @@ class AstolfoCategoryPanel(x: Float, y: Float, var category: ModuleCategory, var
                 val box = moduleButton.drawPanel(mouseX, mouseY)
                 used += box.height
             }
-        } //		drawRect(x, y + count + height, x + width, y + used + height, -0xe7e5e9)
-        //		drawBorder(x, y, x + width, y + used + height + 2, 2f, color.rgb)
-        drawBorderedRect(x, y, x + width, y + height + used, 2f, color.rgb, Color(0, 0, 0, 0).rgb)
+        }
+
+        if (moduleButtons.isNotEmpty() && open) {
+            drawRect(x, y + height + used, x + width, y + height + used + 2f, BACKGROUND_MODULE)
+        }
+        drawBorderedRect(x, y, x + width, y + height + used + if (moduleButtons.isNotEmpty() && open) 2f else 0f, 2f, color.rgb, Color(0, 0, 0, 0).rgb)
 
         return Rectangle() // unused since panel is the biggest unit there is
     }

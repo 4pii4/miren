@@ -211,7 +211,7 @@ class NoSlow : Module() {
                     mc.thePlayer.motionZ = lastMotionZ
                 }
                 "custom" -> {
-                    if (MovementUtils.isMoving()) {
+                    if (MovementUtils.isMoving) {
                         MovementUtils.strafe(teleportCustomSpeedValue.get())
                     }
 
@@ -328,7 +328,7 @@ class NoSlow : Module() {
         val itemType = mc.thePlayer.heldItem.item ?: return
         if ((!sword.get() && itemType is ItemSword) || (!bow.get() && itemType is ItemBow) || (!food.get() && (itemType is ItemFood || itemType is ItemPotion)))
             return
-        if (!MovementUtils.isMoving() && !modeValue.get().equals("blink", true))
+        if (!MovementUtils.isMoving && !modeValue.get().equals("blink", true))
             return
 
         val heldItem = mc.thePlayer.heldItem
@@ -413,8 +413,15 @@ class NoSlow : Module() {
             }
             "switchitem" -> {
                 if (mc.thePlayer.isUsingItem || killAura.blockingStatus) {
-                    mc.netHandler.addToSendQueue(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem % 8 + 1))
-                    mc.netHandler.addToSendQueue(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem))
+                    if (event.eventState == EventState.POST) {
+                        mc.playerController.syncCurrentPlayItem()
+                        PacketUtils.sendPacketNoEvent(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem % 8 + 1))
+                        PacketUtils.sendPacketNoEvent(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem))
+                    }
+                    if (event.eventState == EventState.PRE) {
+                        mc.playerController.syncCurrentPlayItem()
+                        PacketUtils.sendPacketNoEvent(C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()))
+                    }
                 }
             }
             else -> {

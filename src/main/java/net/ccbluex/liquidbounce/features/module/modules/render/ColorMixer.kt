@@ -14,13 +14,11 @@ import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.utils.render.BlendUtils
 import net.ccbluex.liquidbounce.value.ColorElement
 import net.ccbluex.liquidbounce.value.IntegerValue
-import net.ccbluex.liquidbounce.value.Value
 import java.awt.Color
-import kotlin.math.max
-import kotlin.math.min
 
 @ModuleInfo(name = "ColorMixer", description = "Mix two colors together.", category = ModuleCategory.RENDER, canEnable = false)
-class ColorMixer : Module() {
+object ColorMixer : Module() {
+
     val blendAmount: IntegerValue = object : IntegerValue("Mixer-Amount", 2, 2, 10) {
         override fun onChanged(oldValue: Int, newValue: Int) {
             regenerateColors(oldValue !== newValue)
@@ -64,56 +62,56 @@ class ColorMixer : Module() {
     val col10GreenValue: ColorElement = ColorElement(10, ColorElement.Material.GREEN, blendAmount)
     val col10BlueValue: ColorElement = ColorElement(10, ColorElement.Material.BLUE, blendAmount)
 
-    companion object {
-        private var lastFraction = floatArrayOf()
-        var lastColors = arrayOf<Color?>()
-        @JvmStatic
-        fun getMixedColor(index: Int, seconds: Int): Color {
-            val colMixer = LiquidBounce.moduleManager.getModule(ColorMixer::class.java) ?: return Color.white
-            if (lastColors.size <= 0 || lastFraction.size <= 0) regenerateColors(true) // just to make sure it won't go white
-            return BlendUtils.blendColors(lastFraction, lastColors, (System.currentTimeMillis() + index) % (seconds * 1000) / (seconds * 1000).toFloat())
+    private var lastFraction = floatArrayOf()
+    var lastColors = arrayOf<Color?>()
+
+    @JvmStatic
+    fun getMixedColor(index: Int, seconds: Int): Color {
+        val colMixer = LiquidBounce.moduleManager.getModule(ColorMixer::class.java) ?: return Color.white
+        if (lastColors.isEmpty() || lastFraction.size <= 0) regenerateColors(true) // just to make sure it won't go white
+        return BlendUtils.blendColors(lastFraction, lastColors, (System.currentTimeMillis() + index) % (seconds * 1000) / (seconds * 1000).toFloat())
+    }
+
+    fun regenerateColors(forceValue: Boolean) {
+        val colMixer = LiquidBounce.moduleManager.getModule(ColorMixer::class.java) ?: return
+
+        // color generation
+        if (forceValue || lastColors.isEmpty() || lastColors.size != colMixer.blendAmount.get() * 2 - 1) {
+            val generator = arrayOfNulls<Color>(colMixer.blendAmount.get() * 2 - 1)
+
+            // reflection is cool
+            for (i in 1..colMixer.blendAmount.get()) {
+                var result = Color.white
+                try {
+                    val red = ColorMixer::class.java.getField("col" + i + "RedValue")
+                    val green = ColorMixer::class.java.getField("col" + i + "GreenValue")
+                    val blue = ColorMixer::class.java.getField("col" + i + "BlueValue")
+                    val r: Int = (red[colMixer] as ColorElement).get()
+                    val g: Int = (green[colMixer] as ColorElement).get()
+                    val b: Int = (blue[colMixer] as ColorElement).get()
+                    result = Color(r.coerceIn(0, 255), g.coerceIn(0, 255), b.coerceIn(0, 255))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                generator[i - 1] = result
+            }
+            var h = colMixer.blendAmount.get()
+            for (z in colMixer.blendAmount.get() - 2 downTo 0) {
+                generator[h] = generator[z]
+                h++
+            }
+            lastColors = generator
         }
 
-        fun regenerateColors(forceValue: Boolean) {
-            val colMixer = LiquidBounce.moduleManager.getModule(ColorMixer::class.java) ?: return
-
-            // color generation
-            if (forceValue || lastColors.size <= 0 || lastColors.size != colMixer.blendAmount.get() * 2 - 1) {
-                val generator = arrayOfNulls<Color>(colMixer.blendAmount.get() * 2 - 1)
-
-                // reflection is cool
-                for (i in 1..colMixer.blendAmount.get()) {
-                    var result = Color.white
-                    try {
-                        val red = ColorMixer::class.java.getField("col" + i + "RedValue")
-                        val green = ColorMixer::class.java.getField("col" + i + "GreenValue")
-                        val blue = ColorMixer::class.java.getField("col" + i + "BlueValue")
-                        val r: Int = (red[colMixer] as ColorElement).get()
-                        val g: Int = (green[colMixer] as ColorElement).get()
-                        val b: Int = (blue[colMixer] as ColorElement).get()
-                        result = Color(r.coerceIn(0, 255), g.coerceIn(0, 255), b.coerceIn(0, 255))
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                    generator[i - 1] = result
-                }
-                var h = colMixer.blendAmount.get()
-                for (z in colMixer.blendAmount.get() - 2 downTo 0) {
-                    generator[h] = generator[z]
-                    h++
-                }
-                lastColors = generator
+        // cache thingy
+        if (forceValue || lastFraction.isEmpty() || lastFraction.size != colMixer.blendAmount.get() * 2 - 1) {
+            // color frac regenerate if necessary
+            val colorFraction = FloatArray(colMixer.blendAmount.get() * 2 - 1)
+            for (i in 0..colMixer.blendAmount.get() * 2 - 2) {
+                colorFraction[i] = i.toFloat() / (colMixer.blendAmount.get() * 2 - 2).toFloat()
             }
-
-            // cache thingy
-            if (forceValue || lastFraction.size <= 0 || lastFraction.size != colMixer.blendAmount.get() * 2 - 1) {
-                // color frac regenerate if necessary
-                val colorFraction = FloatArray(colMixer.blendAmount.get() * 2 - 1)
-                for (i in 0..colMixer.blendAmount.get() * 2 - 2) {
-                    colorFraction[i] = i.toFloat() / (colMixer.blendAmount.get() * 2 - 2).toFloat()
-                }
-                lastFraction = colorFraction
-            }
+            lastFraction = colorFraction
         }
     }
+
 }

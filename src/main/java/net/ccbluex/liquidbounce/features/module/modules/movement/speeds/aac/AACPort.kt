@@ -19,7 +19,7 @@ import net.minecraft.util.MathHelper
 class AACPort : SpeedMode("AACPort") {
     
     override fun onUpdate() {
-        if (!MovementUtils.isMoving()) return
+        if (!MovementUtils.isMoving) return
         val f = mc.thePlayer.rotationYaw * 0.017453292f
         var d = 0.2
         while (d <= LiquidBounce.moduleManager.getModule<Speed>(Speed::class.java)!!.portMax.get()) {

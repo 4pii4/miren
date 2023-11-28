@@ -37,7 +37,7 @@ class InvMove : Module() {
 
     @EventTarget
     fun onClick(event: ClickWindowEvent) {
-        if (noMoveClicksValue.get() && MovementUtils.isMoving())
+        if (noMoveClicksValue.get() && MovementUtils.isMoving)
             event.cancelEvent()
     }
 

@@ -186,7 +186,7 @@ class Velocity : Module() {
                     return
 
                 if (!mc.thePlayer.onGround) {
-                    MovementUtils.strafe(MovementUtils.getSpeed() * reverseStrengthValue.get())
+                    MovementUtils.strafe(MovementUtils.speed * reverseStrengthValue.get())
                 } else if (velocityTimer.hasTimePassed(80L))
                     velocityInput = false
             }
@@ -539,7 +539,7 @@ class Velocity : Module() {
                 }
                 val yaw = rot.yaw
                 if (legitStrafeValue.get()) {
-                    val speed = MovementUtils.getSpeed()
+                    val speed = MovementUtils.speed
                     val yaw1 = Math.toRadians(yaw.toDouble())
                     mc.thePlayer.motionX = -sin(yaw1) * speed
                     mc.thePlayer.motionZ = cos(yaw1) * speed

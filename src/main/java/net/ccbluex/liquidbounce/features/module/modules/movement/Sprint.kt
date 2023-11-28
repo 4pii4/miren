@@ -46,7 +46,7 @@ class Sprint : Module() {
     fun onUpdate(event: UpdateEvent) {
         val killAura = LiquidBounce.moduleManager.getModule(KillAura::class.java)!!
 
-        if (!MovementUtils.isMoving() || mc.thePlayer.isSneaking ||
+        if (!MovementUtils.isMoving || mc.thePlayer.isSneaking ||
                 (blindnessValue.get() && mc.thePlayer.isPotionActive(Potion.blindness)) ||
                 (foodValue.get() && !(mc.thePlayer.foodStats.foodLevel > 6.0F || mc.thePlayer.capabilities.allowFlying))
                 || (checkServerSide.get() && (mc.thePlayer.onGround || !checkServerSideGround.get())
@@ -60,7 +60,7 @@ class Sprint : Module() {
             mc.thePlayer.isSprinting = true
 
         if (allDirectionsValue.get() && moveDirPatchValue.get() && killAura.target == null)
-            RotationUtils.setTargetRotation(Rotation(MovementUtils.getRawDirection(), mc.thePlayer.rotationPitch))
+            RotationUtils.setTargetRotation(Rotation(MovementUtils.rawDirection, mc.thePlayer.rotationPitch))
     }
 
 }

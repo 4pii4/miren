@@ -9,6 +9,7 @@ import net.ccbluex.liquidbounce.ui.client.hud.element.Border
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Target
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.targets.TargetStyle
 import net.ccbluex.liquidbounce.ui.font.Fonts
+import net.ccbluex.liquidbounce.utils.extensions.drawScaledString
 import net.ccbluex.liquidbounce.utils.extensions.getHealth1D
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils.drawEntityOnScreen
@@ -21,7 +22,7 @@ import org.lwjgl.opengl.GL11
 class Astolfo2(inst: Target) : TargetStyle("Astolfo2", inst, true) {
 
     override fun drawTarget(entity: EntityPlayer) {
-        val font = Fonts.minecraftFont
+        val font = Fonts.astolfoFont
 
         updateAnim(entity.health)
 
@@ -37,16 +38,14 @@ class Astolfo2(inst: Target) : TargetStyle("Astolfo2", inst, true) {
         drawArmor(entity)
         GL11.glPopMatrix()
 
-        GL11.glPushMatrix()
-        GL11.glScalef(2f, 2f, 2f)
-        font.drawStringWithShadow(entity.name, 22f, 2f, getColor(-1).rgb)
-        font.drawStringWithShadow("${entity.getHealth1D()}", 22f, 10f, targetInstance.barColor.rgb)
-        GL11.glPopMatrix()
+//        GL11.glPushMatrix()
+//        GL11.glScalef(2f, 2f, 2f)
+//        font.drawStringWithShadow(entity.name, 22f, 2f, getColor(-1).rgb)
+//        font.drawStringWithShadow("${entity.getHealth1D()}", 22f, 12f, targetInstance.barColor.rgb)
+//        GL11.glPopMatrix()
 
-        GL11.glPushMatrix()
-        GL11.glScalef(1.5f, 1.5f, 1.5f)
-        font.drawStringWithShadow("❤", 50f, 15f, targetInstance.barColor.rgb)
-        GL11.glPopMatrix()
+        font.drawScaledString(entity.name, 40f, 4f, getColor(-1).rgb, 2f, false)
+        font.drawScaledString("${entity.getHealth1D()}❤", 40f, 28f, targetInstance.barColor.rgb, 1.5f, false)
 
         RenderUtils.newDrawRect(3F, 66F, 2F + (easingHealth / entity.maxHealth) * 185F, 71F, targetInstance.barColor.rgb)
     }

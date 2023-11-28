@@ -10,12 +10,25 @@ import net.ccbluex.liquidbounce.utils.render.shader.Shader
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL20.glUniform1f
 import org.lwjgl.opengl.GL20.glUniform2f
+import java.io.File
+import java.io.IOException
 
 /**
  * @author https://forums.ccbluex.net/topic/1699/shader-two-backgroundshader-share
  */
-class BackgroundShader : Shader("background.frag", "fragment") {
+
+class BackgroundShader : Shader {
+    constructor() : super("background.frag")
+
+    @Throws(IOException::class)
+    constructor(fragmentShader: File) : super(fragmentShader)
+
+    companion object {
+        val BACKGROUND_SHADER = BackgroundShader()
+    }
+
     private var time = 0f
+
     override fun setupUniforms() {
         setupUniform("iResolution")
         setupUniform("iTime")
@@ -26,11 +39,9 @@ class BackgroundShader : Shader("background.frag", "fragment") {
         if (resolutionID > -1)
             glUniform2f(resolutionID, Display.getWidth().toFloat(), Display.getHeight().toFloat())
 
-        glUniform1f(getUniform("iTime"), time)
-        time += 0.002f * deltaTime
-    }
+        val timeID = getUniform("iTime")
+        if (timeID > -1) glUniform1f(timeID, time)
 
-    companion object {
-        val BACKGROUND_SHADER = BackgroundShader()
+        time += 0.0015f * deltaTime
     }
 }

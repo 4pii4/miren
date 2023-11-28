@@ -33,7 +33,8 @@ class BindCommand : Command("bind", emptyArray()) {
                 LiquidBounce.hud.addNotification(
                     Notification(
                         "Removed ${module.name}'s bind",
-                        Type.SUCCESS
+                        Type.SUCCESS,
+                        title = "Bind"
                     )
                 )
             } else {
@@ -41,7 +42,8 @@ class BindCommand : Command("bind", emptyArray()) {
                 LiquidBounce.hud.addNotification(
                     Notification(
                         "${module.name} bound to $keyName",
-                        Type.SUCCESS
+                        Type.SUCCESS,
+                        title = "Bind"
                     )
                 )
             }

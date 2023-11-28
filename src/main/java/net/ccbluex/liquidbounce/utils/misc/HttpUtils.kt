@@ -5,6 +5,7 @@
  */
 package net.ccbluex.liquidbounce.utils.misc
 
+import net.ccbluex.liquidbounce.utils.ClientUtils
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.IOException
@@ -30,6 +31,7 @@ object HttpUtils {
     private fun make(url: String, method: String,
                      agent: String = DEFAULT_AGENT): HttpURLConnection {
         val httpConnection = URL(url).openConnection() as HttpURLConnection
+        ClientUtils.logger.info("Trying to request HTTP $method $url")
 
         httpConnection.requestMethod = method
         httpConnection.connectTimeout = 1000

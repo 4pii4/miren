@@ -17,6 +17,7 @@ import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Type
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.PacketUtils
+import net.ccbluex.liquidbounce.utils.misc.RandomUtils
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
 import net.ccbluex.liquidbounce.value.BoolValue
 import net.ccbluex.liquidbounce.value.IntegerValue
@@ -27,6 +28,9 @@ import net.minecraft.network.play.server.S45PacketTitle
 
 @ModuleInfo(name = "AutoLogin", spacedName = "Auto Login", description = "Automatically login into some servers for you.", category = ModuleCategory.WORLD)
 class AutoLogin : Module() {
+	private val minDelayValue = IntegerValue("MinDelay", 1000, 0, 5000, "ms").canSetIf { it < maxDelay }
+	private val minDelay: Int by minDelayValue
+	private val maxDelay by IntegerValue("MaxDelay", 1500, 0, 5000, "ms").canSetIf { it > minDelay }
 
 	private val password = TextValue("Password", "example@01")
 	private val regRegex = TextValue("Register-Regex", "/register")
@@ -37,7 +41,7 @@ class AutoLogin : Module() {
     private val uniqueFormat = TextValue("UniqueFormat", "%name%_%p%_xx") { unique.get() }
 
     private val uniqueHelp: BoolValue = object : BoolValue("ClickForFormatHelp", false, { unique.get() }) {
-        override fun onChange(oldValue: Boolean, newValue: Boolean) {
+		override fun onChanged(oldValue: Boolean, newValue: Boolean) {
             ClientUtils.displayChatMessage("UniqueFormat placeholders:")
             ClientUtils.displayChatMessage("  - %name%: username")
             ClientUtils.displayChatMessage("  - %pass%: original password")
@@ -45,12 +49,11 @@ class AutoLogin : Module() {
         }
     }
 
-	private val delayValue = IntegerValue("Delay", 5000, 0, 5000, "ms")
-
 	private val loginPackets = arrayListOf<C01PacketChatMessage>()
 	private val registerPackets = arrayListOf<C01PacketChatMessage>()
 	private val regTimer = MSTimer()
 	private val logTimer = MSTimer()
+	private var delay = RandomUtils.nextInt(minDelay, maxDelay)
 
 	override fun onEnable() = resetEverything()
 
@@ -69,20 +72,20 @@ class AutoLogin : Module() {
 	fun onUpdate(event: UpdateEvent) {
 		if (registerPackets.isEmpty())
 			regTimer.reset()
-		else if (regTimer.hasTimePassed(delayValue.get().toLong())) {
+		else if (regTimer.hasTimePassed(delay)) {
 			for (packet in registerPackets)
 				PacketUtils.sendPacketNoEvent(packet)
-			LiquidBounce.hud.addNotification(Notification("Successfully registered.", Type.SUCCESS))
+			LiquidBounce.hud.addNotification(Notification("Successfully registered.", Type.SUCCESS, title = "Auto Login"))
 			registerPackets.clear()
 			regTimer.reset()
 		}
 
 		if (loginPackets.isEmpty())
 			logTimer.reset()
-		else if (logTimer.hasTimePassed(delayValue.get().toLong())) {
+		else if (logTimer.hasTimePassed(delay)) {
 			for (packet in loginPackets)
 				PacketUtils.sendPacketNoEvent(packet)
-            LiquidBounce.hud.addNotification(Notification("Successfully logged in.", Type.SUCCESS))
+            LiquidBounce.hud.addNotification(Notification("Successfully logged in.", Type.SUCCESS, title = "Auto Login"))
 			loginPackets.clear()
 			logTimer.reset()
 		}
@@ -125,5 +128,6 @@ class AutoLogin : Module() {
 		loginPackets.clear()
 		regTimer.reset()
 		logTimer.reset()
+		delay = RandomUtils.nextInt(minDelay, maxDelay)
     }
 }

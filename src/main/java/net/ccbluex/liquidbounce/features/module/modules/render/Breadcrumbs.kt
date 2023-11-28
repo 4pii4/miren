@@ -122,7 +122,7 @@ class Breadcrumbs : Module() {
             "Rainbow" -> Color(RenderUtils.getRainbowOpaque(mixerSecondsValue.get(), saturationValue.get(), brightnessValue.get(), 0))
             "Sky" -> RenderUtils.skyRainbow(0, saturationValue.get(), brightnessValue.get())
             "LiquidSlowly" -> LiquidSlowly(System.nanoTime(), 0, saturationValue.get(), brightnessValue.get())
-            "Mixer" -> ColorMixer.Companion.getMixedColor(0, mixerSecondsValue.get())
+            "Mixer" -> ColorMixer.getMixedColor(0, mixerSecondsValue.get())
             else -> fade(Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get()), 0, 100)
         }
 }

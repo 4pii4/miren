@@ -322,7 +322,7 @@ class Fly : Module() {
                 "watchdog" -> {
                     expectItemStack = slimeSlot
                     if (expectItemStack == -1) {
-                        LiquidBounce.hud.addNotification(Notification("The fly requires slime blocks to be activated properly.", Type.ERROR, 500))
+                        LiquidBounce.hud.addNotification(Notification("The fly requires slime blocks to be activated properly.", Type.ERROR, 500, "Fly"))
                         break
                     }
                     if (mc.thePlayer.onGround) {
@@ -529,7 +529,7 @@ class Fly : Module() {
                         MovementUtils.strafe(motion)
                     } else if (verusDmged) {
                         mc.timer.timerSpeed = 1f
-                        MovementUtils.strafe(MovementUtils.getBaseMoveSpeed().toFloat() * 0.6f)
+                        MovementUtils.strafe(MovementUtils.baseMoveSpeed.toFloat() * 0.6f)
                     } else {
                         mc.thePlayer.movementInput.moveForward = 0f
                         mc.thePlayer.movementInput.moveStrafe = 0f
@@ -751,7 +751,7 @@ class Fly : Module() {
                     val enderPearlSlot = pearlSlot
                     if (pearlState == 0) {
                         if (enderPearlSlot == -1) {
-                            LiquidBounce.hud.addNotification(Notification("You don't have any ender pearl!", Type.ERROR, 500))
+                            LiquidBounce.hud.addNotification(Notification("You don't have any ender pearl!", Type.ERROR, 500, "Fly"))
                             pearlState = -1
                             state = false
                             return
@@ -863,7 +863,7 @@ class Fly : Module() {
         when (modeValue.get().lowercase(Locale.getDefault())) {
             "funcraft" -> {
                 event.onGround = true
-                if (!MovementUtils.isMoving()) moveSpeed = 0.25
+                if (!MovementUtils.isMoving) moveSpeed = 0.25
                 if (moveSpeed > 0.25) {
                     moveSpeed -= moveSpeed / 159.0
                 }
@@ -890,7 +890,7 @@ class Fly : Module() {
                         expectItemStack = -1
                     }
                     if (wdState == 4) {
-                        if (MovementUtils.isMoving()) MovementUtils.strafe(MovementUtils.getBaseMoveSpeed().toFloat() * 0.938f) else MovementUtils.strafe(0f)
+                        if (MovementUtils.isMoving) MovementUtils.strafe(MovementUtils.baseMoveSpeed.toFloat() * 0.938f) else MovementUtils.strafe(0f)
                         mc.thePlayer.motionY = -0.0015
                     } else if (wdState < 3) {
                         val rot = RotationUtils.getRotationFromPosition(mc.thePlayer.posX, mc.thePlayer.posZ, (mc.thePlayer.posY.toInt() - 1).toDouble())
@@ -917,7 +917,7 @@ class Fly : Module() {
                 if (started) {
                     mc.thePlayer.motionY += 0.025
                     MovementUtils.strafe(0.95f.let { bmcSpeed *= it; bmcSpeed }.toFloat())
-                    if (mc.thePlayer.motionY < -0.5 && !MovementUtils.isBlockUnder()) {
+                    if (mc.thePlayer.motionY < -0.5 && !MovementUtils.isBlockUnder) {
                         toggle()
                     }
                 }
@@ -1069,7 +1069,7 @@ class Fly : Module() {
                 "verus" -> if (!verusDmged) if (verusDmgModeValue.get().equals("Jump", ignoreCase = true)) event.zeroXZ() else event.cancelEvent()
                 "clip" -> if (clipNoMove.get()) event.zeroXZ()
                 "veruslowhop" -> if (!mc.thePlayer.isInWeb && !mc.thePlayer.isInLava && !mc.thePlayer.isInWater && !mc.thePlayer.isOnLadder && !mc.gameSettings.keyBindJump.isKeyDown && mc.thePlayer.ridingEntity == null) {
-                    if (MovementUtils.isMoving()) {
+                    if (MovementUtils.isMoving) {
                         mc.gameSettings.keyBindJump.pressed = false
                         if (mc.thePlayer.onGround) {
                             mc.thePlayer.jump()
@@ -1095,7 +1095,7 @@ class Fly : Module() {
                 }
 
                 "boosthypixel" -> {
-                    if (!MovementUtils.isMoving()) {
+                    if (!MovementUtils.isMoving) {
                         event.x = 0.0
                         event.z = 0.0
                         break
@@ -1123,7 +1123,7 @@ class Fly : Module() {
                         else -> moveSpeed = lastDistance - lastDistance / 159.8
                     }
                     moveSpeed = max(moveSpeed, 0.3)
-                    val yaw = MovementUtils.getDirection()
+                    val yaw = MovementUtils.direction
                     event.x = -sin(yaw) * moveSpeed
                     event.z = cos(yaw) * moveSpeed
                     mc.thePlayer.motionX = event.x

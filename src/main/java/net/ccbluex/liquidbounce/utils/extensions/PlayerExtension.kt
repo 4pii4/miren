@@ -7,9 +7,10 @@ package net.ccbluex.liquidbounce.utils.extensions
 
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.utils.MinecraftInstance
-import net.ccbluex.liquidbounce.utils.MinecraftInstance.mc
 import net.ccbluex.liquidbounce.utils.Rotation
 import net.ccbluex.liquidbounce.utils.render.RenderUtils.stripColor
+import net.minecraft.client.Minecraft
+import net.minecraft.client.entity.EntityPlayerSP
 import net.minecraft.entity.Entity
 import net.minecraft.entity.boss.EntityDragon
 import net.minecraft.entity.monster.EntityGhast
@@ -79,9 +80,9 @@ fun EntityPlayer.isClientFriend(): Boolean {
 }
 fun EntityPlayer.customRayTrace(blockReachDistance: Double, partialTicks: Float, yaw: Float, pitch: Float): MovingObjectPosition? {
     val vec3: Vec3 = this.getPositionEyes(partialTicks)
-    val vec4: Vec3? = this.customGetLook(partialTicks, yaw, pitch)
+    val vec4: Vec3 = this.customGetLook(partialTicks, yaw, pitch)
     val vec5 = vec3.addVector(
-        vec4!!.xCoord * blockReachDistance,
+        vec4.xCoord * blockReachDistance,
         vec4.yCoord * blockReachDistance,
         vec4.zCoord * blockReachDistance
     )
@@ -109,7 +110,17 @@ val Entity.eyesLoc: Vec3
     get() = getPositionEyes(1f)
 
 fun Entity.interpolatedPosition() = Vec3(
-    prevPosX + (posX - prevPosX) * mc.timer.renderPartialTicks,
-    prevPosY + (posY - prevPosY) * mc.timer.renderPartialTicks,
-    prevPosZ + (posZ - prevPosZ) * mc.timer.renderPartialTicks
+    prevPosX + (posX - prevPosX) * Minecraft.getMinecraft().timer.renderPartialTicks,
+    prevPosY + (posY - prevPosY) * Minecraft.getMinecraft().timer.renderPartialTicks,
+    prevPosZ + (posZ - prevPosZ) * Minecraft.getMinecraft().timer.renderPartialTicks
 )
+
+fun EntityPlayerSP.stopXZ() {
+    motionX = 0.0
+    motionZ = 0.0
+}
+
+fun EntityPlayerSP.stop() {
+    stopXZ()
+    motionY = 0.0
+}

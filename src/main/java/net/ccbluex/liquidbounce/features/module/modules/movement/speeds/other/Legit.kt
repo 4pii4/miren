@@ -18,7 +18,7 @@ import net.minecraft.client.settings.GameSettings
 class Legit : SpeedMode("Legit") {
     override fun onMotion() {
         val invMove = LiquidBounce.moduleManager.getModule(InvMove::class.java)
-        mc.gameSettings.keyBindJump.pressed = (MovementUtils.isMoving() || GameSettings.isKeyDown(mc.gameSettings.keyBindJump)) && (mc.inGameHasFocus || invMove!!.state && !(mc.currentScreen is GuiChat || mc.currentScreen is GuiIngameMenu) && mc.currentScreen !is GuiContainer)
+        mc.gameSettings.keyBindJump.pressed = (MovementUtils.isMoving || GameSettings.isKeyDown(mc.gameSettings.keyBindJump)) && (mc.inGameHasFocus || invMove!!.state && !(mc.currentScreen is GuiChat || mc.currentScreen is GuiIngameMenu) && mc.currentScreen !is GuiContainer)
     }
 
     

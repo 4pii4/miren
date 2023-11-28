@@ -81,7 +81,8 @@ class BanChecker : Module() {
                                     Notification(
                                         "Staffs banned $staffLastMin players in the last minute!",
                                         Type.WARNING,
-                                        alertTime.get() * 500L
+                                        alertTime.get() * 500L,
+                                        "Ban Checker"
                                     )
                                 )
                             else if (nofifyWhenNoBan.get())
@@ -89,7 +90,8 @@ class BanChecker : Module() {
                                     Notification(
                                         "Staffs didn't ban any player in the last minute.",
                                         Type.SUCCESS,
-                                        alertTime.get() * 500L
+                                        alertTime.get() * 500L,
+                                        "Ban Checker"
                                     )
                                 )
 
@@ -99,7 +101,8 @@ class BanChecker : Module() {
                                     Notification(
                                         "Watchdog banned $watchdogLastMin players in the last minute!",
                                         Type.WARNING,
-                                        alertTime.get() * 500L
+                                        alertTime.get() * 500L,
+                                        "Ban Checker"
                                     )
                                 )
                             else if (nofifyWhenNoBan.get())
@@ -107,7 +110,8 @@ class BanChecker : Module() {
                                     Notification(
                                         "Watchdog didn't ban any player in the last minute.",
                                         Type.SUCCESS,
-                                        alertTime.get() * 500L
+                                        alertTime.get() * 500L,
+                                        "Ban Checker"
                                     )
                                 )
                     }

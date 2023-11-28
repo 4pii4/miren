@@ -47,9 +47,9 @@ class NameProtect : Module() {
                 val bufferedImage = ImageIO.read(FileInputStream(skinFile)) ?: return
                 skinImage = ResourceLocation(LiquidBounce.CLIENT_NAME.lowercase(Locale.getDefault()) + "/cskin.png")
                 mc.textureManager.loadTexture(skinImage, DynamicTexture(bufferedImage))
-                ClientUtils.getLogger().info("Loaded custom skin for NameProtect.")
+                ClientUtils.logger.info("Loaded custom skin for NameProtect.")
             } catch (e: Exception) {
-                ClientUtils.getLogger().error("Failed to load custom skin.", e)
+                ClientUtils.logger.error("Failed to load custom skin.", e)
             }
         }
     }

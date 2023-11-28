@@ -105,7 +105,7 @@ class Step : Module() {
                 isStep = false
 
             mode.equals("aac3.3.4", true) -> if (mc.thePlayer.isCollidedHorizontally
-                && MovementUtils.isMoving()) {
+                && MovementUtils.isMoving) {
                 if (mc.thePlayer.onGround && couldStep()) {
                     mc.thePlayer.motionX *= 1.26
                     mc.thePlayer.motionZ *= 1.26
@@ -121,7 +121,7 @@ class Step : Module() {
             } else
                 isAACStep = false
 
-            mode.equals("1.5Twillight", true) -> if (MovementUtils.isMoving() &&
+            mode.equals("1.5Twillight", true) -> if (MovementUtils.isMoving &&
                 mc.thePlayer.isCollidedHorizontally) {
                 ticks++
                 if (ticks == 1) mc.thePlayer.motionY = 0.4399
@@ -154,7 +154,7 @@ class Step : Module() {
                     }
 
                     ncpNextStep == 2 -> {
-                        val yaw = MovementUtils.getDirection()
+                        val yaw = MovementUtils.direction
 
                         event.y = 1.001335979112147 - 0.7531999805212
                         event.x = -sin(yaw) * 0.7
@@ -408,7 +408,7 @@ class Step : Module() {
     }
 
     private fun couldStep(): Boolean {
-        val yaw = MovementUtils.getDirection()
+        val yaw = MovementUtils.direction
         val x = -sin(yaw) * 0.4
         val z = cos(yaw) * 0.4
 

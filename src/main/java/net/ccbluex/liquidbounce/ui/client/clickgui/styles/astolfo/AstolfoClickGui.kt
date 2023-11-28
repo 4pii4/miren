@@ -72,14 +72,14 @@ class AstolfoClickGui : GuiScreen() {
                         val elementObject = panelObject.getAsJsonObject(moduleElement.module.name)
                         moduleElement.open = elementObject["Settings"].asBoolean
                     } catch (e: Exception) {
-                        ClientUtils.getLogger().error(
+                        ClientUtils.logger.error(
                             "Error while loading clickgui module element with the name '" + moduleElement.module.name + "' (Panel Name: " + panel.name + ").",
                             e
                         )
                     }
                 }
             } catch (e: Exception) {
-                ClientUtils.getLogger()
+                ClientUtils.logger
                     .error("Error while loading clickgui panel with the name '" + panel.name + "'.", e)
             }
         }
@@ -176,6 +176,10 @@ class AstolfoClickGui : GuiScreen() {
 
     override fun mouseReleased(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
         mouseAction(mouseXIn, mouseYIn, mouseButton, false)
+    }
+
+    override fun doesGuiPauseGame(): Boolean {
+        return false
     }
 
     companion object {

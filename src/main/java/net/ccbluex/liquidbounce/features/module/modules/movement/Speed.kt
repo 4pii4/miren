@@ -20,10 +20,6 @@ import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.hypixel.
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.matrix.*
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.ncp.*
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.other.*
-import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.spartan.SpartanYPort
-import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.spectre.SpectreBHop
-import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.spectre.SpectreLowHop
-import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.spectre.SpectreOnGround
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.verus.VerusHard
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.verus.VerusHop
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.verus.VerusLowHop
@@ -44,11 +40,12 @@ import net.minecraft.client.settings.GameSettings
 
 @ModuleInfo(name = "Speed", description = "Allows you to move faster.", category = ModuleCategory.MOVEMENT)
 class Speed : Module() {
-    val speedModes = arrayOf( // NCP
+    private val speedModes = arrayOf( // NCP
         NCPBHop(),
         NCPFHop(),
         SNCPBHop(),
         NCPHop(),
+        NCPHop2(),
         NCPYPort(),  // AAC
         AAC4Hop(),
         AAC4SlowHop(),
@@ -76,11 +73,7 @@ class Speed : Module() {
         HypixelBoost(),
         HypixelStable(),
         HypixelCustom(),
-        HypixelNew(),  // Spartan
-        SpartanYPort(),  // Spectre
-        SpectreBHop(),
-        SpectreLowHop(),
-        SpectreOnGround(),  // Other
+        HypixelNew(),
         SlowHop(),
         CustomSpeed(),
         Jump(),
@@ -111,7 +104,7 @@ class Speed : Module() {
         Matrix692(),
         MatrixLowHop()
     )
-    val typeValue: ListValue = object : ListValue("Type", arrayOf("NCP", "AAC", "Spartan", "Spectre", "Hypixel", "Verus", "Vulcan", "Matrix", "Custom", "Other"), "NCP") {
+    private val typeValue: ListValue = object : ListValue("Type", arrayOf("NCP", "AAC", "Hypixel", "Verus", "Vulcan", "Matrix", "Custom", "Other"), "NCP") {
         override fun onChange(oldValue: String, newValue: String) {
             if (state) onDisable()
         }
@@ -120,7 +113,7 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val ncpModeValue: ListValue = object : ListValue("NCP-Mode", arrayOf("BHop", "FHop", "SBHop", "Hop", "YPort"), "BHop", { typeValue.get().equals("ncp", ignoreCase = true) }) {
+    private val ncpModeValue: ListValue = object : ListValue("NCP-Mode", arrayOf("BHop", "FHop", "SBHop", "Hop", "YPort", "Hop2"), "BHop", { typeValue.get().equals("ncp", ignoreCase = true) }) {
         override fun onChange(oldValue: String, newValue: String) {
             if (state) onDisable()
         }
@@ -129,7 +122,7 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val aacModeValue: ListValue = object : ListValue("AAC-Mode", arrayOf(
+    private val aacModeValue: ListValue = object : ListValue("AAC-Mode", arrayOf(
         "4Hop",
         "4SlowHop",
         "v4BHop",
@@ -162,7 +155,7 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val hypixelModeValue: ListValue = object : ListValue("Hypixel-Mode", arrayOf("Boost", "Stable", "Custom", "New"), "Stable", { typeValue.get().equals("hypixel", ignoreCase = true) }) {
+    private val hypixelModeValue: ListValue = object : ListValue("Hypixel-Mode", arrayOf("Boost", "Stable", "Custom", "New"), "Stable", { typeValue.get().equals("hypixel", ignoreCase = true) }) {
         // the worst hypixel bypass ever existed
         override fun onChange(oldValue: String, newValue: String) {
             if (state) onDisable()
@@ -172,7 +165,8 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val spectreModeValue: ListValue = object : ListValue("Spectre-Mode", arrayOf("BHop", "LowHop", "OnGround"), "BHop", { typeValue.get().equals("spectre", ignoreCase = true) }) {
+
+    private val verusModeValue: ListValue = object : ListValue("Verus-Mode", arrayOf("Hop", "LowHop", "Hard"), "Hop", { typeValue.get().equals("verus", ignoreCase = true) }) {
         override fun onChange(oldValue: String, newValue: String) {
             if (state) onDisable()
         }
@@ -181,7 +175,7 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val otherModeValue: ListValue = object : ListValue("Other-Mode", arrayOf("YPort", "YPort2", "Boost", "Frame", "MiJump", "OnGround", "SlowHop", "Jump", "Legit", "AEMine", "GWEN", "HiveHop", "MineplexGround", "TeleportCubeCraft", "GrimCombat"), "Boost", { typeValue.get().equals("other", ignoreCase = true) }) {
+    private val vulcanModeValue: ListValue = object : ListValue("Vulcan-Mode", arrayOf("GroundSpeed", "LowHopSpeed", "YPort2Speed", "YPortSpeed"), "Ground", { typeValue.get().equals("vulcan", ignoreCase = true) }) {
         override fun onChange(oldValue: String, newValue: String) {
             if (state) onDisable()
         }
@@ -190,7 +184,7 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val verusModeValue: ListValue = object : ListValue("Verus-Mode", arrayOf("Hop", "LowHop", "Hard"), "Hop", { typeValue.get().equals("verus", ignoreCase = true) }) {
+    private val matrixModeValue: ListValue = object : ListValue("Matrix-Mode", arrayOf("Matrix6.9.2", "MatrixSemiStrafe", "MatrixTimerBalance", "MatrixMultiply", "MatrixDynamic", "MatrixLowHop"), "MatrixSemiStrafe", { typeValue.get().equals("matrix", ignoreCase = true) }) {
         override fun onChange(oldValue: String, newValue: String) {
             if (state) onDisable()
         }
@@ -199,7 +193,8 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val vulcanModeValue: ListValue = object : ListValue("Vulcan-Mode", arrayOf("GroundSpeed", "LowHopSpeed", "YPort2Speed", "YPortSpeed"), "Ground", { typeValue.get().equals("vulcan", ignoreCase = true) }) {
+
+    private val otherModeValue: ListValue = object : ListValue("Other-Mode", arrayOf("YPort", "YPort2", "Boost", "Frame", "MiJump", "OnGround", "SlowHop", "Jump", "Legit", "AEMine", "GWEN", "HiveHop", "MineplexGround", "TeleportCubeCraft", "GrimCombat"), "Boost", { typeValue.get().equals("other", ignoreCase = true) }) {
         override fun onChange(oldValue: String, newValue: String) {
             if (state) onDisable()
         }
@@ -208,60 +203,52 @@ class Speed : Module() {
             if (state) onEnable()
         }
     }
-    val matrixModeValue: ListValue = object : ListValue("Matrix-Mode", arrayOf("Matrix6.9.2", "MatrixSemiStrafe", "MatrixTimerBalance", "MatrixMultiply", "MatrixDynamic", "MatrixLowHop"), "MatrixSemiStrafe", { typeValue.get().equals("matrix", ignoreCase = true) }) {
-        override fun onChange(oldValue: String, newValue: String) {
-            if (state) onDisable()
-        }
 
-        override fun onChanged(oldValue: String, newValue: String) {
-            if (state) onEnable()
-        }
-    }
-    val modifySprint = BoolValue("ModifySprinting", true)
-    val timerValue = BoolValue("UseTimer", true) { modeName.equals("hypixelcustom", ignoreCase = true) }
-    val smoothStrafe = BoolValue("SmoothStrafe", true) { modeName.equals("hypixelcustom", ignoreCase = true) }
-    val customSpeedValue = FloatValue("StrSpeed", 0.42f, 0.2f, 2f) { modeName.equals("hypixelcustom", ignoreCase = true) }
-    val motionYValue = FloatValue("MotionY", 0.42f, 0f, 2f) { modeName.equals("hypixelcustom", ignoreCase = true) }
-    val verusTimer = FloatValue("Verus-Timer", 1f, 0.1f, 10f) { modeName.equals("verushard", ignoreCase = true) }
-    val speedValue = FloatValue("CustomSpeed", 1.6f, 0.2f, 2f) { typeValue.get().equals("custom", ignoreCase = true) }
-    val launchSpeedValue = FloatValue("CustomLaunchSpeed", 1.6f, 0.2f, 2f) { typeValue.get().equals("custom", ignoreCase = true) }
-    val addYMotionValue = FloatValue("CustomAddYMotion", 0f, 0f, 2f) { typeValue.get().equals("custom", ignoreCase = true) }
-    val yValue = FloatValue("CustomY", 0f, 0f, 4f) { typeValue.get().equals("custom", ignoreCase = true) }
-    val upTimerValue = FloatValue("CustomUpTimer", 1f, 0.1f, 2f) { typeValue.get().equals("custom", ignoreCase = true) }
-    val downTimerValue = FloatValue("CustomDownTimer", 1f, 0.1f, 2f) { typeValue.get().equals("custom", ignoreCase = true) }
-    val strafeValue = ListValue("CustomStrafe", arrayOf("Strafe", "Boost", "Plus", "PlusOnlyUp", "Non-Strafe"), "Boost") { typeValue.get().equals("custom", ignoreCase = true) }
-    val groundStay = IntegerValue("CustomGroundStay", 0, 0, 10) { typeValue.get().equals("custom", ignoreCase = true) }
-    val groundResetXZValue = BoolValue("CustomGroundResetXZ", false) { typeValue.get().equals("custom", ignoreCase = true) }
-    val resetXZValue = BoolValue("CustomResetXZ", false) { typeValue.get().equals("custom", ignoreCase = true) }
-    val resetYValue = BoolValue("CustomResetY", false) { typeValue.get().equals("custom", ignoreCase = true) }
-    val doLaunchSpeedValue = BoolValue("CustomDoLaunchSpeed", true) { typeValue.get().equals("custom", ignoreCase = true) }
-    val NoBob = BoolValue("NoBob", true)
-    val jumpStrafe = BoolValue("JumpStrafe", false) { typeValue.get().equals("other", ignoreCase = true) }
-    val sendJumpValue = BoolValue("SendJump", true) { typeValue.get().equals("hypixel", ignoreCase = true) && !modeName.equals("hypixelcustom", ignoreCase = true) }
-    val recalcValue = BoolValue("ReCalculate", true) { typeValue.get().equals("hypixel", ignoreCase = true) && sendJumpValue.get() && !modeName.equals("hypixelcustom", ignoreCase = true) }
-    val glideStrengthValue = FloatValue("GlideStrength", 0.03f, 0f, 0.05f) { typeValue.get().equals("hypixel", ignoreCase = true) && !modeName.equals("hypixelcustom", ignoreCase = true) }
-    val moveSpeedValue = FloatValue("MoveSpeed", 1.47f, 1f, 1.7f) { typeValue.get().equals("hypixel", ignoreCase = true) && !modeName.equals("hypixelcustom", ignoreCase = true) }
-    val jumpYValue = FloatValue("JumpY", 0.42f, 0f, 1f) { typeValue.get().equals("hypixel", ignoreCase = true) && !modeName.equals("hypixelcustom", ignoreCase = true) }
-    val baseStrengthValue = FloatValue("BaseMultiplier", 1f, 0.5f, 1f) { typeValue.get().equals("hypixel", ignoreCase = true) && !modeName.equals("hypixelcustom", ignoreCase = true) }
-    val baseTimerValue = FloatValue("BaseTimer", 1.5f, 1f, 3f) { modeName.equals("hypixelboost", ignoreCase = true) }
-    val baseMTimerValue = FloatValue("BaseMultiplierTimer", 1f, 0f, 3f) { modeName.equals("hypixelboost", ignoreCase = true) }
-    val bypassWarning = BoolValue("BypassWarning", true) { typeValue.get().equals("hypixel", ignoreCase = true) && !modeName.equals("hypixelcustom", ignoreCase = true) }
-    val customSpeedBoost = FloatValue("SpeedPotJumpModifier", 0.1f, 0f, 0.4f) { hypixelModeValue.get().equals("new", ignoreCase = true) }
-    val portMax = FloatValue("AAC-PortLength", 1f, 1f, 20f) { typeValue.get().equals("aac", ignoreCase = true) }
-    val aacGroundTimerValue = FloatValue("AACGround-Timer", 3f, 1.1f, 10f) { typeValue.get().equals("aac", ignoreCase = true) }
-    val cubecraftPortLengthValue = FloatValue("CubeCraft-PortLength", 1f, 0.1f, 2f) { modeName.equals("teleportcubecraft", ignoreCase = true) }
-    val mineplexGroundSpeedValue = FloatValue("MineplexGround-Speed", 0.5f, 0.1f, 1f) { modeName.equals("mineplexground", ignoreCase = true) }
-    val onlyAir = BoolValue("OnlyAir", false) { modeName.equals("grimcombat", ignoreCase = true) }
-    val okstrafe = BoolValue("Strafe", false) { modeName.equals("grimcombat", ignoreCase = true) }
-    val speedUp = BoolValue("SpeedUp", false) { modeName.equals("grimcombat", ignoreCase = true) }
-    val speed = IntegerValue("Speed", 0, 0, 15) { modeName.equals("grimcombat", ignoreCase = true) }
-    val distance = FloatValue("Range", 0f, 0f, 2f) { modeName.equals("grimcombat", ignoreCase = true) }
-    val tagDisplay = ListValue("Tag", arrayOf("Type", "FullName", "All"), "Type")
+    private val modifySprint = BoolValue("ModifySprinting", true)
+    val timerValue = BoolValue("UseTimer", true) { modeName.equals("hypixelcustom", true) }
+    val smoothStrafe = BoolValue("SmoothStrafe", true) { modeName.equals("hypixelcustom", true) }
+    val customSpeedValue = FloatValue("StrSpeed", 0.42f, 0.2f, 2f) { modeName.equals("hypixelcustom", true) }
+    val motionYValue = FloatValue("MotionY", 0.42f, 0f, 2f) { modeName.equals("hypixelcustom", true) }
+    val verusTimer = FloatValue("Verus-Timer", 1f, 0.1f, 10f) { modeName.equals("verushard", true) }
+    val speedValue = FloatValue("CustomSpeed", 1.6f, 0.2f, 2f) { typeValue.isMode("custom") }
+    val launchSpeedValue = FloatValue("CustomLaunchSpeed", 1.6f, 0.2f, 2f) { typeValue.isMode("custom") }
+    val addYMotionValue = FloatValue("CustomAddYMotion", 0f, 0f, 2f) { typeValue.isMode("custom") }
+    val yValue = FloatValue("CustomY", 0f, 0f, 4f) { typeValue.isMode("custom") }
+    val upTimerValue = FloatValue("CustomUpTimer", 1f, 0.1f, 2f) { typeValue.isMode("custom") }
+    val downTimerValue = FloatValue("CustomDownTimer", 1f, 0.1f, 2f) { typeValue.isMode("custom") }
+    val strafeValue = ListValue("CustomStrafe", arrayOf("Strafe", "Boost", "Plus", "PlusOnlyUp", "Non-Strafe"), "Boost") { typeValue.isMode("custom") }
+    val groundStay = IntegerValue("CustomGroundStay", 0, 0, 10) { typeValue.isMode("custom") }
+    val groundResetXZValue = BoolValue("CustomGroundResetXZ", false) { typeValue.isMode("custom") }
+    val resetXZValue = BoolValue("CustomResetXZ", false) { typeValue.isMode("custom") }
+    val resetYValue = BoolValue("CustomResetY", false) { typeValue.isMode("custom") }
+    val doLaunchSpeedValue = BoolValue("CustomDoLaunchSpeed", true) { typeValue.isMode("custom") }
+    private val noBob = BoolValue("NoBob", true)
+    val jumpStrafe = BoolValue("JumpStrafe", false) { typeValue.isMode("other") }
+    val sendJumpValue = BoolValue("SendJump", true) { typeValue.isMode("hypixel") && !modeName.equals("hypixelcustom", true) }
+    val recalcValue = BoolValue("ReCalculate", true) { typeValue.isMode("hypixel") && sendJumpValue.get() && !modeName.equals("hypixelcustom", true) }
+    val glideStrengthValue = FloatValue("GlideStrength", 0.03f, 0f, 0.05f) { typeValue.isMode("hypixel") && !modeName.equals("hypixelcustom", true) }
+    val moveSpeedValue = FloatValue("MoveSpeed", 1.47f, 1f, 1.7f) { typeValue.isMode("hypixel") && !modeName.equals("hypixelcustom", true) }
+    val jumpYValue = FloatValue("JumpY", 0.42f, 0f, 1f) { typeValue.isMode("hypixel") && !modeName.equals("hypixelcustom", true) }
+    val baseStrengthValue = FloatValue("BaseMultiplier", 1f, 0.5f, 1f) { typeValue.isMode("hypixel") && !modeName.equals("hypixelcustom", true) }
+    val baseTimerValue = FloatValue("BaseTimer", 1.5f, 1f, 3f) { modeName.equals("hypixelboost", true) }
+    val baseMTimerValue = FloatValue("BaseMultiplierTimer", 1f, 0f, 3f) { modeName.equals("hypixelboost", true) }
+    private val bypassWarning = BoolValue("BypassWarning", true) { typeValue.isMode("hypixel") && !modeName.equals("hypixelcustom", true) }
+    val customSpeedBoost = FloatValue("SpeedPotJumpModifier", 0.1f, 0f, 0.4f) { hypixelModeValue.isMode("new") }
+    val portMax = FloatValue("AAC-PortLength", 1f, 1f, 20f) { typeValue.isMode("aac") }
+    val aacGroundTimerValue = FloatValue("AACGround-Timer", 3f, 1.1f, 10f) { typeValue.isMode("aac") }
+    val cubecraftPortLengthValue = FloatValue("CubeCraft-PortLength", 1f, 0.1f, 2f) { modeName.equals("teleportcubecraft", true) }
+    val mineplexGroundSpeedValue = FloatValue("MineplexGround-Speed", 0.5f, 0.1f, 1f) { modeName.equals("mineplexground", true) }
+    val onlyAir = BoolValue("OnlyAir", false) { modeName.equals("grimcombat", true) }
+    val okstrafe = BoolValue("Strafe", false) { modeName.equals("grimcombat", true) }
+    val speedUp = BoolValue("SpeedUp", false) { modeName.equals("grimcombat", true) }
+    val speed = IntegerValue("Speed", 0, 0, 15) { modeName.equals("grimcombat", true) }
+    val distance = FloatValue("Range", 0f, 0f, 2f) { modeName.equals("grimcombat", true) }
+    private val tagDisplay = ListValue("Tag", arrayOf("Type", "FullName", "All"), "Type")
 
     @EventTarget
     fun onUpdate(event: UpdateEvent?) {
         if (mc.thePlayer.isSneaking) return
-        if (MovementUtils.isMoving() && modifySprint.get()) mc.thePlayer.isSprinting = !modeName.equals("verushard", ignoreCase = true)
+        if (MovementUtils.isMoving && modifySprint.get()) mc.thePlayer.isSprinting = !modeName.equals("verushard", ignoreCase = true)
         val speedMode = mode
         speedMode?.onUpdate()
     }
@@ -269,7 +256,7 @@ class Speed : Module() {
     @EventTarget
     fun onMotion(event: MotionEvent) {
         if (event.eventState !== EventState.PRE) return
-        if (MovementUtils.isMoving() && modifySprint.get()) mc.thePlayer.isSprinting = !modeName.equals("verushard", ignoreCase = true)
+        if (MovementUtils.isMoving && modifySprint.get()) mc.thePlayer.isSprinting = !modeName.equals("verushard", ignoreCase = true)
         val speedMode = mode
         if (speedMode != null) {
             speedMode.onMotion(event)
@@ -304,10 +291,10 @@ class Speed : Module() {
     }
 
     override fun onEnable() {
-        if (NoBob.get()) mc.gameSettings.viewBobbing = false
+        if (noBob.get()) mc.gameSettings.viewBobbing = false
         if (mc.thePlayer == null) return
         if (bypassWarning.get() && typeValue.get().equals("hypixel", ignoreCase = true) && !LiquidBounce.moduleManager.getModule(Disabler::class.java)!!.state) {
-            LiquidBounce.hud.addNotification(Notification("Disabler is OFF! Disable this notification in settings.", Type.WARNING, 3000))
+            LiquidBounce.hud.addNotification(Notification("Disabler is OFF! Disable this notification in settings.", Type.WARNING, 3000, "Speed"))
         }
         mc.timer.timerSpeed = 1f
         val speedMode = mode
@@ -315,7 +302,7 @@ class Speed : Module() {
     }
 
     override fun onDisable() {
-        if (NoBob.get()) mc.gameSettings.viewBobbing = true
+        if (noBob.get()) mc.gameSettings.viewBobbing = true
         if (mc.thePlayer == null) return
         mc.timer.timerSpeed = 1f
         mc.gameSettings.keyBindJump.pressed = mc.thePlayer != null && (mc.inGameHasFocus || LiquidBounce.moduleManager.getModule(InvMove::class.java)!!.state) && !(mc.currentScreen is GuiIngameMenu || mc.currentScreen is GuiChat) && GameSettings.isKeyDown(mc.gameSettings.keyBindJump)
@@ -335,8 +322,6 @@ class Speed : Module() {
             when (typeValue.get()) {
                 "NCP" -> mode = ncpModeValue.get()
                 "AAC" -> mode = aacModeValue.get()
-                "Spartan" -> mode = "Spartan"
-                "Spectre" -> mode = spectreModeValue.get()
                 "Hypixel" -> mode = hypixelModeValue.get()
                 "Verus" -> mode = verusModeValue.get()
                 "Matrix" -> mode = matrixModeValue.get()
@@ -350,8 +335,6 @@ class Speed : Module() {
             when (typeValue.get()) {
                 "NCP" -> mode = if (ncpModeValue.get().equals("SBHop", ignoreCase = true)) "SNCPBHop" else "NCP" + ncpModeValue.get()
                 "AAC" -> mode = if (aacModeValue.get().equals("oldbhop", ignoreCase = true)) "OldAACBHop" else "AAC" + aacModeValue.get()
-                "Spartan" -> mode = "SpartanYPort"
-                "Spectre" -> mode = "Spectre" + spectreModeValue.get()
                 "Hypixel" -> mode = "Hypixel" + hypixelModeValue.get()
                 "Verus" -> mode = "Verus" + verusModeValue.get()
                 "Custom" -> mode = "Custom"
@@ -361,9 +344,7 @@ class Speed : Module() {
             }
             return mode
         }
+
     val mode: SpeedMode?
-        get() {
-            for (speedMode in speedModes) if (speedMode.modeName.equals(modeName, ignoreCase = true)) return speedMode
-            return null
-        }
+        get() = speedModes.find { it.modeName.equals(modeName, true) }
 }

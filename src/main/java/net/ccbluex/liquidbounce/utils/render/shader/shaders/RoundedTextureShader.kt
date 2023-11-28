@@ -16,7 +16,7 @@ import java.io.Closeable
 /**
  * @author inf, remoted through pie's pc (shader not by me though)
  */
-class RoundedTextureShader : Shader("roundedtexture.frag", "other") {
+class RoundedTextureShader : Shader("roundedtexture.frag") {
     override fun setupUniforms() {
         setupUniform("textureIn")
         setupUniform("rectSize")

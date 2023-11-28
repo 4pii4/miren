@@ -1,81 +1,46 @@
-uniform float iTime;
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+#extension GL_OES_standard_derivatives : enable
+
 uniform vec2 iResolution;
+uniform float iTime;
 
-float rand(vec2 p){
-    p+=.2127+p.x+.3713*p.y;
-    vec2 r=4.789*sin(789.123*(p));
-    return fract(r.x*r.y);
+
+float rand(vec2 n) {
+    return fract(cos(dot(n, vec2(15.9898, 10.1414))) * 93758.5453);
 }
 
-float sn(vec2 p){
-    vec2 i=floor(p-.5);
-    vec2 f=fract(p-.5);
-    f = f*f*f*(f*(f*6.0-15.0)+10.0);
-    float rt=mix(rand(i),rand(i+vec2(1.,0.)),f.x);
-    float rb=mix(rand(i+vec2(0.,1.)),rand(i+vec2(1.,1.)),f.x);
-    return mix(rt,rb,f.y);
+float noise(vec2 n) {
+    const vec2 d = vec2(0.0, 1.0);
+    vec2 b = floor(n), f = smoothstep(vec2(0.0), vec2(1.0), fract(n));
+    return mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);
 }
 
-void main()
-{
-    vec2 uv = gl_FragCoord.xy / iResolution.y;
+float fbm(vec2 n) {
+    float total = 0.0, amplitude = 1.0;
+    for (int i = 0; i < 5; i++) {
+        total += noise(n) * amplitude;
+        n += n;
+        amplitude *= 0.3;
+    }
+    return total;
+}
 
-    vec2 p=uv.xy*vec2(3.,4.3);
-    float f =
-    .5*sn(p)
-    +.25*sn(2.*p)
-    +.125*sn(4.*p)
-    +.0625*sn(8.*p)
-    +.03125*sn(16.*p)+
-    .015*sn(32.*p)
-    ;
+void main() {
+    const vec3 c1 = vec3(186.0/255.0, 50.0/255.0, 197.0/255.0);
+    const vec3 c2 = vec3(223.0/255.0, 50.0/255.0, 111.4/255.0);
+    const vec3 c3 = vec3(0.2 + .19, 0.19, 0.19);
+    const vec3 c4 = vec3(54.0/255.0, 51.0/255.0, 254.4/255.0);
+    const vec3 c5 = vec3(0.2);
+    const vec3 c6 = vec3(.2);
 
-    float newT = iTime*0.4 + sn(vec2(iTime*1.))*0.1;
-    p.x-=iTime*0.2;
-
-    p.y*=1.3;
-    float f2=
-    .5*sn(p)
-    +.25*sn(2.04*p+newT*1.1)
-    -.125*sn(4.03*p-iTime*0.3)
-    +.0625*sn(8.02*p-iTime*0.4)
-    +.03125*sn(16.01*p+iTime*0.5)+
-    .018*sn(24.02*p);
-
-    float f3=
-    .5*sn(p)
-    +.25*sn(2.04*p+newT*1.1)
-    -.125*sn(4.03*p-iTime*0.3)
-    +.0625*sn(8.02*p-iTime*0.5)
-    +.03125*sn(16.01*p+iTime*0.6)+
-    .019*sn(18.02*p);
-
-    float f4 = f2*smoothstep(0.0,1.,uv.y);
-
-    vec3 clouds = mix(vec3(-0.4,-0.3,-0.15),vec3(1.4,1.4,1.3),f4*f);
-    float lightning = sn((f3)+vec2(pow(sn(vec2(iTime*4.5)),6.)));
-
-    lightning *= smoothstep(0.0,1.,uv.y+0.5);
-
-    lightning = smoothstep(0.76,1.,lightning);
-    lightning=lightning*2.;
-
-
-
-    clouds*=0.8;
-    clouds += lightning +0.2;
-
-
-    vec2 newUV = uv;
-    newUV.x-=iTime*0.3;
-    newUV.y+=iTime*3.;
-    float strength = sin(iTime*0.5+sn(newUV))*0.1+0.15;
-
-
-    vec3 painting = (clouds)+clamp((strength-0.1),0.,1.);
-
-    float r=1.-length(max(abs(gl_FragCoord.xy / iResolution.xy*2.-1.)-.5,0.));
-    painting*=r;
-
-    gl_FragColor = vec4(painting, 1.);
+    vec2 p = gl_FragCoord.xy * 2.0 / iResolution.xx;
+    float q = fbm(p - iTime * 0.1);
+    vec2 r = vec2(fbm(p + q + iTime * 1.0 - p.x - p.y), fbm(p + q - iTime * 1.0));
+    vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);
+    gl_FragColor = vec4(c * cos(1.0 * gl_FragCoord.y / iResolution.y), 1.0);
+    gl_FragColor.xyz *= 1.0 - gl_FragCoord.y / iResolution.y;
+    gl_FragColor.w = 0.7;
 }

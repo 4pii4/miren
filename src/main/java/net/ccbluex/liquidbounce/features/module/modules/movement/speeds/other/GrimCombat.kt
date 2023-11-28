@@ -5,7 +5,9 @@ import net.ccbluex.liquidbounce.event.MotionEvent
 import net.ccbluex.liquidbounce.event.MoveEvent
 import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.SpeedMode
+import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.MovementUtils.getSpeed
+import net.ccbluex.liquidbounce.utils.MovementUtils.speed
 import net.ccbluex.liquidbounce.utils.MovementUtils.strafe
 import net.ccbluex.liquidbounce.utils.extensions.getDistanceToEntityBox
 import net.minecraft.entity.EntityLivingBase
@@ -24,7 +26,7 @@ class GrimCombat : SpeedMode("GrimCombat") {
                     mc.thePlayer.motionZ *= (1 + (speed.speed.get() * 0.01))
                 }
                 if(speed.okstrafe.get()){
-                    strafe(getSpeed())
+                    strafe(MovementUtils.speed)
                 }
                 return
             }

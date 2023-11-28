@@ -44,7 +44,7 @@ class Tifality(inst: Target): TargetStyle("Tifality", inst, true) {
             val colors: Array<Color> = arrayOf(Color.RED, Color.YELLOW, Color.GREEN)
             val progress = health / entity.maxHealth
             val customColor: Color =
-                if (health >= 0.0f) Colors.blendColors(fractions, colors, progress).brighter() else Color.RED
+                if (health >= 0.0f) Colors.blendColors(fractions, colors, progress)!!.brighter() else Color.RED
             var width1 = 0.0
             width1 = Colors.getIncremental(width1, 5.0)
             if (width1 < 50.0) width1 = 50.0

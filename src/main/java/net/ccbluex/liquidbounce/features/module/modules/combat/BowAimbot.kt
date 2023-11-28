@@ -41,12 +41,11 @@ class BowAimbot : Module() {
 
     @EventTarget
     fun onUpdate(event: UpdateEvent) {
-        target = null
-
         if (mc.thePlayer.itemInUse?.item is ItemBow) {
             val entity = getTarget(throughWallsValue.get(), priorityValue.get()) ?: return
 
-            target = entity
+            val target: Entity = entity
+            target ?: return
             RotationUtils.faceBow(target, silentValue.get(), predictValue.get(), predictSizeValue.get())
         }
     }

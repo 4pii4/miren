@@ -106,8 +106,8 @@ class AsianHat : Module() {
             var yaw = RenderUtils.interpolate(entity.prevRotationYaw, entity.rotationYaw, partialTicks)
             var pitch = RenderUtils.interpolate(entity.prevRotationPitch, entity.rotationPitch, partialTicks)
             if (rotMod != null && entity === mc.thePlayer) {
-                yaw = if (RotationUtils.targetRotation != null) RotationUtils.targetRotation.yaw else if (RotationUtils.serverRotation != null) RotationUtils.serverRotation.yaw else yaw
-                pitch = if (RotationUtils.targetRotation != null) RotationUtils.targetRotation.pitch else if (RotationUtils.serverRotation != null) RotationUtils.serverRotation.pitch else pitch
+                yaw = if (RotationUtils.targetRotation != null) RotationUtils.targetRotation!!.yaw else RotationUtils.serverRotation.yaw
+                pitch = if (RotationUtils.targetRotation != null) RotationUtils.targetRotation!!.pitch else RotationUtils.serverRotation.pitch
             }
             GlStateManager.rotate(-yaw, 0f, 1f, 0f)
             GlStateManager.rotate(pitch, 1f, 0f, 0f)

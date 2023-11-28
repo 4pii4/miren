@@ -315,7 +315,7 @@ class KillAura : Module() {
                 "silent" -> {
                     update()
 
-                    RotationUtils.targetRotation.applyStrafeToPlayer(event)
+                    RotationUtils.targetRotation!!.applyStrafeToPlayer(event)
                     event.cancelEvent()
                 }
 
@@ -379,7 +379,7 @@ class KillAura : Module() {
     fun onJump(event: JumpEvent) {
         if (rotationStrafe == "Strict" || rotationStrafe == "Fdp" && !testSilent) {
             if (currentTarget != null && RotationUtils.targetRotation != null) {
-                event.yaw = RotationUtils.targetRotation.yaw
+                event.yaw = RotationUtils.targetRotation!!.yaw
             }
         }
     }
@@ -885,15 +885,15 @@ class KillAura : Module() {
                     predict,
                     !mc.thePlayer.canEntityBeSeen(entity),
                     range
-                ),
+                )!!,
                 (Math.random() * (yawMaxTurnSpeed - yawMinTurnSpeed) + yawMinTurnSpeed).toFloat(),
                 (Math.random() * (pitchMaxTurnSpeed - pitchMinTurnSpeed) + pitchMinTurnSpeed).toFloat()
             )
         }
         if (rotations == "Novoline") {
             return Rotation(
-                (RotationUtils.getAngles(entity).yaw + Math.random() * amount - amount / 2).toFloat(),
-                (RotationUtils.getAngles(entity).pitch + Math.random() * amount - amount / 2).toFloat()
+                (RotationUtils.getAngles(entity)!!.yaw + Math.random() * amount - amount / 2).toFloat(),
+                (RotationUtils.getAngles(entity)!!.pitch + Math.random() * amount - amount / 2).toFloat()
             )
         }
         return RotationUtils.serverRotation
@@ -919,17 +919,17 @@ class KillAura : Module() {
         val reach = min(attackRange.toDouble(), mc.thePlayer.getDistanceToEntityBox(target!!)) + 1
 
         if (raycast) {
-            val raycastedEntity = RaycastUtils.raycastEntity(reach) {
+            val raycastedEntity = RaycastUtils.raycastEntity(reach, RaycastUtils.IEntityFilter {
                 (!livingRaycast || it is EntityLivingBase && it !is EntityArmorStand) &&
                         (isEnemy(it) || raycastIgnored || aac && mc.theWorld.getEntitiesWithinAABBExcludingEntity(it, it.entityBoundingBox).isNotEmpty())
-            }
+            })
 
             if (raycast && raycastedEntity is EntityLivingBase && (LiquidBounce.moduleManager[NoFriends::class.java]!!.state || !EntityUtils.isFriend(raycastedEntity)))
                 currentTarget = raycastedEntity
 
             hitable = if(yawMaxTurnSpeed > 0F) currentTarget == raycastedEntity else true
         } else
-            hitable = RotationUtils.isFaced(currentTarget, reach)
+            hitable = RotationUtils.isFaced(currentTarget!!, reach)
     }
 
     /**

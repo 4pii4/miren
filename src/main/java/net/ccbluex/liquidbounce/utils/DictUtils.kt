@@ -15,12 +15,12 @@ object DictUtils {
             dictFile.writeText(
                 LiquidBounce::class.java.getResource("/assets/minecraft/liquidbounce+/dict.txt").readText()
             )
-            ClientUtils.getLogger().info("[DictUtils] Extracted dictionary")
+            ClientUtils.logger.info("[DictUtils] Extracted dictionary")
         }
 
         dict = mutableListOf()
         dict!!.addAll(dictFile.readText().lines().filter { !it.contains(Regex("\\s")) })
-        ClientUtils.getLogger().info("[DictUtils] Loaded ${dict!!.size} words from dictionary")
+        ClientUtils.logger.info("[DictUtils] Loaded ${dict!!.size} words from dictionary")
 
     }
 

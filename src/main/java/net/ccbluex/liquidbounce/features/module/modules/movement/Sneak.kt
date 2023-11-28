@@ -32,7 +32,7 @@ class Sneak : Module() {
 
     @EventTarget
     fun onMotion(event: MotionEvent) {
-        if (stopMoveValue.get() && MovementUtils.isMoving()) {
+        if (stopMoveValue.get() && MovementUtils.isMoving) {
             if (sneaked) {
                 onDisable()
                 sneaked = false
@@ -45,7 +45,7 @@ class Sneak : Module() {
             "legit" -> mc.gameSettings.keyBindSneak.pressed = true
             "switch" -> when (event.eventState) {
                 EventState.PRE -> {
-                    if (!MovementUtils.isMoving()) return
+                    if (!MovementUtils.isMoving) return
                     mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SNEAKING))
                     mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING))
                 }
@@ -54,6 +54,8 @@ class Sneak : Module() {
                     mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING))
                     mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SNEAKING))
                 }
+
+                else -> { }
             }
 
             "minesecure" -> {
@@ -64,9 +66,9 @@ class Sneak : Module() {
             "aac3.6.4" -> {
                 mc.gameSettings.keyBindSneak.pressed = true
                 if (mc.thePlayer.onGround) {
-                    MovementUtils.strafe(MovementUtils.getSpeed() * 1.251f)
+                    MovementUtils.strafe(MovementUtils.speed * 1.251f)
                 } else {
-                    MovementUtils.strafe(MovementUtils.getSpeed() * 1.03f)
+                    MovementUtils.strafe(MovementUtils.speed * 1.03f)
                 }
             }
         }

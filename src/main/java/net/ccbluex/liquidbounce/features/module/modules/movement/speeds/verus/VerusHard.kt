@@ -6,11 +6,13 @@
 package net.ccbluex.liquidbounce.features.module.modules.movement.speeds.verus
 
 import net.ccbluex.liquidbounce.LiquidBounce
+import net.ccbluex.liquidbounce.event.MotionEvent
 import net.ccbluex.liquidbounce.event.MoveEvent
 import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.SpeedMode
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import kotlin.math.max
+
 
 class VerusHard : SpeedMode("VerusHard") {
     override fun onDisable() {
@@ -18,19 +20,20 @@ class VerusHard : SpeedMode("VerusHard") {
         super.onDisable()
     }
 
-    override fun onMotion() {
+    override fun onMotion(eventMotion: MotionEvent) {
         val speed = LiquidBounce.moduleManager.getModule(Speed::class.java) ?: return
         if (!mc.gameSettings.keyBindForward.isKeyDown && !mc.gameSettings.keyBindLeft.isKeyDown && !mc.gameSettings.keyBindRight.isKeyDown && !mc.gameSettings.keyBindBack.isKeyDown) return
         mc.timer.timerSpeed = speed.verusTimer.get()
         if (mc.thePlayer.onGround) {
             mc.thePlayer.jump()
-            if (mc.thePlayer.isSprinting) {
-                MovementUtils.strafe(MovementUtils.getSpeed() + 0.2f)
-            }
+//            if (mc.thePlayer.isSprinting) {
+                MovementUtils.strafe(MovementUtils.speed + 0.1f)
+//            }
         }
-        MovementUtils.strafe(max(MovementUtils.getBaseMoveSpeed().toFloat().toDouble(), MovementUtils.getSpeed().toDouble()).toFloat()) // no sprint = faster - verus, since 2018
+        MovementUtils.strafe(max(MovementUtils.baseMoveSpeed.toFloat().toDouble(), MovementUtils.speed.toDouble()).toFloat()) // no sprint = faster - verus, since 2018
     }
 
-    
-    
+    override fun onUpdate() {}
+
+    override fun onMove(event: MoveEvent) {}
 }

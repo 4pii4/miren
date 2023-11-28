@@ -369,7 +369,8 @@ class Scaffold : Module() {
                 Notification(
                     "Speed is disabled to prevent flags/errors.",
                     Type.WARNING,
-                    500
+                    500,
+                    "Scaffold"
                 )
             )
         }
@@ -673,6 +674,7 @@ class Scaffold : Module() {
             } else {
                 rotation
             }
+        rotation ?: return
         RotationUtils.setTargetRotation(rotation)
 
     }
@@ -834,7 +836,7 @@ class Scaffold : Module() {
                 .equals("air", ignoreCase = true) && mc.thePlayer.onGround || sprintModeValue.get()
                 .equals("falldownoff", ignoreCase = true) && mc.thePlayer.fallDistance > 0 ||
             sprintModeValue.get().equals("tellyticks", ignoreCase = true) && offGroundTicks >= (tellyTicks.get() - 1) ||
-            sprintModeValue.get().equals("legit", ignoreCase = true) && abs(MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw) - MathHelper.wrapAngleTo180_float(RotationUtils.targetRotation.yaw)) > 90
+            sprintModeValue.get().equals("legit", ignoreCase = true) && abs(MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw) - MathHelper.wrapAngleTo180_float(RotationUtils.targetRotation!!.yaw)) > 90
         ) {
             mc.thePlayer.isSprinting = false
         }
@@ -844,17 +846,17 @@ class Scaffold : Module() {
             launchY = mc.thePlayer.posY.toInt() - 1
         } else if (!sameYValue.get()) {
             if (!autoJumpValue.get() && !(smartSpeedValue.get() && LiquidBounce.moduleManager.getModule(Speed::class.java)!!.state) || GameSettings.isKeyDown(mc.gameSettings.keyBindJump) || mc.thePlayer.posY < launchY) launchY = mc.thePlayer.posY.toInt()
-            if (autoJumpValue.get() && !LiquidBounce.moduleManager.getModule(Speed::class.java)!!.state && MovementUtils.isMoving() && mc.thePlayer.onGround) {
+            if (autoJumpValue.get() && !LiquidBounce.moduleManager.getModule(Speed::class.java)!!.state && MovementUtils.isMoving && mc.thePlayer.onGround) {
                 mc.thePlayer.jump()
             }
         }
         if(motionY.get()){
-            if(mc.thePlayer.onGround && MovementUtils.isMoving()){
+            if(mc.thePlayer.onGround && MovementUtils.isMoving){
                 mc.thePlayer.motionY = motionYValue.get().toDouble()
             }
         }
         if(parkourValue.get()){
-            if (MovementUtils.isMoving() && mc.thePlayer.onGround && !mc.thePlayer.isSneaking && !mc.gameSettings.keyBindSneak.isKeyDown && !mc.gameSettings.keyBindJump.isKeyDown &&
+            if (MovementUtils.isMoving && mc.thePlayer.onGround && !mc.thePlayer.isSneaking && !mc.gameSettings.keyBindSneak.isKeyDown && !mc.gameSettings.keyBindJump.isKeyDown &&
                 mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.entityBoundingBox
                     .offset(0.0, -0.5, 0.0).expand(-0.001, 0.0, -0.001)).isEmpty())
                 mc.thePlayer.jump()

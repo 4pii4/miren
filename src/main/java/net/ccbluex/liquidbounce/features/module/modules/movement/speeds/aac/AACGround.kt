@@ -15,7 +15,7 @@ import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition
 class AACGround : SpeedMode("AACGround") {
     
     override fun onUpdate() {
-        if (!MovementUtils.isMoving()) return
+        if (!MovementUtils.isMoving) return
         mc.timer.timerSpeed = LiquidBounce.moduleManager.getModule(Speed::class.java)!!.aacGroundTimerValue.get()
         mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true))
     }

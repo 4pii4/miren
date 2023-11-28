@@ -94,6 +94,8 @@ object ChestAura : Module() {
                     timer.reset()
                 }
             }
+
+            else -> { }
         }
     }
 

@@ -67,8 +67,8 @@ class SessionInfo(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F) : Eleme
                 )
                 Fonts.fontSFUI35.drawString("Playtime", 2F, 15F, Color(0xFFFFFF).rgb)
                 Fonts.fontSFUI35.drawString(
-                    SessionUtils.getFormatSessionTime(),
-                    165 - Fonts.fontSFUI35.getStringWidth(SessionUtils.getFormatSessionTime()) - 3F,
+                    SessionUtils.formatSessionTime,
+                    165 - Fonts.fontSFUI35.getStringWidth(SessionUtils.formatSessionTime) - 3F,
                     15F,
                     Color(0xFFFFFF).rgb
                 )
@@ -88,8 +88,8 @@ class SessionInfo(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F) : Eleme
                 )
                 Fonts.fontSFUI35.drawString("Server", 2F, 51F, Color(0xFFFFFF).rgb)
                 Fonts.fontSFUI35.drawString(
-                    ServerUtils.getRemoteIp(),
-                    165 - Fonts.fontSFUI35.getStringWidth(ServerUtils.getRemoteIp()) - 3F,
+                    ServerUtils.remoteIp,
+                    165 - Fonts.fontSFUI35.getStringWidth(ServerUtils.remoteIp) - 3F,
                     51F,
                     Color(0xFFFFFF).rgb
                 )
@@ -106,8 +106,8 @@ class SessionInfo(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F) : Eleme
                 Fonts.fontTahoma.drawString("SessionInfo", 2F, 4F, Color(0xFFFFFF).rgb)
                 Fonts.fontSFUI35.drawString("Playtime", 2F, 15F, Color(0xFFFFFF).rgb)
                 Fonts.fontSFUI35.drawString(
-                    SessionUtils.getFormatSessionTime(),
-                    165 - Fonts.fontSFUI35.getStringWidth(SessionUtils.getFormatSessionTime()) - 3F,
+                    SessionUtils.formatSessionTime,
+                    165 - Fonts.fontSFUI35.getStringWidth(SessionUtils.formatSessionTime) - 3F,
                     15F,
                     Color(0xFFFFFF).rgb
                 )
@@ -127,8 +127,8 @@ class SessionInfo(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F) : Eleme
                 )
                 Fonts.fontSFUI35.drawString("Server", 2F, 51F, Color(0xFFFFFF).rgb)
                 Fonts.fontSFUI35.drawString(
-                    ServerUtils.getRemoteIp(),
-                    165 - Fonts.fontSFUI35.getStringWidth(ServerUtils.getRemoteIp()) - 3F,
+                    ServerUtils.remoteIp,
+                    165 - Fonts.fontSFUI35.getStringWidth(ServerUtils.remoteIp) - 3F,
                     51F,
                     Color(0xFFFFFF).rgb
                 )

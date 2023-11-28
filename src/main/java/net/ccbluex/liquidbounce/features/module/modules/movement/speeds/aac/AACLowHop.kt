@@ -17,7 +17,7 @@ class AACLowHop : SpeedMode("AACLowHop") {
     }
 
     override fun onMotion() {
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             if (mc.thePlayer.onGround) {
                 if (legitJump) {
                     mc.thePlayer.jump()

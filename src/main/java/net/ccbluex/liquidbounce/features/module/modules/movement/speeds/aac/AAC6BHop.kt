@@ -14,7 +14,7 @@ class AAC6BHop : SpeedMode("AAC6BHop") {
     override fun onUpdate() {
         mc.timer.timerSpeed = 1f
         if (mc.thePlayer.isInWater) return
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             if (mc.thePlayer.onGround) {
                 if (legitJump) {
                     mc.thePlayer.motionY = 0.4

@@ -15,7 +15,7 @@ class AEMine : SpeedMode("AEMine") {
     }
 
     override fun onMotion() {
-        if (mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (mc.thePlayer.onGround && MovementUtils.isMoving) {
             mc.thePlayer.jump()
             mc.timer.timerSpeed = 1f
         } else {

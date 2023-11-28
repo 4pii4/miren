@@ -30,7 +30,7 @@ class FastStairs : Module() {
 
     @EventTarget
     fun onUpdate(event: UpdateEvent) {
-        if (!MovementUtils.isMoving() || LiquidBounce.moduleManager[Speed::class.java]!!.state)
+        if (!MovementUtils.isMoving || LiquidBounce.moduleManager[Speed::class.java]!!.state)
             return
 
         if (mc.thePlayer.fallDistance > 0 && !walkingDown)

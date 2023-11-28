@@ -50,7 +50,7 @@ class ItemESP : Module() {
                     mc.renderManager.renderEntityStatic(entity, event.partialTicks, true)
                 }
             } catch (ex: Exception) {
-                ClientUtils.getLogger().error("An error occurred while rendering all item entities for shader esp", ex)
+                ClientUtils.logger.error("An error occurred while rendering all item entities for shader esp", ex)
             }
             OutlineShader.OUTLINE_SHADER.stopDraw(if (colorRainbow.get()) rainbow() else Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get()), 1f, 1f)
         }

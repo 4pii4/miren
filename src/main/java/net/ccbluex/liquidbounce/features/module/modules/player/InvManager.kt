@@ -154,7 +154,7 @@ class InvManager : Module() {
 
     fun performManager() {
         if ((noScaffoldValue.get() && (LiquidBounce.moduleManager[Scaffold::class.java]!!.state))|| !InventoryUtils.CLICK_TIMER.hasTimePassed(delay) ||
-            noMoveValue.get() && MovementUtils.isMoving() ||
+            noMoveValue.get() && MovementUtils.isMoving ||
             mc.thePlayer.openContainer != null && mc.thePlayer.openContainer.windowId != 0)
             return
 
@@ -299,7 +299,7 @@ class InvManager : Module() {
             delay = TimerUtils.randomDelay(minDelayValue.get(), maxDelayValue.get())
 
             return true
-        } else if (!(noMoveValue.get() && MovementUtils.isMoving()) && (!invOpenValue.get() || mc.currentScreen is GuiInventory) && item != -1) {
+        } else if (!(noMoveValue.get() && MovementUtils.isMoving) && (!invOpenValue.get() || mc.currentScreen is GuiInventory) && item != -1) {
             val openInventory = invSpoof.get() && mc.currentScreen !is GuiInventory && !invSpoofOld.get()
 
             if (openInventory)
@@ -382,7 +382,7 @@ class InvManager : Module() {
                         item is ItemEnderPearl || item is ItemBucket || ignoreVehiclesValue.get() && (item is ItemBoat || item is ItemMinecart)
             }
         } catch (ex: Exception) {
-            ClientUtils.getLogger().error("(InventoryCleaner) Failed to check item: ${itemStack.unlocalizedName}.", ex)
+            ClientUtils.logger.error("(InventoryCleaner) Failed to check item: ${itemStack.unlocalizedName}.", ex)
             true
         }
     }

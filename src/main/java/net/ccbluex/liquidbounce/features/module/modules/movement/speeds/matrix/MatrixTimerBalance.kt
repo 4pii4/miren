@@ -16,7 +16,7 @@ class MatrixTimerBalance : SpeedMode("MatrixTimerBalance") {
     }
 
     override fun onMotion() {
-        if (!MovementUtils.isMoving()) {
+        if (!MovementUtils.isMoving) {
             mc.timer.timerSpeed = 1.0f
             return
         }

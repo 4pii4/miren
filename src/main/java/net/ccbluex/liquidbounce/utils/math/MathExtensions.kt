@@ -48,3 +48,50 @@ operator fun Vec3.plus(vec: Vec3): Vec3 = add(vec)
 operator fun Vec3.minus(vec: Vec3): Vec3 = subtract(vec)
 operator fun Vec3.times(number: Double) = Vec3(xCoord * number, yCoord * number, zCoord * number)
 operator fun Vec3.div(number: Double) = times(1 / number)
+
+fun Int.toRoman(): String {
+    var s = ""
+    fun select(number: Int, collection: Array<Int>, size: Int): Int {
+        fun show(n : Int) {
+            s += when (n) {
+                1  -> "I"
+                4  -> "IV"
+                5  -> "V"
+                9  -> "IX"
+                10 -> "X"
+                40 -> "XL"
+                50 -> "L"
+                90 -> "XC"
+                100 -> "C"
+                400 -> "CD"
+                500 -> "D"
+                900 -> "DM"
+                1000 -> "M"
+                else -> ""
+            }
+        }
+        var n = 1
+        var i = 0
+        while (i < size) {
+            if (number >= collection[i])
+                n = collection[i]
+            else
+                break
+
+            i += 1
+        }
+        show(n)
+        return number - n
+    }
+
+    var number = this
+    if (number <= 0)
+        return ""
+
+    val collection : Array<Int> = arrayOf(1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000)
+    val size : Int = collection.count()
+    while (number > 0)
+        number = select(number, collection, size)
+
+    return s
+}

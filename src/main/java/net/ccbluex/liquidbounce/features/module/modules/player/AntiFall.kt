@@ -13,6 +13,7 @@ import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.module.modules.movement.Fly
+import net.ccbluex.liquidbounce.features.module.modules.movement.LongJump
 import net.ccbluex.liquidbounce.features.module.modules.render.FreeCam
 import net.ccbluex.liquidbounce.features.module.modules.world.Scaffold
 import net.ccbluex.liquidbounce.utils.ClientUtils
@@ -70,6 +71,7 @@ class AntiFall : Module() {
     private val renderTraceValue = BoolValue("Render-Trace", true)
     private val scaffoldValue = BoolValue("AutoScaffold", true)
     private val noFlyValue = BoolValue("NoFly", true)
+    private val noLongJumpValue = BoolValue("NoLongJump", true)
     private val noFreeCamValue = BoolValue("NoFreecam", true)
 
     private var detectedLocation = BlockPos.ORIGIN
@@ -93,7 +95,8 @@ class AntiFall : Module() {
     private val packetCache = ArrayList<C03PacketPlayer>()
     private val shouldSkip: Boolean
         get() = (noFlyValue.get() && LiquidBounce.moduleManager.getModule(Fly::class.java)!!.state) ||
-                (noFreeCamValue.get() && LiquidBounce.moduleManager.getModule(FreeCam::class.java)!!.state)
+                (noFreeCamValue.get() && LiquidBounce.moduleManager.getModule(FreeCam::class.java)!!.state) ||
+                (noLongJumpValue.get() && LiquidBounce.moduleManager.getModule(LongJump::class.java)!!.state)
     private val scaffold: Scaffold
         get() = LiquidBounce.moduleManager.getModule(Scaffold::class.java)!!
 
@@ -231,10 +234,10 @@ class AntiFall : Module() {
                 lastY = mc.thePlayer.prevPosY
                 lastZ = mc.thePlayer.prevPosZ
             }
-            shouldRender = renderTraceValue.get() && !MovementUtils.isBlockUnder()
+            shouldRender = renderTraceValue.get() && !MovementUtils.isBlockUnder
             shouldStopMotion = false
             shouldEdit = false
-            if (!MovementUtils.isBlockUnder()) {
+            if (!MovementUtils.isBlockUnder) {
                 if (mc.thePlayer.fallDistance >= setBackFallDistValue.get())
                     pullBack()
             }

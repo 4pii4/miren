@@ -36,11 +36,11 @@ abstract class Value<T>(val name: String,var value: T, var canDisplay: () -> Boo
                 LiquidBounce.fileManager.saveConfig(LiquidBounce.fileManager.valuesConfig)
             }
         } catch (e: Exception) {
-            ClientUtils.getLogger().error("[ValueSystem ($name)]: ${e.javaClass.name} (${e.message}) [$oldValue >> $newValue]")
+            ClientUtils.logger.error("[ValueSystem ($name)]: ${e.javaClass.name} (${e.message}) [$oldValue >> $newValue]")
         }
     }
 
-    fun get() = value
+    open fun get() = value
 
     open fun changeValue(value: T) {
         this.value = value

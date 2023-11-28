@@ -13,7 +13,7 @@ object AstolfoConstants {
 
     const val VALUE_HEIGHT = 10f
     val FONT: FontRenderer
-        get() = Fonts.minecraftFont
+        get() = Fonts.fontMedium
 
     const val SLIDER_OFFSET = 0.02f
 

@@ -8,7 +8,9 @@ import net.ccbluex.liquidbounce.utils.render.GLUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.value.IntegerValue
 import net.ccbluex.liquidbounce.value.ListValue
+import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
 import java.awt.Color
@@ -35,8 +37,18 @@ class Inventory(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F) : Element
             }
 
             "Textured" -> {
+                GL11.glPushMatrix()
+                GLUtils.glDisable(GL11.GL_DEPTH_TEST)
+                GLUtils.glEnable(GL11.GL_BLEND)
+                GL11.glDepthMask(false)
+                OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
                 mc.textureManager.bindTexture(inventoryBackground)
                 mc.ingameGUI.drawTexturedModalRect(0, 0, 6, 83, 163, 54)
+                GL11.glDepthMask(true)
+                GLUtils.glDisable(GL11.GL_BLEND)
+                GLUtils.glEnable(GL11.GL_DEPTH_TEST)
+                GL11.glPopMatrix()
             }
         }
 

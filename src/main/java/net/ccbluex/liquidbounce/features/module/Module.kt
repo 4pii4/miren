@@ -25,6 +25,7 @@ open class Module : MinecraftInstance(), Listenable {
     var spacedName: String
     var description: String
     var category: ModuleCategory
+    var createCommand: Boolean
     var keyBind = Keyboard.CHAR_NONE
         set(keyBind) {
             field = keyBind
@@ -39,9 +40,9 @@ open class Module : MinecraftInstance(), Listenable {
             if (!LiquidBounce.isStarting)
                 LiquidBounce.fileManager.saveConfig(LiquidBounce.fileManager.modulesConfig)
         }
+
     private val canEnable: Boolean
-    @JvmField
-    public val onlyEnable: Boolean
+    private val onlyEnable: Boolean
     private val forceNoSound: Boolean
 
     var slideStep = 0F
@@ -64,6 +65,7 @@ open class Module : MinecraftInstance(), Listenable {
         canEnable = moduleInfo.canEnable
         onlyEnable = moduleInfo.onlyEnable
         forceNoSound = moduleInfo.forceNoSound
+        createCommand = moduleInfo.createCommand
     }
 
     // Current state of module
@@ -82,7 +84,7 @@ open class Module : MinecraftInstance(), Listenable {
                     2 -> (if (value) LiquidBounce.tipSoundManager.enableSound else LiquidBounce.tipSoundManager.disableSound).asyncPlay(LiquidBounce.moduleManager.toggleVolume)
                 }
                 if (LiquidBounce.moduleManager.shouldNotify)
-                    LiquidBounce.hud.addNotification(Notification("${if (value) "Enabled" else "Disabled"} §r$name", if (value) Type.SUCCESS else Type.ERROR, 1000))
+                    LiquidBounce.hud.addNotification(Notification("${if (value) "Enabled" else "Disabled"} §r$name", if (value) Type.SUCCESS else Type.ERROR, 1000, title = "Module"))
             }
 
             // Call on enabled or disabled

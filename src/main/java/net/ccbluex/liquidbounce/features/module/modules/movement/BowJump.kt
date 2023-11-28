@@ -80,7 +80,7 @@ class BowJump : Module() {
             0 -> {
                 val slot = bowSlot
                 if (slot < 0 || !mc.thePlayer.inventory.hasItem(Items.arrow)) {
-                    LiquidBounce.hud.addNotification(Notification("No arrows or bow found in your inventory!", Type.ERROR, 500))
+                    LiquidBounce.hud.addNotification(Notification("No arrows or bow found in your inventory!", Type.ERROR, 500, title = "Bow Jump"))
                     forceDisable = true
                     bowState = 5
                     state = false

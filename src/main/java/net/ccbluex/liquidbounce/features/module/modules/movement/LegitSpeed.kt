@@ -24,7 +24,7 @@ class LegitSpeed : Module() {
     
     @EventTarget
     fun onJump(event: JumpEvent?) {
-        if (mc.thePlayer != null || MovementUtils.isMoving()) {
+        if (mc.thePlayer != null || MovementUtils.isMoving) {
             if (mode.get() == "Phantom") {
                 ph = true
             }
@@ -56,7 +56,7 @@ class LegitSpeed : Module() {
     @EventTarget
     fun onMove(event: MoveEvent){
         if (mode.get() == "Phantom") {
-            if (mc.thePlayer != null || MovementUtils.isMoving()) {
+            if (mc.thePlayer != null || MovementUtils.isMoving) {
                 if (ph) {
                     event.setX(event.x + event.x * speed.get())
                     event.setZ(event.z + event.z * speed.get())
@@ -67,7 +67,7 @@ class LegitSpeed : Module() {
     @EventTarget
     fun onMotion(event:MotionEvent){
         if(event.eventState == EventState.PRE){
-            if (MovementUtils.isMoving() && fastFall.get()) {
+            if (MovementUtils.isMoving && fastFall.get()) {
                 if (mc.thePlayer.motionY < 0.1 && mc.thePlayer.motionY > -0.25 && mc.thePlayer.fallDistance < 0.1) {
                     mc.thePlayer.motionY -= 0.15
                 }

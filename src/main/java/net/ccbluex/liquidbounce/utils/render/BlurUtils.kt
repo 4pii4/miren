@@ -39,7 +39,7 @@ object BlurUtils : MinecraftInstance() {
         try {
             shaderGroup.createBindFramebuffers(mc.displayWidth, mc.displayHeight)
         } catch (e : Exception) {
-            ClientUtils.getLogger().error("Exception caught while setting up shader group", e)
+            ClientUtils.logger.error("Exception caught while setting up shader group", e)
         }
     }
 

@@ -14,7 +14,7 @@ class AAC5BHop : SpeedMode("AAC5BHop") {
     override fun onTick() {
         mc.timer.timerSpeed = 1f
         if (mc.thePlayer.isInWater) return
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             if (mc.thePlayer.onGround) {
                 if (legitJump) {
                     mc.thePlayer.jump()

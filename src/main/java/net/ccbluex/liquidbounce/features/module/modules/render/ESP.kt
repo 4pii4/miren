@@ -248,7 +248,7 @@ class ESP : Module() {
                 mc.renderManager.renderEntityStatic(entity, mc.timer.renderPartialTicks, true)
             }
         } catch (ex: Exception) {
-            ClientUtils.getLogger().error("An error occurred while rendering all entities for shader esp", ex)
+            ClientUtils.logger.error("An error occurred while rendering all entities for shader esp", ex)
         }
         renderNameTags = true
         val radius = if (mode.equals("shaderoutline", ignoreCase = true)) shaderOutlineRadius.get() else if (mode.equals("shaderglow", ignoreCase = true)) shaderGlowRadius.get() else 1f

@@ -7,6 +7,7 @@ package net.ccbluex.liquidbounce.ui.client
 
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.command.CommandManager
+import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi
 import net.ccbluex.liquidbounce.ui.font.Fonts
@@ -99,7 +100,7 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
 
                 MiscUtils.showErrorPopup("Wrong file extension.", "The file extension has to be .js or .zip")
             } catch (t: Throwable) {
-                ClientUtils.getLogger().error("Something went wrong while importing a script.", t)
+                ClientUtils.logger.error("Something went wrong while importing a script.", t)
                 MiscUtils.showErrorPopup(t.javaClass.name, t.message)
             }
 
@@ -113,7 +114,7 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
                     LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.hudConfig)
                 }
             } catch (t: Throwable) {
-                ClientUtils.getLogger().error("Something went wrong while deleting a script.", t)
+                ClientUtils.logger.error("Something went wrong while deleting a script.", t)
                 MiscUtils.showErrorPopup(t.javaClass.name, t.message)
             }
             3 -> try {
@@ -130,16 +131,15 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
                 LiquidBounce.isStarting = false
                 LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig)
                 LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
-                AstolfoClickGui.resetInstance()
-                NewUi.resetInstance()
+                ClickGUI.reload()
             } catch (t: Throwable) {
-                ClientUtils.getLogger().error("Something went wrong while reloading all scripts.", t)
+                ClientUtils.logger.error("Something went wrong while reloading all scripts.", t)
                 MiscUtils.showErrorPopup(t.javaClass.name, t.message)
             }
             4 -> try {
                 Desktop.getDesktop().open(LiquidBounce.scriptManager.scriptsFolder)
             } catch (t: Throwable) {
-                ClientUtils.getLogger().error("Something went wrong while trying to open your scripts folder.", t)
+                ClientUtils.logger.error("Something went wrong while trying to open your scripts folder.", t)
                 MiscUtils.showErrorPopup(t.javaClass.name, t.message)
             }
             5 -> try {

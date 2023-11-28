@@ -16,7 +16,7 @@ class MatrixMultiply : SpeedMode("MatrixMultiply") {
     }
 
     override fun onMotion() {
-        if (!MovementUtils.isMoving()) {
+        if (!MovementUtils.isMoving) {
             return
         }
         if (mc.thePlayer.onGround) {

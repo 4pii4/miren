@@ -26,10 +26,10 @@ class VulcanYPortSpeed : SpeedMode("YPortSpeed") {
         }
 
         mc.gameSettings.keyBindJump.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindJump)
-        if (MovementUtils.getSpeed() < 0.215f && !mc.thePlayer.onGround) {
+        if (MovementUtils.speed < 0.215f && !mc.thePlayer.onGround) {
             MovementUtils.strafe(0.215f)
         }
-        if (mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (mc.thePlayer.onGround && MovementUtils.isMoving) {
             ticks = 0
             mc.gameSettings.keyBindJump.pressed = false
             mc.thePlayer.jump()
@@ -38,12 +38,12 @@ class VulcanYPortSpeed : SpeedMode("YPortSpeed") {
             }
             mc.timer.timerSpeed = 1.2f
             wasTimer = true
-            if(MovementUtils.getSpeed() < 0.48f) {
+            if(MovementUtils.speed < 0.48f) {
                 MovementUtils.strafe(0.48f)
             }else{
-                MovementUtils.strafe((MovementUtils.getSpeed()*0.985).toFloat())
+                MovementUtils.strafe((MovementUtils.speed*0.985).toFloat())
             }
-        }else if (!MovementUtils.isMoving()) {
+        }else if (!MovementUtils.isMoving) {
             mc.timer.timerSpeed = 1.00f
             mc.thePlayer.motionX = 0.0
             mc.thePlayer.motionZ = 0.0

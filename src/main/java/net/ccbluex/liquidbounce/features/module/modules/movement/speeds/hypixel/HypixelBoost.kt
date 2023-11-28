@@ -21,11 +21,11 @@ class HypixelBoost : SpeedMode("HypixelBoost") {
         val speed = LiquidBounce.moduleManager.getModule(Speed::class.java) ?: return
         val targetStrafe = LiquidBounce.moduleManager.getModule(TargetStrafe::class.java) ?: return
         mc.timer.timerSpeed = 1f
-        if (MovementUtils.isMoving() && !(mc.thePlayer.isInWater || mc.thePlayer.isInLava) && !mc.gameSettings.keyBindJump.isKeyDown) {
-            var moveSpeed = max(MovementUtils.getBaseMoveSpeed() * speed.baseStrengthValue.get(), MovementUtils.getSpeed().toDouble())
+        if (MovementUtils.isMoving && !(mc.thePlayer.isInWater || mc.thePlayer.isInLava) && !mc.gameSettings.keyBindJump.isKeyDown) {
+            var moveSpeed = max(MovementUtils.baseMoveSpeed * speed.baseStrengthValue.get(), MovementUtils.speed.toDouble())
             if (mc.thePlayer.onGround) {
                 if (speed.sendJumpValue.get()) mc.thePlayer.jump()
-                if (speed.recalcValue.get()) moveSpeed = max(MovementUtils.getBaseMoveSpeed() * speed.baseStrengthValue.get(), MovementUtils.getSpeed().toDouble())
+                if (speed.recalcValue.get()) moveSpeed = max(MovementUtils.baseMoveSpeed * speed.baseStrengthValue.get(), MovementUtils.speed.toDouble())
                 mc.thePlayer.motionY = MovementUtils.getJumpBoostModifier(if (mc.thePlayer.isCollidedHorizontally) 0.42 else speed.jumpYValue.get().toDouble())
                 event.y = mc.thePlayer.motionY
                 moveSpeed *= speed.moveSpeedValue.get().toDouble()

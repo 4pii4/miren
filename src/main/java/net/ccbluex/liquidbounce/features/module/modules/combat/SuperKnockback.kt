@@ -38,7 +38,7 @@ class SuperKnockback : Module() {
     fun onAttack(event: AttackEvent) {
         if (event.targetEntity is EntityLivingBase) {
             if (event.targetEntity.hurtTime > hurtTimeValue.get() || !timer.hasTimePassed(delayValue.get().toLong()) ||
-                (!MovementUtils.isMoving() && onlyMoveValue.get()) || (!mc.thePlayer.onGround && onlyGroundValue.get())) {
+                (!MovementUtils.isMoving && onlyMoveValue.get()) || (!mc.thePlayer.onGround && onlyGroundValue.get())) {
                 return
             }
 

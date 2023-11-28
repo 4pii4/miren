@@ -80,11 +80,6 @@ class NameTags : Module() {
 
     private val inventoryBackground = ResourceLocation("textures/gui/container/inventory.png")
 
-    private val viewport: IntBuffer = GLAllocation.createDirectIntBuffer(16)
-    private val modelview: FloatBuffer = GLAllocation.createDirectFloatBuffer(16)
-    private val projection: FloatBuffer = GLAllocation.createDirectFloatBuffer(16)
-    private val vector: FloatBuffer = GLAllocation.createDirectFloatBuffer(4)
-
     @EventTarget
     fun onRender3D(event: Render3DEvent) {
         if (!positionMode.isMode("3D"))
@@ -122,26 +117,6 @@ class NameTags : Module() {
 
             renderNameTags(entity, false, event)
         }
-    }
-
-    private fun project2D(scaleFactor: Int, x: Double, y: Double, z: Double): Vector3d? {
-        glGetFloat(2982, modelview)
-        glGetFloat(2983, projection)
-        glGetInteger(2978, viewport)
-        return if (GLU.gluProject(
-                x.toFloat(),
-                y.toFloat(),
-                z.toFloat(),
-                modelview,
-                projection,
-                viewport,
-                vector
-            )
-        ) Vector3d(
-            (vector[0] / scaleFactor.toFloat()).toDouble(),
-            ((Display.getHeight().toFloat() - vector[1]) / scaleFactor.toFloat()).toDouble(),
-            vector[2].toDouble()
-        ) else null
     }
 
     private fun getTag(entity: EntityLivingBase): String {
@@ -185,60 +160,13 @@ class NameTags : Module() {
             glRotatef(-mc.renderManager.playerViewY, 0F, 1F, 0F)
             glRotatef(mc.renderManager.playerViewX, 1F, 0F, 0F)
         } else {
-            event2D ?: return
-            val partialTicks = event2D.partialTicks
-            val scaledResolution = ScaledResolution(mc)
-            val scaleFactor = scaledResolution.scaleFactor
-            val renderMng = mc.renderManager
-            val entityRenderer = mc.entityRenderer
-            val x = RenderUtils.interpolate(entity.posX, entity.lastTickPosX, partialTicks.toDouble())
-            val y = RenderUtils.interpolate(entity.posY, entity.lastTickPosY, partialTicks.toDouble())
-            val z = RenderUtils.interpolate(entity.posZ, entity.lastTickPosZ, partialTicks.toDouble())
-            val width = entity.width.toDouble() / 1.5
-            val height = entity.height.toDouble() + if (entity.isSneaking) -0.3 else 0.2
-            val aabb = AxisAlignedBB(x - width, y, z - width, x + width, y + height, z + width)
-            val vectors: List<*> = Arrays.asList(
-                Vector3d(aabb.minX, aabb.minY, aabb.minZ),
-                Vector3d(aabb.minX, aabb.maxY, aabb.minZ),
-                Vector3d(aabb.maxX, aabb.minY, aabb.minZ),
-                Vector3d(aabb.maxX, aabb.maxY, aabb.minZ),
-                Vector3d(aabb.minX, aabb.minY, aabb.maxZ),
-                Vector3d(aabb.minX, aabb.maxY, aabb.maxZ),
-                Vector3d(aabb.maxX, aabb.minY, aabb.maxZ),
-                Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ)
-            )
+            val position = EntityUtils.projectEntity2d(entity, event2D!!.partialTicks) ?: return
 
-            mc.entityRenderer.setupCameraTransform(partialTicks, 0)
-
-            var position: Vector4d? = null
-            val var38 = vectors.iterator()
-            while (var38.hasNext()) {
-                var vector = var38.next() as Vector3d?
-                vector = project2D(
-                    scaleFactor,
-                    vector!!.x - renderMng.viewerPosX,
-                    vector.y - renderMng.viewerPosY,
-                    vector.z - renderMng.viewerPosZ
-                )
-                if (vector != null && vector.z >= 0.0 && vector.z < 1.0) {
-                    if (position == null) {
-                        position = Vector4d(vector.x, vector.y, vector.z, 0.0)
-                    }
-                    position.x = min(vector.x, position.x)
-                    position.y = min(vector.y, position.y)
-                    position.z = max(vector.x, position.z)
-                    position.w = max(vector.y, position.w)
-                }
-            }
-
-            position ?: return
-
-            entityRenderer.setupOverlayRendering()
+            mc.entityRenderer.setupOverlayRendering()
             val posX = position.x
             val posY = position.y
             val endPosX = position.z
-            val endPosY = position.w
-            glTranslated(posX + (endPosX - posX) / 2, posY, 0.0)
+            glTranslated(posX + (endPosX - posX) / 2, posY - fontRenderer.FONT_HEIGHT, 0.0)
         }
 
         // Scale

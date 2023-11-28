@@ -48,7 +48,7 @@ public class FriendsConfig extends FileConfig {
 
         } catch (JsonSyntaxException | IllegalStateException ex) {
             //When the JSON Parse fail, the client try to load and update the old config
-            ClientUtils.getLogger().info("[FileManager] Try to load old Friends config...");
+            ClientUtils.logger.info("[FileManager] Try to load old Friends config...");
 
             final BufferedReader bufferedReader = new BufferedReader(new FileReader(getFile()));
 
@@ -65,11 +65,11 @@ public class FriendsConfig extends FileConfig {
                 }
             }
             bufferedReader.close();
-            ClientUtils.getLogger().info("[FileManager] Loaded old Friends config...");
+            ClientUtils.logger.info("[FileManager] Loaded old Friends config...");
 
             //Save the friends into a new valid JSON file
             saveConfig();
-            ClientUtils.getLogger().info("[FileManager] Saved Friends to new config...");
+            ClientUtils.logger.info("[FileManager] Saved Friends to new config...");
         }
     }
 

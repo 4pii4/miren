@@ -12,6 +12,8 @@ import net.ccbluex.liquidbounce.utils.MinecraftInstance
 import java.util.*
 
 abstract class Command(val command: String, val alias: Array<String>) : MinecraftInstance() {
+
+    constructor(command: String): this(command, emptyArray())
     /**
      * Execute commands with provided [args]
      */

@@ -20,7 +20,7 @@ class AAC4BHop : SpeedMode("AAC4BHop") {
     }
 
     override fun onTick() {
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             if (legitHop) {
                 if (mc.thePlayer.onGround) {
                     mc.thePlayer.jump()

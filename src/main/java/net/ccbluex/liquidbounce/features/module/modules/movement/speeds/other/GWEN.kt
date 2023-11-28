@@ -23,7 +23,7 @@ class GWEN : SpeedMode("GWEN") {
     
 
     override fun onMotion(event: MotionEvent) {
-        if (event.eventState == EventState.PRE && MovementUtils.isMoving()) {
+        if (event.eventState == EventState.PRE && MovementUtils.isMoving) {
             if (stage) {
                 mc.timer.timerSpeed = 1.5F
                 if (timer.hasTimePassed(700)) {

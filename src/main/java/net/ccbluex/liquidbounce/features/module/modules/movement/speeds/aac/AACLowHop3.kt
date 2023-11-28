@@ -19,7 +19,7 @@ class AACLowHop3 : SpeedMode("AACLowHop3") {
     }
 
     override fun onMotion() {
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             if (mc.thePlayer.hurtTime <= 0) {
                 if (mc.thePlayer.onGround) {
                     waitForGround = false
@@ -41,9 +41,9 @@ class AACLowHop3 : SpeedMode("AACLowHop3") {
             mc.thePlayer.motionZ = 0.0
             mc.thePlayer.motionX = 0.0
         }
-        val speed = MovementUtils.getSpeed().toDouble()
-        mc.thePlayer.motionX = -(sin(MovementUtils.getDirection()) * speed)
-        mc.thePlayer.motionZ = cos(MovementUtils.getDirection()) * speed
+        val speed = MovementUtils.speed.toDouble()
+        mc.thePlayer.motionX = -(sin(MovementUtils.direction) * speed)
+        mc.thePlayer.motionZ = cos(MovementUtils.direction) * speed
     }
 
     

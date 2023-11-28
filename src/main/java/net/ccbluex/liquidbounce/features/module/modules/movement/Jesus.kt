@@ -94,7 +94,7 @@ class Jesus : Module() {
             "horizon1.4.6" -> if (mc.thePlayer.isInWater) {
                 MovementUtils.strafe()
                 mc.gameSettings.keyBindJump.pressed = true
-                if (MovementUtils.isMoving()) if (!mc.thePlayer.onGround) {
+                if (MovementUtils.isMoving) if (!mc.thePlayer.onGround) {
                     mc.thePlayer.motionY += 0.13
                 }
             }

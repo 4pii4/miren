@@ -19,7 +19,7 @@ class CustomSpeed : SpeedMode("Custom") {
     override fun onMotion(eventMotion: MotionEvent) {
         val speed = LiquidBounce.moduleManager.getModule(Speed::class.java)
         if (speed == null || eventMotion.eventState !== EventState.PRE) return
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             mc.timer.timerSpeed = if (mc.thePlayer.motionY > 0) speed.upTimerValue.get() else speed.downTimerValue.get()
             if (mc.thePlayer.onGround) {
                 if (groundTick >= speed.groundStay.get()) {

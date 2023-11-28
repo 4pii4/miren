@@ -16,7 +16,7 @@ class AACHop438 : SpeedMode("AACHop4.3.8") {
 
         mc.timer.timerSpeed = 1.0f
 
-        if (!MovementUtils.isMoving() || thePlayer.isInWater || thePlayer.isInLava ||
+        if (!MovementUtils.isMoving || thePlayer.isInWater || thePlayer.isInLava ||
                 thePlayer.isOnLadder || thePlayer.isRiding) return
 
         if (thePlayer.onGround)

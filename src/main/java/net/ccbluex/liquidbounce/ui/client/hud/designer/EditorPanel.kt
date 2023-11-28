@@ -14,6 +14,7 @@ import net.ccbluex.liquidbounce.ui.client.hud.element.Side
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.ui.font.GameFontRenderer
 import net.ccbluex.liquidbounce.utils.MinecraftInstance
+import net.ccbluex.liquidbounce.utils.getName
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.value.*
 import net.minecraft.client.gui.Gui
@@ -261,7 +262,7 @@ class EditorPanel(private val hudDesigner: GuiHudDesigner, var x: Int, var y: In
             element.side.vertical = values[if (currIndex + 1 >= values.size) 0 else currIndex + 1]
             element.y = when (element.side.vertical) {
                 Side.Vertical.UP -> y
-                Side.Vertical.MIDDLE -> (ScaledResolution(mc).scaledHeight / 2) - y
+//                Side.Vertical.MIDDLE -> (ScaledResolution(mc).scaledHeight / 2) - y
                 Side.Vertical.DOWN -> ScaledResolution(mc).scaledHeight - y
             }
 
@@ -398,11 +399,7 @@ class EditorPanel(private val hudDesigner: GuiHudDesigner, var x: Int, var y: In
                     val fontRenderer = value.get()
 
                     // Title
-                    val text = when (fontRenderer) {
-                        is GameFontRenderer -> "${value.name}: ${fontRenderer.defaultFont.font.name} - ${fontRenderer.defaultFont.font.size}"
-                        Fonts.minecraftFont -> "${value.name}: Minecraft"
-                        else -> "${value.name}: Unknown"
-                    }
+                    val text = "${value.name}: ${value.get().getName()}"
 
                     Fonts.font35.drawString(text, x + 2, y + height, Color.WHITE.rgb)
 

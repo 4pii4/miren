@@ -103,7 +103,7 @@ public abstract class MixinGuiScreen {
                 worldRenderer.pos(0, 0, 0).endVertex();
                 instance.draw();
 
-                BackgroundShader.Companion.getBACKGROUND_SHADER().stopShader();;
+                BackgroundShader.Companion.getBACKGROUND_SHADER().stopShader();
             }else{
                 final ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final int width = scaledResolution.getScaledWidth();

@@ -6,7 +6,6 @@
 package net.ccbluex.liquidbounce.utils.timer
 
 class MSTimer {
-    @JvmField
     var time = -1L
 
     fun hasTimePassed(ms: Number): Boolean {

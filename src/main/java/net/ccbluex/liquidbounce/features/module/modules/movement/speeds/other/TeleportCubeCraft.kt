@@ -19,8 +19,8 @@ class TeleportCubeCraft : SpeedMode("TeleportCubeCraft") {
     
     
     override fun onMove(event: MoveEvent) {
-        if (MovementUtils.isMoving() && mc.thePlayer.onGround && timer.hasTimePassed(300L)) {
-            val yaw = MovementUtils.getDirection()
+        if (MovementUtils.isMoving && mc.thePlayer.onGround && timer.hasTimePassed(300L)) {
+            val yaw = MovementUtils.direction
             val length = LiquidBounce.moduleManager.getModule(Speed::class.java)!!.cubecraftPortLengthValue.get()
             event.x = -sin(yaw) * length
             event.z = cos(yaw) * length

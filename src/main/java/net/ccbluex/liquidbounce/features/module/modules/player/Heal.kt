@@ -71,7 +71,7 @@ class Heal : Module() {
             ClientUtils.displayChatMessage("§f[§cSLHeal§f] §6Enable Heal due to World Changed or Player Respawned")
         }
         val absorp = MathHelper.ceiling_double_int(mc.thePlayer.absorptionAmount.toDouble())
-        if (groundCheck.get() && !mc.thePlayer.onGround || voidCheck.get() && !MovementUtils.isBlockUnder() || invCheck.get() && mc.currentScreen is GuiContainer || absorp != 0 && absorpCheck.get())
+        if (groundCheck.get() && !mc.thePlayer.onGround || voidCheck.get() && !MovementUtils.isBlockUnder || invCheck.get() && mc.currentScreen is GuiContainer || absorp != 0 && absorpCheck.get())
             return
         if (waitRegen.get() && mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).duration > regenSec.get() * 20.0f)
             return

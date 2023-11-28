@@ -35,7 +35,7 @@ class LocalAutoSettingsCommand :
                                 chat("§9Set settings...")
                                 SettingsUtils.executeScript(settings)
                                 chat("§6Settings applied successfully.")
-                                LiquidBounce.hud.addNotification(Notification("Updated Settings", Type.SUCCESS))
+                                LiquidBounce.hud.addNotification(Notification("Updated Settings", Type.SUCCESS, title = "Local Auto Settings"))
                                 playEdit()
                             } catch (e: IOException) {
                                 e.printStackTrace()
@@ -83,7 +83,7 @@ class LocalAutoSettingsCommand :
                             chat("§6Settings saved successfully.")
                         } catch (throwable: Throwable) {
                             chat("§cFailed to create local config: §3${throwable.message}")
-                            ClientUtils.getLogger().error("Failed to create local config.", throwable)
+                            ClientUtils.logger.error("Failed to create local config.", throwable)
                         }
                         return
                     }

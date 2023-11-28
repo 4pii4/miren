@@ -27,7 +27,7 @@ class Lnk(inst: Target): TargetStyle("Lnk", inst, true){
             fractions,
             colors,
             progress
-        ).brighter()
+        )!!.brighter()
         RenderUtils.drawRect(0F, 0F, width + 6F, 45F, Color(35, 35, 35, 190))
         GL11.glPushMatrix()
         GL11.glColor4f(1f, 1f, 1f, 1f)

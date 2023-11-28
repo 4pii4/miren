@@ -38,7 +38,7 @@ class ModuleManager : Listenable {
      * Register all modules
      */
     fun registerModules() {
-        ClientUtils.getLogger().info("[ModuleManager] Loading modules...")
+        ClientUtils.logger.info("[ModuleManager] Loading modules...")
 
         registerModules(
             AntiStuck::class.java,
@@ -138,7 +138,6 @@ class ModuleManager : Listenable {
             Heal::class.java,
             AuthBypass::class.java,
             Gapple::class.java,
-            ColorMixer::class.java,
             Disabler::class.java,
             CustomDisabler::class.java,
             AutoDisable::class.java,
@@ -213,6 +212,9 @@ class ModuleManager : Listenable {
             AntiStaff::class.java,
             AntiBook::class.java,
             AttackEffect::class.java,
+            Targets::class.java,
+            BedInstantLeave::class.java,
+            OnDamage::class.java,
         )
 
         registerModule(Breaker)
@@ -222,8 +224,10 @@ class ModuleManager : Listenable {
         registerModule(Animations)
         registerModule(ClickGUI)
         registerModule(RenderConfig)
+        registerModule(ColorMixer)
+        registerModule(PacketDebugger)
 
-        ClientUtils.getLogger().info("[ModuleManager] Successfully loaded ${modules.size} modules.")
+        ClientUtils.logger.info("[ModuleManager] Successfully loaded ${modules.size} modules.")
     }
 
     fun getModuleInCategory(category: ModuleCategory) = modules.filter { it.category == category }
@@ -236,7 +240,8 @@ class ModuleManager : Listenable {
         moduleClassMap[module.javaClass] = module
 
         module.onInitialize()
-        generateCommand(module)
+        if (module.createCommand)
+            generateCommand(module)
         LiquidBounce.eventManager.registerListener(module)
     }
 
@@ -247,7 +252,7 @@ class ModuleManager : Listenable {
         try {
             registerModule(moduleClass.newInstance())
         } catch (e: Throwable) {
-            ClientUtils.getLogger().error("Failed to load module: ${moduleClass.name} (${e.javaClass.name}: ${e.message})")
+            ClientUtils.logger.error("Failed to load module: ${moduleClass.name} (${e.javaClass.name}: ${e.message})")
         }
     }
 

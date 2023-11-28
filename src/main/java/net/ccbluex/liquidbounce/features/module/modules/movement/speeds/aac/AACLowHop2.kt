@@ -23,7 +23,7 @@ class AACLowHop2 : SpeedMode("AACLowHop2") {
     override fun onMotion() {
         mc.timer.timerSpeed = 1f
         if (mc.thePlayer.isInWater) return
-        if (MovementUtils.isMoving()) {
+        if (MovementUtils.isMoving) {
             mc.timer.timerSpeed = 1.09f
             if (mc.thePlayer.onGround) {
                 if (legitJump) {

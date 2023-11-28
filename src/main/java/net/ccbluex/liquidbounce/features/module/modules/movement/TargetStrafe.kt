@@ -133,7 +133,7 @@ class TargetStrafe : Module() {
         if (killAura.target == null) return
         val target = killAura.target
 
-        val rotYaw = RotationUtils.getRotationsEntity(killAura.target).yaw
+        val rotYaw = RotationUtils.getRotationsEntity(killAura.target!!).yaw
 
         when (radiusMode.get()){
             "TrueRadius" -> {
@@ -177,11 +177,11 @@ class TargetStrafe : Module() {
                 val zPos: Double = target.posZ + Math.cos(Math.toRadians(target.rotationYaw.toDouble())) * -2
                 event.setX(
                     if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed * -MathHelper.sin(
-                        Math.toRadians(RotationUtils.getRotations1(xPos, target.posY, zPos)[0].toDouble())
+                        Math.toRadians(RotationUtils.getRotations(xPos, target.posY, zPos).yaw.toDouble())
                     .toFloat()))
                 event.setZ(
                     if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed * MathHelper.cos(
-                        Math.toRadians(RotationUtils.getRotations1(xPos, target.posY, zPos)[0].toDouble())
+                        Math.toRadians(RotationUtils.getRotations(xPos, target.posY, zPos).yaw.toDouble())
                     .toFloat()))
             }
         }

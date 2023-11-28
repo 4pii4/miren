@@ -41,7 +41,7 @@ class AutoKit : Module() {
     private val editMode: BoolValue = object : BoolValue("Edit-Mode", false) {
         override fun onChanged(oldValue: Boolean, newValue: Boolean) {
             if (newValue)
-                LiquidBounce.hud.addNotification(Notification("Change default kit by right clicking the kit selector and select.", Type.INFO))
+                LiquidBounce.hud.addNotification(Notification("Change default kit by right clicking the kit selector and select.", Type.INFO, title = "Auto Kit"))
         }
     }
     private val debugValue = BoolValue("Debug", false)
@@ -88,7 +88,7 @@ class AutoKit : Module() {
                 listening = false
                 mc.netHandler.addToSendQueue(C0DPacketCloseWindow())
                 mc.netHandler.addToSendQueue(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem))
-                LiquidBounce.hud.addNotification(Notification("Kit checker timed out. Please use the right kit name.", Type.ERROR))
+                LiquidBounce.hud.addNotification(Notification("Kit checker timed out. Please use the right kit name.", Type.ERROR, title = "Auto Kit"))
                 debug("can't find any kit with that name")
             }
         } else {
@@ -108,7 +108,7 @@ class AutoKit : Module() {
 
         if (packet is C0DPacketCloseWindow && editMode.get()) {
             editMode.set(false)
-            LiquidBounce.hud.addNotification(Notification("Edit mode aborted.", Type.INFO))
+            LiquidBounce.hud.addNotification(Notification("Edit mode aborted.", Type.INFO, title = "Auto Kit"))
             debug("abort edit mode")
             return
         }
@@ -159,13 +159,13 @@ class AutoKit : Module() {
                     editMode.set(false)
                     clickStage = 0
                     listening = false
-                    LiquidBounce.hud.addNotification(Notification("Successfully detected and added $kitName kit.", Type.SUCCESS))
+                    LiquidBounce.hud.addNotification(Notification("Successfully detected and added $kitName kit.", Type.SUCCESS, title = "Auto Kit"))
                     debug("finished detecting kit")
                     return
                 } else {
                     listening = false
                     event.cancelEvent()
-                    LiquidBounce.hud.addNotification(Notification("Successfully selected ${kitNameValue.get()} kit.", Type.SUCCESS))
+                    LiquidBounce.hud.addNotification(Notification("Successfully selected ${kitNameValue.get()} kit.", Type.SUCCESS, title = "Auto Kit"))
                     debug("finished")
                     return
                 }

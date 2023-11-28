@@ -95,14 +95,14 @@ class Crosshair : Module() {
     }
 
     private val isMoving: Boolean
-        private get() = dynamicVal.get() && MovementUtils.isMoving()
+        private get() = dynamicVal.get() && MovementUtils.isMoving
     private val crosshairColor: Color
         private get() = when (colorModeValue.get()) {
             "Custom" -> Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get(), colorAlphaValue.get())
             "Rainbow" -> Color(RenderUtils.getRainbowOpaque(mixerSecondsValue.get(), saturationValue.get(), brightnessValue.get(), 0))
             "Sky" -> reAlpha(RenderUtils.skyRainbow(0, saturationValue.get(), brightnessValue.get()), colorAlphaValue.get())
             "LiquidSlowly" -> reAlpha(LiquidSlowly(System.nanoTime(), 0, saturationValue.get(), brightnessValue.get()), colorAlphaValue.get())
-            "Mixer" -> reAlpha(ColorMixer.Companion.getMixedColor(0, mixerSecondsValue.get()), colorAlphaValue.get())
+            "Mixer" -> reAlpha(ColorMixer.getMixedColor(0, mixerSecondsValue.get()), colorAlphaValue.get())
             else -> reAlpha(fade(Color(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get()), 0, 100), colorAlphaValue.get())
         }
 }

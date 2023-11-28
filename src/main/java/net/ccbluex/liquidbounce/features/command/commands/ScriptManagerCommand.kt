@@ -8,6 +8,7 @@ package net.ccbluex.liquidbounce.features.command.commands
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.features.command.CommandManager
+import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi
 import net.ccbluex.liquidbounce.utils.ClientUtils
@@ -73,7 +74,7 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
 
                         chat("The file extension has to be .js or .zip")
                     } catch (t: Throwable) {
-                        ClientUtils.getLogger().error("Something went wrong while importing a script.", t)
+                        ClientUtils.logger.error("Something went wrong while importing a script.", t)
                         chat("${t.javaClass.name}: ${t.message}")
                     }
                 }
@@ -102,7 +103,7 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
                     } catch (numberFormat: NumberFormatException) {
                         chatSyntaxError()
                     } catch (t: Throwable) {
-                        ClientUtils.getLogger().error("Something went wrong while deleting a script.", t)
+                        ClientUtils.logger.error("Something went wrong while deleting a script.", t)
                         chat("${t.javaClass.name}: ${t.message}")
                     }
                 }
@@ -122,11 +123,10 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
                         LiquidBounce.isStarting = false
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig)
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
-                        AstolfoClickGui.resetInstance()
-                        NewUi.resetInstance()
+                        ClickGUI.reload()
                         chat("Successfully reloaded all scripts.")
                     } catch (t: Throwable) {
-                        ClientUtils.getLogger().error("Something went wrong while reloading all scripts.", t)
+                        ClientUtils.logger.error("Something went wrong while reloading all scripts.", t)
                         chat("${t.javaClass.name}: ${t.message}")
                     }
                 }
@@ -136,7 +136,7 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
                         Desktop.getDesktop().open(LiquidBounce.scriptManager.scriptsFolder)
                         chat("Successfully opened scripts folder.")
                     } catch (t: Throwable) {
-                        ClientUtils.getLogger().error("Something went wrong while trying to open your scripts folder.", t)
+                        ClientUtils.logger.error("Something went wrong while trying to open your scripts folder.", t)
                         chat("${t.javaClass.name}: ${t.message}")
                     }
                 }

@@ -15,11 +15,11 @@ class VulcanLowHopSpeed : SpeedMode("LowHopSpeed") {
     override fun onUpdate() {
         ticks++
         mc.thePlayer.jumpMovementFactor = 0.0245f
-        if (mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (mc.thePlayer.onGround && MovementUtils.isMoving) {
             mc.thePlayer.jump()
             ticks = 0
             MovementUtils.strafe()
-            if (MovementUtils.getSpeed() < 0.5f) {
+            if (MovementUtils.speed < 0.5f) {
                 MovementUtils.strafe(0.484f)
             }
             launchY = mc.thePlayer.posY
@@ -28,7 +28,7 @@ class VulcanLowHopSpeed : SpeedMode("LowHopSpeed") {
         }else if (ticks == 5) {
             mc.thePlayer.motionY = -0.17
         }
-        if (MovementUtils.getSpeed() < 0.215) {
+        if (MovementUtils.speed < 0.215) {
             MovementUtils.strafe(0.215f)
         }
     }

@@ -10,7 +10,7 @@ class MatrixLowHop : SpeedMode("MatrixLowHop") {
 
     }
     override fun onUpdate() {
-        if (mc.thePlayer.onGround && MovementUtils.isMoving()) {
+        if (mc.thePlayer.onGround && MovementUtils.isMoving) {
             mc.thePlayer.jump()
             mc.thePlayer.motionY -= 0.116 * 0.03
         }

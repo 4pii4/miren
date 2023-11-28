@@ -16,7 +16,7 @@ class MatrixSemiStrafe : SpeedMode("MatrixSemiStrafe") {
     }
 
     override fun onMotion() {
-        if (MovementUtils.isMoving() && mc.thePlayer.onGround) {
+        if (MovementUtils.isMoving && mc.thePlayer.onGround) {
             mc.thePlayer.jump()
             MovementUtils.strafe(0.3f)
         }

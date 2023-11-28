@@ -17,7 +17,7 @@ class AAC4Hop : SpeedMode("AAC4Hop") {
     override fun onUpdate() {
         if (mc.thePlayer!!.isInWater) return
 
-        if (isMoving()) {
+        if (isMoving) {
             if (mc.thePlayer!!.onGround) {
                 mc.thePlayer!!.jump()
                 mc.thePlayer!!.speedInAir = 0.0201f

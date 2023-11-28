@@ -96,7 +96,7 @@ object Breaker : Module() {
     fun onJump(event: JumpEvent) {
         if (movementCorrectionValue.get()) {
             if (RotationUtils.targetRotation != null && breaking) {
-                event.yaw = RotationUtils.targetRotation.yaw
+                event.yaw = RotationUtils.targetRotation!!.yaw
             }
         }
     }
@@ -356,17 +356,17 @@ object Breaker : Module() {
         if (ignoreFirstBlockValue.get() && nearestBlock != null) {
             if (firstPos == null) {
                 firstPos = nearestBlock
-                LiquidBounce.hud.addNotification(Notification("Found first ${getBlockName(targetID)} block at ${nearestBlock.x.toInt()} ${nearestBlock.y.toInt()} ${nearestBlock.z.toInt()}", Type.SUCCESS))
+                LiquidBounce.hud.addNotification(Notification("Found first ${getBlockName(targetID)} block at ${nearestBlock.x} ${nearestBlock.y} ${nearestBlock.z}", Type.SUCCESS, "Breaker"))
             }
             if (targetID == 26 && firstPos != null && firstPosBed == null) { // bed
-                when (true) {
-                    getBlock(firstPos!!.east()) != null && Block.getIdFromBlock(getBlock(firstPos!!.east())!!) == 26 -> firstPosBed = firstPos!!.east()
-                    getBlock(firstPos!!.west()) != null && Block.getIdFromBlock(getBlock(firstPos!!.west())!!) == 26 -> firstPosBed = firstPos!!.west()
-                    getBlock(firstPos!!.south()) != null && Block.getIdFromBlock(getBlock(firstPos!!.south())!!) == 26 -> firstPosBed = firstPos!!.south()
-                    getBlock(firstPos!!.north()) != null && Block.getIdFromBlock(getBlock(firstPos!!.north())!!) == 26 -> firstPosBed = firstPos!!.north()
+                when {
+                    (getBlock(firstPos!!.east()) != null && Block.getIdFromBlock(getBlock(firstPos!!.east())!!) == 26) -> firstPosBed = firstPos!!.east()
+                    (getBlock(firstPos!!.west()) != null && Block.getIdFromBlock(getBlock(firstPos!!.west())!!) == 26) -> firstPosBed = firstPos!!.west()
+                    (getBlock(firstPos!!.south()) != null && Block.getIdFromBlock(getBlock(firstPos!!.south())!!) == 26) -> firstPosBed = firstPos!!.south()
+                    (getBlock(firstPos!!.north()) != null && Block.getIdFromBlock(getBlock(firstPos!!.north())!!) == 26) -> firstPosBed = firstPos!!.north()
                 }
                 if (firstPosBed != null)
-                    LiquidBounce.hud.addNotification(Notification("Found second Bed block at ${firstPosBed!!.x} ${firstPosBed!!.y} ${firstPosBed!!.z}", Type.SUCCESS))
+                    LiquidBounce.hud.addNotification(Notification("Found second Bed block at ${firstPosBed!!.x} ${firstPosBed!!.y} ${firstPosBed!!.z}", Type.SUCCESS, "Breaker"))
             }
         }
         return if (ignoreFirstBlockValue.get() && (firstPos == nearestBlock || firstPosBed == nearestBlock)) null else nearestBlock

@@ -14,7 +14,7 @@ import kotlin.math.abs
 /**
  * @author inf, remoted through pie's pc (shader not by me though)
  */
-class RoundedRectShader : Shader("roundedrect.frag", "other") {
+class RoundedRectShader : Shader("roundedrect.frag") {
     override fun setupUniforms() {
         setupUniform("u_size")
         setupUniform("u_radius")

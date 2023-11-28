@@ -169,7 +169,7 @@ class Trails : Module() {
     fun onUpdate(event: UpdateEvent) {
         val a1in8chance = (1..8).random()
         var ifrender: Boolean
-        ifrender = a1in8chance == 1 && MovementUtils.isMoving() && mc.gameSettings.thirdPersonView != 0
+        ifrender = a1in8chance == 1 && MovementUtils.isMoving && mc.gameSettings.thirdPersonView != 0
         when(typeValue.get().lowercase()) {
             "heart" -> {
                 if (ifrender) {

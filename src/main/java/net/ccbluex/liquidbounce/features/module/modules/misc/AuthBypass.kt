@@ -50,7 +50,7 @@ class AuthBypass : Module() {
                 mc.netHandler.addToSendQueue(packet)
             }
             packets.clear()
-            LiquidBounce.hud.addNotification(Notification("Authentication bypassed.", Type.INFO))
+            LiquidBounce.hud.addNotification(Notification("Authentication bypassed.", Type.INFO, title = "Auth Bypass"))
         }
     }
 

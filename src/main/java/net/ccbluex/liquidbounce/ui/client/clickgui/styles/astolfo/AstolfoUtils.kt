@@ -6,7 +6,7 @@ import net.minecraft.client.gui.FontRenderer
 import java.awt.Color
 
 fun FontRenderer.drawHeightCenteredString(string: String, x: Float, y: Float, color: Int) {
-    this.drawStringWithShadow(string, x, y - FONT_HEIGHT / 2, color)
+    this.drawString(string, x, y - FONT_HEIGHT / 2 + 2f, color, true)
 }
 
 fun getHeight(font: GameFontRenderer) = font.height

@@ -121,11 +121,11 @@ public abstract class MixinNetHandlerPlayClient {
                 
             }
         } catch (final URISyntaxException e) {
-            ClientUtils.getLogger().error("Failed to handle resource pack", e);
+            ClientUtils.logger.error("Failed to handle resource pack", e);
             netManager.sendPacket(new C19PacketResourcePackStatus(hash, C19PacketResourcePackStatus.Action.FAILED_DOWNLOAD));
             callbackInfo.cancel();
         } catch (final IllegalStateException e) {
-            ClientUtils.getLogger().error("Failed to handle resource pack", e);
+            ClientUtils.logger.error("Failed to handle resource pack", e);
             callbackInfo.cancel();
         }
     }

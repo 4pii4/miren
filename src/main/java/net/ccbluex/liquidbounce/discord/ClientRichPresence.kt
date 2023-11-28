@@ -74,7 +74,7 @@ class ClientRichPresence : MinecraftInstance() {
             })
             ipcClient?.connect()
         } catch (e: Throwable) {
-            ClientUtils.getLogger().error("Failed to setup Discord RPC.", e)
+            ClientUtils.logger.error("Failed to setup Discord RPC.", e)
         }
 
     }
@@ -119,7 +119,7 @@ class ClientRichPresence : MinecraftInstance() {
         try {
             ipcClient?.close()
         } catch (e: Throwable) {
-            ClientUtils.getLogger().error("Failed to close Discord RPC.", e)
+            ClientUtils.logger.error("Failed to close Discord RPC.", e)
         }
     }
 

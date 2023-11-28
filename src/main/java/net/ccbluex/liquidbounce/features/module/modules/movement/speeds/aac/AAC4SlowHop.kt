@@ -17,7 +17,7 @@ class AAC4SlowHop : SpeedMode("AAC4SlowHop") {
     override fun onUpdate() {
         if (mc.thePlayer!!.isInWater) return
 
-        if (isMoving()) {
+        if (isMoving) {
             if (mc.thePlayer!!.onGround) {
                 mc.gameSettings.keyBindJump.pressed = false
                 mc.thePlayer!!.jump()

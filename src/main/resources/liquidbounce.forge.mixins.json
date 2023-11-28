@@ -8,7 +8,6 @@
     "accessors.MinecraftForgeClientAccessor",
     "block.MixinBlock",
     "block.MixinBlockAnvil",
-    "block.MixinBlockLadder",
     "block.MixinBlockLiquid",
     "block.MixinBlockModelRenderer",
     "block.MixinBlockRedstoneTorch",
