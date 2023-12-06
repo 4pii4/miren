@@ -45,7 +45,7 @@ class BowAimbot : Module() {
             val entity = getTarget(throughWallsValue.get(), priorityValue.get()) ?: return
 
             val target: Entity = entity
-            target ?: return
+            target
             RotationUtils.faceBow(target, silentValue.get(), predictValue.get(), predictSizeValue.get())
         }
     }

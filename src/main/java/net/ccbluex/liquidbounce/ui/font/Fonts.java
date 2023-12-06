@@ -50,8 +50,8 @@ public class Fonts {
     @FontDetails(fontName = "SFUI Regular", fontSize = 40)
     public static GameFontRenderer fontSFUI40;
 
-    @FontDetails(fontName = "Roboto Bold", fontSize = 180)
-    public static GameFontRenderer fontBold180;
+//    @FontDetails(fontName = "Roboto Bold", fontSize = 180)
+//    public static GameFontRenderer fontBold180;
 
     @FontDetails(fontName = "Tahoma Bold", fontSize = 35)
     public static GameFontRenderer fontTahoma;
@@ -105,7 +105,7 @@ public class Fonts {
         fontLarge = new GameFontRenderer(getFontFromResource("Roboto-Medium.ttf", 60));
         fontSFUI35 = new GameFontRenderer(getFontFromResource("sfui.ttf", 35));
         fontSFUI40 = new GameFontRenderer(getFontFromResource("sfui.ttf", 40));
-        fontBold180 = new GameFontRenderer(getFontFromResource("Roboto-Bold.ttf", 180));
+//        fontBold180 = new GameFontRenderer(getFontFromResource("Roboto-Bold.ttf", 180));
         fontTahoma = new GameFontRenderer(getFontFromResource("TahomaBold.ttf", 35));
         fontTahoma30 = new GameFontRenderer(getFontFromResource("TahomaBold.ttf", 30));
         fontTahomaSmall = new TTFFontRenderer(getFontFromResource("Tahoma.ttf", 11));

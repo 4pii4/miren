@@ -40,7 +40,7 @@ class ModuleInfo(x: Double = -8.0, y: Double = 57.0, scale: Float = 1F, side: Si
 
         for (module in modules) {
             val name = if (spacedName) module.spacedName else module.name
-            var state = module.state.toString().capitalize()
+            var state = module.state.toString().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             if (coloredState)
                 state = if (module.state) green(state) else red(state)
             when (case) {

@@ -15,7 +15,8 @@ open class Element : MinecraftInstance() {
         this.y = y
     }
 
-    open fun drawScreen(mouseX: Int, mouseY: Int, button: Float) {}
+    open fun preDrawScreen(x: Float, y: Float, x2: Float, y2: Float) {}
+    open fun drawScreen(mouseX: Int, mouseY: Int, button: Float, parent: Panel) {}
     open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
         return false
     }

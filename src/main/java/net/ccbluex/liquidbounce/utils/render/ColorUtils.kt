@@ -56,7 +56,7 @@ object ColorUtils {
 
     @JvmStatic
     fun interpolateInt(oldValue: Int, newValue: Int, interpolationValue: Double): Int {
-        return interpolate(oldValue.toDouble(), newValue.toDouble(), interpolationValue.toFloat().toDouble())!!.toInt()
+        return interpolate(oldValue.toDouble(), newValue.toDouble(), interpolationValue.toFloat().toDouble()).toInt()
     }
 
     @JvmStatic

@@ -198,15 +198,12 @@ class LongJump : Module() {
             }
 
             if(mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, check).isEmpty() && !bmcStarted && bmcBoost) {
-                bmcStarted = true;
+                bmcStarted = true
                 bmcSpeed = bmcInitialSpeed.get()
-                PacketUtils.sendPacket(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
-                PacketUtils.sendPacket(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
-                PacketUtils.sendPacket(C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, false))
-                mc.thePlayer.jump();
-                MovementUtils.strafe(bmcSpeed);
+                mc.thePlayer.jump()
+                MovementUtils.strafe(bmcSpeed)
             } else if (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, check).isNotEmpty()) {
-                bmcBoost = true;
+                bmcBoost = true
             }
 
         }

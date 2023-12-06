@@ -38,16 +38,16 @@ object PathUtils : MinecraftInstance() {
         var lastDashLoc: Vec3? = null
         val path = ArrayList<Vec3>()
         val pathFinderPath = pathfinder.path
-        for (pathElm in pathFinderPath!!) {
+        for (pathElm in pathFinderPath) {
             if (i == 0 || i == pathFinderPath.size - 1) {
                 if (lastLoc != null) {
                     path.add(lastLoc.addVector(0.5, 0.0, 0.5))
                 }
-                path.add(pathElm!!.addVector(0.5, 0.0, 0.5))
+                path.add(pathElm.addVector(0.5, 0.0, 0.5))
                 lastDashLoc = pathElm
             } else {
                 var canContinue = true
-                if (pathElm!!.squareDistanceTo(lastDashLoc) > dashDistance * dashDistance) {
+                if (pathElm.squareDistanceTo(lastDashLoc) > dashDistance * dashDistance) {
                     canContinue = false
                 } else {
                     val smallX = min(lastDashLoc!!.xCoord, pathElm.xCoord)

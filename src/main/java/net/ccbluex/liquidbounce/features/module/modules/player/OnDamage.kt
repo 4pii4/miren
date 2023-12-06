@@ -83,5 +83,5 @@ class OnDamage : Module() {
     }
 
     override val tag: String
-        get() = "${if (timer.get()) "Timer," else ""}${if (strafe.get()) "Strafe" else ""}"
+        get() = "${if (timer.get()) "Timer," else ""}${if (strafe.get()) "Strafe" else ""}".removeSuffix(",")
 }

@@ -24,61 +24,45 @@ import net.ccbluex.liquidbounce.value.IntegerValue
 import net.ccbluex.liquidbounce.value.ListValue
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.Entity
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.util.AxisAlignedBB
-import net.minecraft.util.MathHelper
 import org.lwjgl.opengl.GL11
 import java.awt.Color
-import java.util.*
 
-@ModuleInfo(name = "TargetStrafe", description = "Strafe around your target. (Require Fly or Speed to be enabled)", category = ModuleCategory.MOVEMENT)
+@ModuleInfo(name = "TargetStrafe", spacedName = "Target Strafe", description = "Strafe around your target. (Require Fly or Speed to be enabled)", category = ModuleCategory.MOVEMENT)
 class TargetStrafe : Module() {
-    private val radiusMode = ListValue("StrafeMode", arrayOf("TrueRadius", "Simple","Behind"), "Behind")
-    val radius = FloatValue("Radius", 2.0f, 0.1f, 4.0f) { !grim.get() }
-    val customSpeed = BoolValue("CustomSpeed", false)
-    val speedValue = FloatValue("Speed", 0.3f, 0.1f, 0.5f)
+    val radius = FloatValue("Radius", 2.0f, 0.1f, 4.0f, "m")
     private val render = BoolValue("Render", true)
-    private val alwaysRender = BoolValue("Always-Render", true, { render.get() })
+    private val alwaysRender = BoolValue("Always-Render", true) { render.get() }
     private val modeValue = ListValue("KeyMode", arrayOf("Jump", "None"), "None")
+    private val safewalk = BoolValue("SafeWalk", true)
+    val thirdPerson = BoolValue("ThirdPerson", true)
     private val colorType = ListValue("Color", arrayOf("Custom", "Dynamic", "Rainbow", "Rainbow2", "Sky", "Fade", "Mixer"), "Custom")
     private val redValue = IntegerValue("Red", 255, 0, 255)
     private val greenValue = IntegerValue("Green", 255, 0, 255)
     private val blueValue = IntegerValue("Blue", 255, 0, 255)
-    private val safewalk = BoolValue("SafeWalk", true)
-    val thirdPerson = BoolValue("ThirdPerson", true)
-    val always = BoolValue("Always",false)
-    val onground = BoolValue("Ground",false)
-    val air = BoolValue("Air",false)
-    val grim = BoolValue("Grim", false)
-
-    private val accuracyValue = IntegerValue("Accuracy", 0, 0, 59)
-    private val thicknessValue = FloatValue("Thickness", 1F, 0.1F, 5F)
-    private val mixerSecondsValue = IntegerValue("Mixer-Seconds", 2, 1, 10)
-    private val outLine = BoolValue("Outline", true)
     private val saturationValue = FloatValue("Saturation", 0.7F, 0F, 1F)
     private val brightnessValue = FloatValue("Brightness", 1F, 0F, 1F)
+    private val mixerSecondsValue = IntegerValue("Mixer-Seconds", 2, 1, 10)
+    private val accuracyValue = IntegerValue("Accuracy", 0, 0, 59)
+    private val thicknessValue = FloatValue("Thickness", 1F, 0.1F, 5F)
+    private val outLine = BoolValue("Outline", true)
+    private val expMode = BoolValue("ExperimentalSpeed", false)
+    private lateinit var killAura: KillAura
+    private lateinit var speed: Speed
+    private lateinit var fly: Fly
 
-    private  var killAura = LiquidBounce.moduleManager.getModule(KillAura::class.java) as KillAura
-    private  var speed=LiquidBounce.moduleManager.getModule(Speed::class.java) as Speed
-    private  var fly =LiquidBounce.moduleManager.getModule(Fly::class.java) as Fly
+    var direction = 1
+    var lastView = 0
+    var hasChangedThirdPerson = true
 
-    var direction: Int = 1
-    var lastView: Int = 0
-    var hasChangedThirdPerson: Boolean = true
+    var hasModifiedMovement = false
 
-    val cansize: Float
-        get() = when {
-            radiusMode.get().lowercase(Locale.getDefault()) == "simple" ->
-                45f / mc.thePlayer!!.getDistance(killAura.target!!.posX, mc.thePlayer!!.posY, killAura.target!!.posZ).toFloat()
-            else -> 45f
-        }
-    val Enemydistance: Double
-        get() = mc.thePlayer!!.getDistance(killAura.target!!.posX, mc.thePlayer!!.posY, killAura.target!!.posZ)
-
-    val algorithm: Float
-        get() = Math.max(
-            Enemydistance - if (grim.get()) 0.8f else radius.get(),
-            Enemydistance - (Enemydistance - if (grim.get()) 0.8f else radius.get() / (if (grim.get()) 0.8f else radius.get() * 2))
-        ).toFloat()
+    override fun onInitialize() {
+        killAura = LiquidBounce.moduleManager.getModule(KillAura::class.java) as KillAura
+        speed = LiquidBounce.moduleManager.getModule(Speed::class.java) as Speed
+        fly = LiquidBounce.moduleManager.getModule(Fly::class.java) as Fly
+    }
 
     override fun onEnable() {
         hasChangedThirdPerson = true
@@ -110,130 +94,67 @@ class TargetStrafe : Module() {
         }
     }
 
-    @EventTarget
+    @EventTarget(priority = 2)
     fun onMove(event: MoveEvent) {
         if (canStrafe) {
-            if (grim.get()) {
-                if (mc.thePlayer.getDistanceSqToEntity(killAura.target!!) < 1.25f) {
-                    //mc.thePlayer.isSprinting = false
-                    //mc.thePlayer.serverSprintState = false
-                    strafe(event, MovementUtils.getSpeed(event.x, event.z))
-                }
-            } else {
-                strafe(event, MovementUtils.getSpeed(event.x, event.z))
-            }
+            if (!hasModifiedMovement) strafe(event, MovementUtils.getSpeed(event.x, event.z))
 
-            if (safewalk.get() && checkVoid()) {
+            if (safewalk.get() && checkVoid())
                 event.isSafeWalk = true
-            }
         }
+        hasModifiedMovement = false
     }
 
     fun strafe(event: MoveEvent, moveSpeed: Double) {
         if (killAura.target == null) return
-        val target = killAura.target
 
-        val rotYaw = RotationUtils.getRotationsEntity(killAura.target!!).yaw
+        val target = killAura.target!!
+        val rotYaw = RotationUtils.getRotationsEntity(target).yaw
 
-        when (radiusMode.get()){
-            "TrueRadius" -> {
-                if (mc.thePlayer.getDistanceToEntity(target) <= radius.get())
-                    setSpeed(
-                        event,
-                        if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed,
-                        rotYaw,
-                        direction,
-                        0.0
-                    )
-                else
-                    setSpeed(
-                        event,
-                        if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed,
-                        rotYaw,
-                        direction,
-                        1.0
-                    )
-            }
-            "Simple" -> {
-                if (mc.thePlayer.getDistanceToEntity(target) <= radius.get())
-                    setSpeed(
-                        event,
-                        if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed,
-                        rotYaw,
-                        direction,
-                        0.0
-                    )
-                else
-                    setSpeed(
-                        event,
-                        if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed,
-                        rotYaw,
-                        direction,
-                        1.0
-                    )
-            }
-            "Behind" -> {
-                val xPos: Double = target!!.posX + -Math.sin(Math.toRadians(target.rotationYaw.toDouble())) * -2
-                val zPos: Double = target.posZ + Math.cos(Math.toRadians(target.rotationYaw.toDouble())) * -2
-                event.setX(
-                    if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed * -MathHelper.sin(
-                        Math.toRadians(RotationUtils.getRotations(xPos, target.posY, zPos).yaw.toDouble())
-                    .toFloat()))
-                event.setZ(
-                    if (customSpeed.get()) speedValue.get().toDouble() else moveSpeed * MathHelper.cos(
-                        Math.toRadians(RotationUtils.getRotations(xPos, target.posY, zPos).yaw.toDouble())
-                    .toFloat()))
-            }
-        }
+        val forward = if (mc.thePlayer.getDistanceToEntity(target) <= radius.get()) 0.0 else 1.0
+        val strafe = direction.toDouble()
+        var modifySpeed = if (expMode.get()) maximizeSpeed(target, moveSpeed, killAura.attackRange) else moveSpeed
+
+        MovementUtils.setSpeed(event, modifySpeed, rotYaw, strafe, forward)
+        hasModifiedMovement = true
     }
 
-    fun setSpeed(
-        moveEvent: MoveEvent, moveSpeed: Double, pseudoYaw: Float, pseudoStrafe: Int,
-        pseudoForward: Double) {
-        var yaw = pseudoYaw
-        var forward = pseudoForward
-        var strafe = pseudoStrafe
-        var strafe2 = 0f
+    fun getData(): Array<Float> {
+        if (killAura.target == null) return arrayOf(0F, 0F, 0F)
 
-        if (forward != 0.0) {
-            if (strafe > 0.0) {
-                if (radiusMode.get().lowercase(Locale.getDefault()) == "trueradius")
-                    yaw += (if (forward > 0.0) -cansize else cansize)
-                strafe2 += (if (forward > 0.0) -45 / algorithm else 45 / algorithm)
-            } else if (strafe < 0.0) {
-                if (radiusMode.get().lowercase(Locale.getDefault()) == "trueradius")
-                    yaw += (if (forward > 0.0) cansize else -cansize)
-                strafe2 += (if (forward > 0.0) 45 / algorithm else -45 / algorithm)
-            }
-            strafe = 0
-            if (forward > 0.0)
-                forward = 1.0
-            else if (forward < 0.0)
-                forward = -1.0
+        val target = killAura.target!!
+        val rotYaw = RotationUtils.getRotationsEntity(target).yaw
 
-        }
-        if (strafe > 0.0)
-            strafe = 1
-        else if (strafe < 0.0)
-            strafe = -1
+        val forward = if (mc.thePlayer.getDistanceToEntity(target) <= radius.get()) 0F else 1F
+        val strafe = direction.toFloat()
 
-
-        val mx = Math.cos(Math.toRadians(yaw + 90.0 + strafe2))
-        val mz = Math.sin(Math.toRadians(yaw + 90.0 + strafe2))
-        moveEvent.x = forward * moveSpeed * mx + strafe * moveSpeed * mz
-        moveEvent.z = forward * moveSpeed * mz - strafe * moveSpeed * mx
+        return arrayOf(rotYaw, strafe, forward)
     }
 
+    fun getMovingYaw(): Float {
+        val dt = getData()
+        return MovementUtils.getRawDirectionRotation(dt[0], dt[1], dt[2])
+    }
+
+    fun getMovingDir(): Double {
+        val dt = getData()
+        return MovementUtils.getDirectionRotation(dt[0], dt[1], dt[2])
+    }
+
+    private fun maximizeSpeed(ent: EntityLivingBase, speed: Double, range: Float): Double {
+        mc.thePlayer ?: return 0.0
+        return if (mc.thePlayer.getDistanceToEntity(ent) <= radius.get()) speed.coerceIn(0.0, range.toDouble() / 20.0) else speed
+    }
 
     val keyMode: Boolean
-        get() = when (modeValue.get().lowercase(Locale.getDefault())) {
+        get() = when (modeValue.get().toLowerCase()) {
             "jump" -> mc.gameSettings.keyBindJump.isKeyDown
             "none" -> mc.thePlayer.movementInput.moveStrafe != 0f || mc.thePlayer.movementInput.moveForward != 0f
             else -> false
         }
 
     val canStrafe: Boolean
-        get() = (state && (speed.state || fly.state || always.get()) && (onground.get() && mc.thePlayer.onGround || !mc.thePlayer.onGround && air.get()) && killAura.state && killAura.target != null && !mc.thePlayer.isSneaking && keyMode)
+        get() = (state && (speed.state || fly.state) && killAura.state && killAura.target != null && !mc.thePlayer.isSneaking && keyMode)
 
     private fun checkVoid(): Boolean {
         for (x in -1..0) {
@@ -262,6 +183,7 @@ class TargetStrafe : Module() {
         }
         return true
     }
+
     @EventTarget
     fun onRender3D(event: Render3DEvent) {
         val target = killAura.target
@@ -269,9 +191,9 @@ class TargetStrafe : Module() {
             target?:return
             GL11.glPushMatrix()
             GL11.glTranslated(
-                target.lastTickPosX + (target.posX - target.lastTickPosX) * mc.timer.renderPartialTicks - mc.renderManager.renderPosX,
-                target.lastTickPosY + (target.posY - target.lastTickPosY) * mc.timer.renderPartialTicks - mc.renderManager.renderPosY,
-                target.lastTickPosZ + (target.posZ - target.lastTickPosZ) * mc.timer.renderPartialTicks - mc.renderManager.renderPosZ
+                target.lastTickPosX + (target.posX - target.lastTickPosX) * mc.timer.renderPartialTicks - mc.getRenderManager().renderPosX,
+                target.lastTickPosY + (target.posY - target.lastTickPosY) * mc.timer.renderPartialTicks - mc.getRenderManager().renderPosY,
+                target.lastTickPosZ + (target.posZ - target.lastTickPosZ) * mc.timer.renderPartialTicks - mc.getRenderManager().renderPosZ
             )
             GL11.glEnable(GL11.GL_BLEND)
             GL11.glEnable(GL11.GL_LINE_SMOOTH)
@@ -303,12 +225,12 @@ class TargetStrafe : Module() {
             for (i in 0..360 step 60 - accuracyValue.get()) { // You can change circle accuracy  (60 - accuracy)
                 when (colorType.get()) {
                     "Custom" -> GL11.glColor3f(redValue.get() / 255.0f, greenValue.get() / 255.0f, blueValue.get() / 255.0f)
-                    "Dynamic" -> if (canStrafe) GL11.glColor4f(redValue.get() / 255.0f, greenValue.get() / 255.0f, blueValue.get() / 255f,255f) else GL11.glColor4f(1f, 1f, 1f, 1f)
+                    "Dynamic" -> if (canStrafe) GL11.glColor4f(0.25f, 1f, 0.25f, 1f) else GL11.glColor4f(1f, 1f, 1f, 1f)
                     "Rainbow" -> {
                         val rainbow = Color(RenderUtils.getNormalRainbow(i, saturationValue.get(), brightnessValue.get()))
                         GL11.glColor3f(rainbow.red / 255.0f, rainbow.green / 255.0f, rainbow.blue / 255.0f)
                     }
-                    "Rainbow2" -> GL11.glColor3f(rainbow2!!.red / 255.0f, rainbow2.green / 255.0f, rainbow2.blue / 255.0f)
+                    "Rainbow2" -> GL11.glColor3f(rainbow2!!.red / 255.0f, rainbow2!!.green / 255.0f, rainbow2!!.blue / 255.0f)
                     "Sky" -> GL11.glColor3f(sky.red / 255.0f, sky.green / 255.0f, sky.blue / 255.0f)
                     "Mixer" -> GL11.glColor3f(mixer.red / 255.0f, mixer.green / 255.0f, mixer.blue / 255.0f)
                     else -> GL11.glColor3f(fade.red / 255.0f, fade.green / 255.0f, fade.blue / 255.0f)

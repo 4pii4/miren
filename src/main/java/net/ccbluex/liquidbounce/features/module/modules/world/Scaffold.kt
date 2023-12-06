@@ -600,8 +600,8 @@ class Scaffold : Module() {
             "Novoline" -> {
                 val entity = EntityPig(mc.theWorld)
                     entity.posX = blockData?.blockPos!!.x + 0.5
-                    entity.posY = blockData?.blockPos.y + 0.5
-                    entity.posZ = blockData?.blockPos.z + 0.5
+                    entity.posY = blockData.blockPos.y + 0.5
+                    entity.posZ = blockData.blockPos.z + 0.5
 
                 lockRotation = RotationUtils.getAngles(entity)
                 faceBlock = true

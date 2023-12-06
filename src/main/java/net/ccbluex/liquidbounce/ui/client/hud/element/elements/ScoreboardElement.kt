@@ -170,7 +170,7 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
         val l1 = if (side.horizontal == Side.Horizontal.LEFT) {maxWidth + 3} else {-maxWidth - 3}
 
         var FadeColor : Int = ColorUtils.fade(Color(rectColorRedValue.get(), rectColorGreenValue.get(), rectColorBlueValue.get(), rectColorBlueAlpha.get()), 0, 100).rgb
-        val LiquidSlowly = ColorUtils.LiquidSlowly(System.nanoTime(), 0, saturationValue.get(), brightnessValue.get())?.rgb
+        val LiquidSlowly = ColorUtils.LiquidSlowly(System.nanoTime(), 0, saturationValue.get(), brightnessValue.get()).rgb
         var liquidSlowli : Int = LiquidSlowly!!
 
         val mixerColor = ColorMixer.getMixedColor(0, cRainbowSecValue.get()).rgb
@@ -248,8 +248,12 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
                             renderX.toFloat() + 5F * scale, renderY.toFloat() + (maxHeight + fontRenderer.FONT_HEIGHT) * scale, roundStrength.get(), blurStrength.get())
                 } else {
                     if (side.horizontal == Side.Horizontal.LEFT) 
-                        BlurUtils.blurArea(renderX.toFloat() + (l1 + 2F) * scale, renderY.toFloat() + -2F * scale, 
-                            renderX.toFloat() + -5F * scale, renderY.toFloat() + (maxHeight + fontRenderer.FONT_HEIGHT) * scale, blurStrength.get())
+                        BlurUtils.blurArea(
+                            renderX.toFloat() + (l1 + 2F) * scale,
+                            renderY.toFloat() + -2F * scale,
+                            renderX.toFloat() + -5F * scale,
+                            renderY.toFloat() + (maxHeight + fontRenderer.FONT_HEIGHT) * scale,
+                            blurStrength.get())
                     else
                         BlurUtils.blurArea(renderX.toFloat() + (l1 - 2F) * scale, renderY.toFloat() + -2F * scale, 
                             renderX.toFloat() + 5F * scale, renderY.toFloat() + (maxHeight + fontRenderer.FONT_HEIGHT) * scale, blurStrength.get())
@@ -347,7 +351,7 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
                                 brightnessValue.get(),
                                 z * delayValue.get()
                             )
-                            rectColorMode.equals("LiquidSlowly", ignoreCase = true) -> ColorUtils.LiquidSlowly(System.nanoTime(), z * delayValue.get(), saturationValue.get(), brightnessValue.get())!!.rgb
+                            rectColorMode.equals("LiquidSlowly", ignoreCase = true) -> ColorUtils.LiquidSlowly(System.nanoTime(), z * delayValue.get(), saturationValue.get(), brightnessValue.get()).rgb
                             rectColorMode.equals("Fade", ignoreCase = true) -> ColorUtils.fade(
                                 Color(rectColorRedValue.get(), rectColorGreenValue.get(), rectColorBlueValue.get(), rectColorBlueAlpha.get()), 
                                 z * delayValue.get(), 

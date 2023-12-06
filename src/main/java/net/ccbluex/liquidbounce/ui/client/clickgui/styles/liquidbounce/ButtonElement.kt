@@ -17,14 +17,14 @@ open class ButtonElement(displayName: String?) : Element() {
         this.displayName = displayName
     }
 
-    override fun drawScreen(mouseX: Int, mouseY: Int, button: Float) {
+    override fun drawScreen(mouseX: Int, mouseY: Int, button: Float, parent: Panel) {
         LiquidBounceStyle.getInstance().drawButtonElement(mouseX, mouseY, this)
-        super.drawScreen(mouseX, mouseY, button)
+        super.drawScreen(mouseX, mouseY, button, parent)
     }
 
     override var height = 16
 
     fun isHovering(mouseX: Int, mouseY: Int): Boolean {
-        return mouseX >= x && mouseX <= x + getWidth() && mouseY >= y && mouseY <= y + 16
+        return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 16
     }
 }

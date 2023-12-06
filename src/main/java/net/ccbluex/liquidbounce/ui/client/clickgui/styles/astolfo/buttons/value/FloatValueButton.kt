@@ -5,6 +5,8 @@ import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstan
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.SLIDER_OFFSET
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.dim
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.drawHeightCenteredString
+import net.ccbluex.liquidbounce.utils.ClientUtils
+import net.ccbluex.liquidbounce.utils.MouseButtons
 import net.ccbluex.liquidbounce.utils.geom.Rectangle
 import net.ccbluex.liquidbounce.utils.render.RenderUtils.drawRect
 import net.ccbluex.liquidbounce.value.FloatValue
@@ -20,7 +22,7 @@ class FloatValueButton(x: Float, y: Float, width: Float, height: Float, var sett
         val background = Rectangle(x, y, width, height)
         drawRect(background, BACKGROUND_VALUE)
         val diff = (setting.maximum - setting.minimum).toDouble()
-        val percentWidth = (setting.get() - setting.minimum) / (setting.maximum - setting.minimum)
+        val percentWidth = (setting.get().coerceIn(setting.minimum, setting.maximum) - setting.minimum) / (setting.maximum - setting.minimum)
 
         val foreground = Rectangle(x + 3, y, width - 3 * 2, height)
         foreground.width *= percentWidth
@@ -54,12 +56,14 @@ class FloatValueButton(x: Float, y: Float, width: Float, height: Float, var sett
         return background
     }
 
-    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int) {
-        if (!show) return
-        if (isHovered(mouseX, mouseY)) {
+    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int): Boolean {
+        if (!show) return false
+        if (isHovered(mouseX, mouseY) && click && button == MouseButtons.LEFT.ordinal) {
             dragged = true
+            return true
         }
         if (!click) dragged = false
+        return false
     }
 
     override fun onClosed() {

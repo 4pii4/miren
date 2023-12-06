@@ -57,7 +57,7 @@ class Aimbot : Module() {
         val boundingBox = entity.entityBoundingBox ?: return
 
         val destinationRotation = if (centerValue.get()) {
-            RotationUtils.toRotation(RotationUtils.getCenter(boundingBox) ?: return, true)
+            RotationUtils.toRotation(RotationUtils.getCenter(boundingBox), true)
         } else {
             RotationUtils.searchCenter(boundingBox, false, false, true, false, range).rotation
         }

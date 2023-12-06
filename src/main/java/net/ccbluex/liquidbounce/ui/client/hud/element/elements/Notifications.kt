@@ -37,7 +37,7 @@ class Notifications(
     side: Side = Side(Side.Horizontal.RIGHT, Side.Vertical.DOWN)
 ) : Element(x, y, scale, side) {
 
-    val styleValue = ListValue("Style", arrayOf("Full", "Compact", "Material", "Astolfo", "IntelliJ"), "Material")
+    val styleValue = ListValue("Style", arrayOf("Full", "Compact", "Material", "Astolfo", "IntelliJ"), "Astolfo")
     val barValue = BoolValue("Bar", true) { styleValue.get().equals("material", true) }
     val bgAlphaValue = IntegerValue("Background-Alpha", 120, 0, 255) { !styleValue.get().equals("material", true) }
 
@@ -102,9 +102,9 @@ class Notifications(
     private fun getNotifBorder() = when (styleValue.get().lowercase(Locale.getDefault())) {
         "full" -> Border(-125F, -58F, 0F, -30F)
         "compact" -> Border(-103F, -48F, 0F, -30F)
-        "astolfo" -> Border(-134f, -56f, 0f, -30f)
-        "intellij" -> Border(-130f, -60f, -0f, -30f)
-        else -> if (side.vertical == Side.Vertical.DOWN) Border(-160F, -50F, 0F, -30F) else Border(-160F, -20F, 0F, 0F)
+        "astolfo" -> Border(-133f, -56f, 0f, -30f)
+        "intellij" -> Border(-129f, -60f, -0f, -30f)
+        else -> Border(-160F, -54F, 0F, -30F)
     }
 }
 

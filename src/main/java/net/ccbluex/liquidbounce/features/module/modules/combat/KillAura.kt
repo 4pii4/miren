@@ -303,8 +303,8 @@ class KillAura : Module() {
                         strafe *= f
                         forward *= f
 
-                        val yawSin = MathHelper.sin((yaw * Math.PI / 180F).toFloat())
-                        val yawCos = MathHelper.cos((yaw * Math.PI / 180F).toFloat())
+                        val yawSin = sin((yaw * Math.PI / 180F).toFloat())
+                        val yawCos = cos((yaw * Math.PI / 180F).toFloat())
 
                         mc.thePlayer.motionX += strafe * yawCos - forward * yawSin
                         mc.thePlayer.motionZ += forward * yawCos + strafe * yawSin
@@ -362,8 +362,8 @@ class KillAura : Module() {
                         strafe *= factor
                         forward *= factor
 
-                        val yawSin = MathHelper.sin((calcYaw * Math.PI / 180F).toFloat())
-                        val yawCos = MathHelper.cos((calcYaw * Math.PI / 180F).toFloat())
+                        val yawSin = sin((calcYaw * Math.PI / 180F).toFloat())
+                        val yawCos = cos((calcYaw * Math.PI / 180F).toFloat())
 
                         mc.thePlayer.motionX += strafe * yawCos - forward * yawSin
                         mc.thePlayer.motionZ += forward * yawCos + strafe * yawSin
@@ -811,7 +811,7 @@ class KillAura : Module() {
         return true
     }
 
-    private fun getTargetRotation(entity: Entity): Rotation? {
+    private fun getTargetRotation(entity: Entity): Rotation {
 
         var boundingBox = entity.hitBox
         val amount = shakeAmout

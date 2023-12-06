@@ -138,7 +138,7 @@ class Velocity : Module() {
     // Grim
     private val transactionQueue: Queue<Short> = ConcurrentLinkedQueue()
     private var grimPacket = false
-    private var attack = false;
+    private var attack = false
 
     private var jumped = 0
 

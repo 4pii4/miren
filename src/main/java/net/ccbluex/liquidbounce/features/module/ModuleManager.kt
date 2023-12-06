@@ -245,6 +245,10 @@ class ModuleManager : Listenable {
         LiquidBounce.eventManager.registerListener(module)
     }
 
+    fun onClientLoaded() {
+        modules.map { it.onClientLoaded() }
+    }
+
     /**
      * Register [moduleClass]
      */

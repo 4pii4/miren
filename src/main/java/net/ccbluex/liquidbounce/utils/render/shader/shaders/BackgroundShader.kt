@@ -13,19 +13,15 @@ import org.lwjgl.opengl.GL20.glUniform2f
 import java.io.File
 import java.io.IOException
 
-/**
- * @author https://forums.ccbluex.net/topic/1699/shader-two-backgroundshader-share
- */
-
 class BackgroundShader : Shader {
+    companion object {
+        val BACKGROUND_SHADER = BackgroundShader()
+    }
+
     constructor() : super("background.frag")
 
     @Throws(IOException::class)
     constructor(fragmentShader: File) : super(fragmentShader)
-
-    companion object {
-        val BACKGROUND_SHADER = BackgroundShader()
-    }
 
     private var time = 0f
 

@@ -75,7 +75,6 @@ object LiquidBounce {
         // Create file manager
         fileManager = FileManager()
 
-        ShaderUtils.init()
         DictUtils.init()
         ChangelogUtils.update()
 
@@ -147,9 +146,8 @@ object LiquidBounce {
 //            }
 //        }
 
+        moduleManager.onClientLoaded()
         ClientUtils.logger.info("Finished loading $CLIENT_NAME version $CLIENT_VERSION in ${System.currentTimeMillis() - startTime}ms.")
-
-        // Set is starting status
         isStarting = false
     }
 

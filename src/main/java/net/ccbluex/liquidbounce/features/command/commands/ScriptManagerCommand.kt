@@ -9,8 +9,6 @@ import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.features.command.CommandManager
 import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
-import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui
-import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.misc.MiscUtils
 import org.apache.commons.io.IOUtils

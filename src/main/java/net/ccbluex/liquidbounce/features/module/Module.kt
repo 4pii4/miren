@@ -151,6 +151,11 @@ open class Module : MinecraftInstance(), Listenable {
     open fun onInitialize() {}
 
     /**
+     * Called when client finished loading
+     */
+    open fun onClientLoaded() {}
+
+    /**
      * Get module by [valueName]
      */
     open fun getValue(valueName: String) =

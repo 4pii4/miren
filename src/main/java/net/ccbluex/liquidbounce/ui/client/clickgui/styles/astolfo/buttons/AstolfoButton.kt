@@ -4,7 +4,7 @@ import net.ccbluex.liquidbounce.utils.geom.Rectangle
 
 abstract class AstolfoButton(var x: Float, var y: Float, var width: Float, var height: Float) {
     abstract fun drawPanel(mouseX: Int, mouseY: Int): Rectangle // return used height
-    abstract fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int)
+    abstract fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int): Boolean
     fun isHovered(mouseX: Int, mouseY: Int): Boolean {
         return mouseX >= x && mouseX <= x + width && mouseY > y && mouseY < y + height
     }

@@ -5,6 +5,7 @@
  */
 package net.ccbluex.liquidbounce.features.module
 
+import net.minecraft.util.ResourceLocation
 import java.awt.Color
 
 enum class ModuleCategory(var displayName: String, val color: Int) {
@@ -19,8 +20,5 @@ enum class ModuleCategory(var displayName: String, val color: Int) {
     MISC("Misc", Color(0x105748).rgb),
     SCRIPT("Script", Color(196, 224, 249).rgb);
 
-    @JvmName("getColor1")
-    fun getColor(): Int {
-        return this.color
-    }
+    var icon: ResourceLocation = ResourceLocation("liquidbounce+/categories/${displayName.lowercase()}.png")
 }

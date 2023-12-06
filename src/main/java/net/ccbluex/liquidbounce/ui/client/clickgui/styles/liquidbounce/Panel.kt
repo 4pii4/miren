@@ -2,6 +2,9 @@ package net.ccbluex.liquidbounce.ui.client.clickgui.styles.liquidbounce
 
 import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
 import net.ccbluex.liquidbounce.utils.MinecraftInstance
+import net.ccbluex.liquidbounce.utils.render.EaseUtils
+import net.ccbluex.liquidbounce.utils.render.animations.Direction
+import net.ccbluex.liquidbounce.utils.render.animations.impl.CustomAnimation
 import net.minecraft.client.audio.PositionedSoundRecord
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.StringUtils
@@ -21,7 +24,8 @@ abstract class Panel(val name: String, var x: Int, var y: Int, val width: Int, v
     val elements: MutableList<Element>
     var isVisible = true
     private var elementsHeight = 0f
-    private var fade = 0f
+    var fade = 0f
+    val anim = CustomAnimation(200, 1.0, Direction.FORWARDS) { EaseUtils.easeInQuad(it) }
 
     init {
         elements = ArrayList()
@@ -50,7 +54,9 @@ abstract class Panel(val name: String, var x: Int, var y: Int, val width: Int, v
             if (++count > scroll && count < scroll + (maxElements + 1) && scroll < elements.size) {
                 element.setLocation(x, y)
                 element.width = width
-                if (y <= this.y + fade) element.drawScreen(mouseX, mouseY, button)
+//                if (y <= this.y + fade) element.drawScreen(mouseX, mouseY, button)
+                element.preDrawScreen(this.x + 0f, this.y + 0f, this.x + this.width + 0f, this.y + this.height + fade)
+                element.drawScreen(mouseX, mouseY, button, this)
                 y += element.height + 1
                 element.isVisible = true
             } else element.isVisible = false
@@ -105,17 +111,12 @@ abstract class Panel(val name: String, var x: Int, var y: Int, val width: Int, v
     }
 
     fun updateFade(delta: Int) {
-        if (open) {
-            if (fade < elementsHeight) fade += 0.4f * delta
-            if (fade > elementsHeight) fade = elementsHeight.toInt().toFloat()
+        fade = if (ClickGUI.animationValue.equals("none", true)) {
+            if (open) elementsHeight else 0f
         } else {
-            if (fade > 0) fade -= 0.4f * delta
-            if (fade < 0) fade = 0f
+            anim.setDirection(if (open) Direction.FORWARDS else Direction.BACKWARDS)
+            elementsHeight * anim.outputFloat.coerceIn(0f, 1f)
         }
-    }
-
-    fun getFade(): Int {
-        return fade.toInt()
     }
 
     private fun getElementsHeight(): Int {

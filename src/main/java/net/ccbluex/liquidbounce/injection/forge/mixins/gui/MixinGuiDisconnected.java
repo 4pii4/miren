@@ -23,6 +23,7 @@ import net.ccbluex.liquidbounce.ui.client.altmanager.menus.GuiLoginProgress;
 import net.ccbluex.liquidbounce.ui.client.altmanager.menus.altgenerator.GuiTheAltening;
 import net.ccbluex.liquidbounce.ui.font.Fonts;
 import net.ccbluex.liquidbounce.utils.ClientUtils;
+import net.ccbluex.liquidbounce.utils.DictUtils;
 import net.ccbluex.liquidbounce.utils.ServerUtils;
 import net.ccbluex.liquidbounce.utils.SessionUtils;
 import net.ccbluex.liquidbounce.utils.misc.RandomUtils;
@@ -125,7 +126,8 @@ public abstract class MixinGuiDisconnected extends MixinGuiScreen {
                 break;
             case 4:
                 final CrackedAccount crackedAccount = new CrackedAccount();
-                crackedAccount.setName(RandomUtils.randomString(RandomUtils.nextInt(5, 16)));
+//                crackedAccount.setName(RandomUtils.randomString(RandomUtils.nextInt(5, 16)));
+                crackedAccount.setName(DictUtils.INSTANCE.get(GuiAltManager.Companion.getGenerateCracked().getText()));
                 crackedAccount.update();
 
                 mc.session = new Session(crackedAccount.getSession().getUsername(), crackedAccount.getSession().getUuid(),

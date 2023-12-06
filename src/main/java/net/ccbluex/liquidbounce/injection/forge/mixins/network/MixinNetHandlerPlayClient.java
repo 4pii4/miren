@@ -13,7 +13,7 @@ import net.ccbluex.liquidbounce.features.module.modules.exploit.NoRotate;
 import net.ccbluex.liquidbounce.features.module.modules.misc.AntiExploit;
 import net.ccbluex.liquidbounce.features.special.AntiForge;
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui;
-import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi;
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.InfClickGui;
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner;
 import net.ccbluex.liquidbounce.utils.ClientUtils;
 import net.ccbluex.liquidbounce.utils.TransferUtils;
@@ -78,7 +78,7 @@ public abstract class MixinNetHandlerPlayClient {
 
     @Inject(method = "handleCloseWindow", at = @At("HEAD"), cancellable = true)
     private void handleCloseWindow(final S2EPacketCloseWindow packetIn, final CallbackInfo callbackInfo) {
-        if (this.gameController.currentScreen instanceof AstolfoClickGui || this.gameController.currentScreen instanceof NewUi
+        if (this.gameController.currentScreen instanceof AstolfoClickGui || this.gameController.currentScreen instanceof InfClickGui
             || this.gameController.currentScreen instanceof GuiHudDesigner 
             || this.gameController.currentScreen instanceof GuiChat)
             callbackInfo.cancel();

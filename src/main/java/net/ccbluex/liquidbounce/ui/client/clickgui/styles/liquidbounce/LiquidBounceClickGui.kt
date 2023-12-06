@@ -1,15 +1,18 @@
 package net.ccbluex.liquidbounce.ui.client.clickgui.styles.liquidbounce
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.ClickGuiStyle
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner
 import net.ccbluex.liquidbounce.ui.font.AWTFontRenderer.Companion.assumeNonVolatile
+import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
 import net.ccbluex.liquidbounce.utils.render.EaseUtils.easeOutBack
 import net.ccbluex.liquidbounce.utils.render.EaseUtils.easeOutQuart
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
-import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.util.ResourceLocation
@@ -17,9 +20,9 @@ import org.lwjgl.input.Mouse
 import java.io.IOException
 
 
-class LiquidBounceClickGui : GuiScreen() {
+class LiquidBounceClickGui : ClickGuiStyle("LiquidBounce") {
     val panels: MutableList<Panel> = ArrayList()
-    private val hudIcon = ResourceLocation(LiquidBounce.CLIENT_NAME.toLowerCase() + "/custom_hud_icon.png")
+    private val hudIcon = ResourceLocation("liquidbounce+/custom_hud_icon.png")
     val style: LiquidBounceStyle
         get() = LiquidBounceStyle.getInstance()
 
@@ -50,6 +53,52 @@ class LiquidBounceClickGui : GuiScreen() {
         slide = progress
         lastMS = System.currentTimeMillis()
         super.initGui()
+    }
+
+    override fun dumpConfig(): JsonElement {
+        val jsonObject = JsonObject()
+
+        for (panel in panels) {
+            val panelObject = JsonObject()
+            panelObject.addProperty("open", panel.open)
+            panelObject.addProperty("visible", panel.isVisible)
+            panelObject.addProperty("posX", panel.x)
+            panelObject.addProperty("posY", panel.y)
+            for (element in panel.elements) {
+                if (element !is ModuleElement) continue
+                val elementObject = JsonObject()
+                elementObject.addProperty("Settings", element.isShowSettings)
+                panelObject.add(element.module.name, elementObject)
+            }
+            jsonObject.add(panel.name, panelObject)
+        }
+
+        return jsonObject
+    }
+
+    override fun loadConfig(json: JsonObject) {
+        for (panel in panels) {
+            if (!json.has(panel.name)) continue
+            try {
+                val panelObject: JsonObject = json.getAsJsonObject(panel.name)
+                panel.open = panelObject["open"].asBoolean
+                panel.isVisible = panelObject["visible"].asBoolean
+                panel.x = panelObject["posX"].asInt
+                panel.y = panelObject["posY"].asInt
+                for (element in panel.elements) {
+                    if (element !is ModuleElement) continue
+                    if (!panelObject.has(element.module.name)) continue
+                    try {
+                        val elementObject = panelObject.getAsJsonObject(element.module.name)
+                        element.isShowSettings = elementObject["Settings"].asBoolean
+                    } catch (e: Exception) {
+                        ClientUtils.logger.error("Error while loading clickgui module element with the name '" + element.module.name + "' (Panel Name: " + panel.name + ").", e)
+                    }
+                }
+            } catch (e: Exception) {
+                ClientUtils.logger.error("Error while loading clickgui panel with the name '" + panel.name + "'.", e)
+            }
+        }
     }
 
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
@@ -115,7 +164,7 @@ class LiquidBounceClickGui : GuiScreen() {
             for (element in panel.elements) {
                 if (element is ModuleElement) {
                     val moduleElement = element
-                    if (mouseX != 0 && mouseY != 0 && moduleElement.isHovering(mouseX, mouseY) && moduleElement.isVisible && element.y <= panel.y + panel.getFade()) style.drawDescription(mouseX, mouseY, moduleElement.module.description)
+                    if (mouseX != 0 && mouseY != 0 && moduleElement.isHovering(mouseX, mouseY) && moduleElement.isVisible && element.y <= panel.y + panel.fade) style.drawDescription(mouseX, mouseY, moduleElement)
                 }
             }
         }

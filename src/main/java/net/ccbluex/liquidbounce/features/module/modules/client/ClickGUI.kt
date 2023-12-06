@@ -5,13 +5,16 @@
  */
 package net.ccbluex.liquidbounce.features.module.modules.client
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.module.modules.render.ColorMixer
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.ClickGuiStyle
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.liquidbounce.LiquidBounceClickGui
-import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.InfClickGui
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.value.BoolValue
@@ -22,7 +25,7 @@ import java.awt.Color
 import java.util.*
 
 
-@ModuleInfo(name = "ClickGUI", description = "Opens the ClickGUI.", category = ModuleCategory.CLIENT, forceNoSound = true, onlyEnable = true)
+@ModuleInfo(name = "ClickGUI", description = "ClickGUI.", category = ModuleCategory.CLIENT, forceNoSound = true, onlyEnable = true)
 object ClickGUI : Module() {
     val style by ListValue("Style", arrayOf("Inf", "Astolfo", "LiquidBounce"), "Inf")
     val scale by FloatValue("Scale", 1f, 0f, 10f) { style.equals("Astolfo", true) || style.equals("LiquidBounce", true) }
@@ -62,13 +65,29 @@ object ClickGUI : Module() {
     override fun onEnable() {
         when (style) {
             "Astolfo" -> mc.displayGuiScreen(AstolfoClickGui.getInstance())
-            "Inf" -> mc.displayGuiScreen(NewUi.getInstance())
+            "Inf" -> mc.displayGuiScreen(InfClickGui.getInstance())
             "LiquidBounce" -> mc.displayGuiScreen(LiquidBounceClickGui.getInstance())
         }
     }
 
+    // need a way to not hardcode things 3 times
+    fun dumpConfig(): JsonObject {
+        val config = JsonObject()
+        config.add("Astolfo", AstolfoClickGui.getInstance().dumpConfig())
+        config.add("Inf", InfClickGui.getInstance().dumpConfig())
+        config.add("LiquidBounce", LiquidBounceClickGui.getInstance().dumpConfig())
+        return config
+    }
+
+    fun loadConfig(json: JsonObject) {
+        AstolfoClickGui.getInstance().loadConfig(json.get("Astolfo").asJsonObject)
+        InfClickGui.getInstance().loadConfig(json.get("Inf").asJsonObject)
+        LiquidBounceClickGui.getInstance().loadConfig(json.get("LiquidBounce").asJsonObject)
+    }
+
     fun reload() {
         AstolfoClickGui.resetInstance()
-        NewUi.resetInstance()
+        InfClickGui.resetInstance()
+        LiquidBounceClickGui.resetInstance()
     }
 }

@@ -1,23 +1,18 @@
 package net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo
 
-import com.google.gson.JsonNull
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
-import net.ccbluex.liquidbounce.file.FileManager
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.ClickGuiStyle
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.buttons.AstolfoCategoryPanel
 import net.ccbluex.liquidbounce.utils.ClientUtils
-import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.GL11
 import java.awt.Color
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
-import java.io.PrintWriter
+import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
 /**
@@ -25,16 +20,16 @@ import kotlin.math.roundToInt
  *
  * Designed in a way that only this class know about scale and scrolling.
  * @author pii4
- * @property panels  the categories
+ * @property panels the categories
  * @property scale scale factor
- * @property scroll scroll amount
+ * @property scrollAmount scroll amount
  */
-class AstolfoClickGui : GuiScreen() {
+class AstolfoClickGui : ClickGuiStyle("Astolfo") {
     private var panels = ArrayList<AstolfoCategoryPanel>()
     private val scale: Float
-        get() = LiquidBounce.moduleManager.getModule(ClickGUI::class.java)!!.scale
-    private val scroll: Float
-        get() = LiquidBounce.moduleManager.getModule(ClickGUI::class.java)!!.scroll
+        get() = ClickGUI.scale
+    private val scrollAmount: Float
+        get() = ClickGUI.scroll
 
     private var pressed = mutableMapOf("UP" to false, "DOWN" to false, "LEFT" to false, "RIGHT" to false)
 
@@ -45,24 +40,98 @@ class AstolfoClickGui : GuiScreen() {
         pressed["RIGHT"] = Keyboard.isKeyDown(Keyboard.KEY_RIGHT)
     }
 
-    private fun init() {
+    override fun initGui() {
         var xPos = 4f
-        for (cat in ModuleCategory.values()) {
-            panels.add(AstolfoCategoryPanel(xPos, 4f, cat, Color(cat.color)))
+        for (cat in ModuleCategory.entries) {
+            panels.add(AstolfoCategoryPanel(xPos, 4f, cat, Color(cat.color), panels))
             xPos += AstolfoConstants.PANEL_WIDTH.toInt() + 10
         }
-        loadConfig()
+
+        LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
     }
 
-    fun loadConfig() {
-        val jsonElement = JsonParser().parse(FileReader(LiquidBounce.fileManager.clickGuiConfig.file))
-        if (jsonElement is JsonNull) return
+    private fun handleScrolling() {
+        if (Mouse.hasWheel() && panels.count { it.hovered } == 0) {
+            val wheel = Mouse.getDWheel()
+            val scrollAmount = scrollAmount * (if (wheel > 0) 1 else if (wheel < 0) -1 else 0)
+            panels.map { it.y += scrollAmount }
+        }
+    }
 
-        val jsonObject = jsonElement as JsonObject
+    override fun onGuiClosed() {
         for (panel in panels) {
-            if (!jsonObject.has(panel.category.displayName)) continue
+            panel.onClosed()
+            for (moduleButton in panel.moduleButtons) {
+                moduleButton.onClosed()
+                for (valueButton in moduleButton.valueButtons) {
+                    valueButton.onClosed()
+                }
+            }
+        }
+        LiquidBounce.fileManager.saveConfigs(LiquidBounce.fileManager.clickGuiConfig)
+    }
+
+    override fun drawScreen(mouseXIn: Int, mouseYIn: Int, partialTicks: Float) {
+        val mouseX = (mouseXIn / scale).roundToInt()
+        val mouseY = (mouseYIn / scale).roundToInt()
+
+        GL11.glPushMatrix()
+        GL11.glScalef(scale, scale, scale)
+
+        drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, Color(0, 0, 0, 50).rgb)
+
+        if (Keyboard.isKeyDown(Keyboard.KEY_UP) && !pressed["UP"]!!) panels.map { it.y -= scrollAmount }
+        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN) && !pressed["DOWN"]!!) panels.map { it.y += scrollAmount }
+        if (Keyboard.isKeyDown(Keyboard.KEY_LEFT) && !pressed["LEFT"]!!) panels.map { it.x -= scrollAmount }
+        if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && !pressed["RIGHT"]!!) panels.map { it.x += scrollAmount }
+
+        if (Keyboard.isKeyDown(Keyboard.KEY_F10)) panels.mapIndexed { index, panel -> panel.x = 10 + (10 + AstolfoConstants.PANEL_WIDTH)*index; panel.y = 10f }
+
+        for (catPanel in panels.sortedBy { it.zLayer }) {
+            catPanel.drawPanel(mouseX, mouseY)
+        }
+
+        GL11.glPopMatrix()
+        updatePressed()
+        handleScrolling()
+    }
+
+    private fun mouseAction(mouseXIn: Int, mouseYIn: Int, mouseButton: Int, state: Boolean) {
+        val mouseX = (mouseXIn / scale).roundToInt()
+        val mouseY = (mouseYIn / scale).roundToInt()
+
+        loop@ for (panel in panels.sortedBy { -it.zLayer }) {
+            if (panel.mouseAction(mouseX, mouseY, state, mouseButton)) break@loop
+            if (panel.open) {
+                for (moduleButton in panel.moduleButtons) {
+                    if (moduleButton.mouseAction(mouseX, mouseY, state, mouseButton)) break@loop
+                    if (moduleButton.open) {
+                        for (pan in moduleButton.valueButtons) {
+                            if (pan.mouseAction(mouseX, mouseY, state, mouseButton)) break@loop
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun mouseClicked(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
+        mouseAction(mouseXIn, mouseYIn, mouseButton, true)
+    }
+
+    override fun mouseReleased(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
+        mouseAction(mouseXIn, mouseYIn, mouseButton, false)
+    }
+
+    override fun doesGuiPauseGame(): Boolean {
+        return false
+    }
+
+    override fun loadConfig(json: JsonObject) {
+        for (panel in panels) {
+            if (!json.has(panel.category.displayName)) continue
             try {
-                val panelObject = jsonObject.getAsJsonObject(panel.name)
+                val panelObject = json.getAsJsonObject(panel.name)
                 panel.open = panelObject["open"].asBoolean
                 panel.x = panelObject["posX"].asFloat
                 panel.y = panelObject["posY"].asFloat
@@ -72,20 +141,16 @@ class AstolfoClickGui : GuiScreen() {
                         val elementObject = panelObject.getAsJsonObject(moduleElement.module.name)
                         moduleElement.open = elementObject["Settings"].asBoolean
                     } catch (e: Exception) {
-                        ClientUtils.logger.error(
-                            "Error while loading clickgui module element with the name '" + moduleElement.module.name + "' (Panel Name: " + panel.name + ").",
-                            e
-                        )
+                        ClientUtils.logger.error("Error while loading clickgui module element with the name '" + moduleElement.module.name + "' (Panel Name: " + panel.name + ").", e)
                     }
                 }
             } catch (e: Exception) {
-                ClientUtils.logger
-                    .error("Error while loading clickgui panel with the name '" + panel.name + "'.", e)
+                ClientUtils.logger.error("Error while loading clickgui panel with the name ${panel.name}: e")
             }
         }
     }
 
-    fun saveConfig() {
+    override fun dumpConfig(): JsonElement {
         val jsonObject = JsonObject()
 
         for (panel in panels) {
@@ -102,84 +167,7 @@ class AstolfoClickGui : GuiScreen() {
             jsonObject.add(panel.name, panelObject)
         }
 
-        val file = LiquidBounce.fileManager.clickGuiConfig.file
-        val printWriter = PrintWriter(FileWriter(file))
-        printWriter.println(FileManager.PRETTY_GSON.toJson(jsonObject))
-        printWriter.close()
-    }
-
-    override fun onGuiClosed() {
-        panels.forEach {
-            it.onClosed()
-            it.moduleButtons.forEach { module -> module.onClosed() }
-        }
-        saveConfig()
-    }
-
-    override fun drawScreen(mouseXIn: Int, mouseYIn: Int, partialTicks: Float) {
-        if (panels.isEmpty())
-            init()
-        val mouseX = (mouseXIn / scale).roundToInt()
-        val mouseY = (mouseYIn / scale).roundToInt()
-
-        GL11.glPushMatrix()
-        GL11.glScalef(scale, scale, scale)
-
-        drawRect(0, 0, mc.currentScreen.width, mc.currentScreen.height, Color(0, 0, 0, 50).rgb)
-
-        // vertical scrolling
-        if (Mouse.hasWheel() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-            val wheel = Mouse.getDWheel()
-            if (wheel != 0) {
-                val scrollAmount = scroll * if (wheel > 0) 1 else -1
-                panels.map { it.y += scrollAmount }
-            }
-        }
-        if (Keyboard.isKeyDown(Keyboard.KEY_UP) && !pressed["UP"]!!) panels.map { it.y -= scroll }
-        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN) && !pressed["DOWN"]!!) panels.map { it.y += scroll }
-        if (Keyboard.isKeyDown(Keyboard.KEY_LEFT) && !pressed["LEFT"]!!) panels.map { it.x -= scroll }
-        if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && !pressed["RIGHT"]!!) panels.map { it.x += scroll }
-
-        if (Keyboard.isKeyDown(Keyboard.KEY_F10)) panels.map { it.y = 10f }
-
-        for (catPanel in panels) {
-            catPanel.drawPanel(mouseX, mouseY)
-        }
-
-        GL11.glPopMatrix()
-        updatePressed()
-    }
-
-    private fun mouseAction(mouseXIn: Int, mouseYIn: Int, mouseButton: Int, state: Boolean) {
-        val mouseX = (mouseXIn / scale).roundToInt()
-        val mouseY = (mouseYIn / scale).roundToInt()
-
-        for (panel in panels) {
-            panel.mouseAction(mouseX, mouseY, state, mouseButton)
-            if (panel.open) {
-                for (moduleButton in panel.moduleButtons) {
-                    moduleButton.mouseAction(mouseX, mouseY, state, mouseButton)
-                    if (moduleButton.open) {
-                        for (pan in moduleButton.valueButtons) {
-                            pan.mouseAction(mouseX, mouseY, state, mouseButton)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Throws(IOException::class)
-    override fun mouseClicked(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
-        mouseAction(mouseXIn, mouseYIn, mouseButton, true)
-    }
-
-    override fun mouseReleased(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
-        mouseAction(mouseXIn, mouseYIn, mouseButton, false)
-    }
-
-    override fun doesGuiPauseGame(): Boolean {
-        return false
+        return jsonObject
     }
 
     companion object {

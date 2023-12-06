@@ -1,11 +1,14 @@
 package net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.buttons.value
 
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.BACKGROUND_VALUE
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.FONT
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.SELECTED_FORMAT
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.VALUE_HEIGHT
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.drawHeightCenteredString
 import net.ccbluex.liquidbounce.utils.FontUtils
 import net.ccbluex.liquidbounce.utils.MouseButtons
+import net.ccbluex.liquidbounce.utils.block.BlockUtils
 import net.ccbluex.liquidbounce.utils.geom.Rectangle
 import net.ccbluex.liquidbounce.utils.render.RenderUtils.drawRect
 import net.ccbluex.liquidbounce.value.FontValue
@@ -13,6 +16,9 @@ import java.awt.Color
 
 class FontValueButton(x: Float, y: Float, width: Float, height: Float, var setting: FontValue, var color: Color) : BaseValueButton(x, y, width, height, setting) {
     private val listEntryBoxPairs = mutableListOf<Pair<Rectangle, String>>()
+
+    override val expectedHeight: Float
+        get() = VALUE_HEIGHT + VALUE_HEIGHT * if (setting.openList) FontUtils.getAllFontDetails().size else 0
 
     override fun drawPanel(mouseX: Int, mouseY: Int): Rectangle {
         val background = Rectangle(x, y, width, height)
@@ -42,21 +48,28 @@ class FontValueButton(x: Float, y: Float, width: Float, height: Float, var setti
         return background
     }
 
-    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int) {
-        if (!show) return
+    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int): Boolean {
+        if (!show) return false
         if (click) {
             when (button) {
-                MouseButtons.LEFT.ordinal -> { //					if (baseRect.contains(mouseX, mouseY)) // clicked on the button with value name
-                    //						setting.nextValue()
+                MouseButtons.LEFT.ordinal -> {
                     for (pair in listEntryBoxPairs) {
-                        if (pair.first.contains(mouseX, mouseY)) setting.set(FontUtils.getAllFontDetails().filter { it.first == pair.second }[0].second)
+                        if (pair.first.contains(mouseX, mouseY)) {
+                            setting.set(FontUtils.getAllFontDetails().filter { it.first == pair.second }[0].second)
+                            return true
+                        }
                     }
                 }
 
                 MouseButtons.RIGHT.ordinal -> {
-                    if (baseRect.contains(mouseX, mouseY)) setting.openList = !setting.openList
+                    if (baseRect.contains(mouseX, mouseY)) {
+                        setting.openList = !setting.openList
+                        return true
+                    }
                 }
             }
+
         }
+        return false
     }
 }

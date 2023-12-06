@@ -186,7 +186,7 @@ class Camera : Module(){
             )
 
             "Sky" -> RenderUtils.skyRainbow(index, saturationValue, brightnessValue)
-            "LiquidSlowly" -> ColorUtils.LiquidSlowly(System.nanoTime(), index, saturationValue, brightnessValue)!!
+            "LiquidSlowly" -> ColorUtils.LiquidSlowly(System.nanoTime(), index, saturationValue, brightnessValue)
             "Mixer" -> ColorMixer.getMixedColor(index, mixerSecondsValue)
             else -> ColorUtils.fade(Color(colorRedValue, colorGreenValue, colorBlueValue), index, 100)
         }

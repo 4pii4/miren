@@ -18,7 +18,8 @@ class TextValueButton(x: Float, y: Float, width: Float, height: Float, var setti
     }
 
     // I don't have any good idea on how to put TextValue on astolfo cgui
-    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int) {
+    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int): Boolean {
+        return false
 
     }
 }

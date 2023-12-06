@@ -785,7 +785,7 @@ public final class RenderUtils extends MinecraftInstance {
     }
 
     private static final Frustum frustrum = new Frustum();
-    private static float zLevel = 0F;
+    private static final float zLevel = 0F;
 
     /**
      * Draws a textured rectangle at the stored z-value. Args: x, y, u, v, width, height
@@ -876,8 +876,8 @@ public final class RenderUtils extends MinecraftInstance {
         RenderHelper.enableStandardItemLighting();
         GlStateManager.rotate(-135.0f, 0.0f, 1.0f, 0.0f);
         GlStateManager.rotate((float) (-Math.atan(pitch / 40.0f) * 20.0), 1.0f, 0.0f, 0.0f);
-        entityLivingBase.renderYawOffset = yaw - 1.0f * 0.4f;
-        entityLivingBase.rotationYaw = yaw - 1.0f * 0.2f;
+        entityLivingBase.renderYawOffset = yaw - 0.4f;
+        entityLivingBase.rotationYaw = yaw - 0.2f;
         entityLivingBase.rotationPitch = pitch;
         entityLivingBase.rotationYawHead = entityLivingBase.rotationYaw;
         entityLivingBase.prevRotationYawHead = entityLivingBase.rotationYaw;
@@ -1034,23 +1034,6 @@ public final class RenderUtils extends MinecraftInstance {
         GL11.glScissor((int)(x * scaleFactor), (int)(Minecraft.getMinecraft().displayHeight - (y + height) * scaleFactor), (int)(width * scaleFactor), (int)(height * scaleFactor));
     }
 
-    public static void drawClickGuiArrow(final float x, final float y, final float size, final Animation animation, final int color) {
-        GL11.glTranslatef(x, y, 0.0f);
-        final double[] interpolation = new double[1];
-        setup2DRendering(() -> render(5, () -> {
-            color(color);
-            interpolation[0] = interpolate(0.0, size / 2.0, animation.getOutput());
-            if (animation.getOutput() >= 0.48) {
-                GL11.glVertex2d((size / 2.0f), interpolate(size / 2.0, 0.0, animation.getOutput()));
-            }
-            GL11.glVertex2d(0.0, interpolation[0]);
-            if (animation.getOutput() < 0.48) {
-                GL11.glVertex2d((size / 2.0f), interpolate(size / 2.0, 0.0, animation.getOutput()));
-            }
-            GL11.glVertex2d(size, interpolation[0]);
-        }));
-        GL11.glTranslatef(-x, -y, 0.0f);
-    }
 
     public static void render(final int mode, final Runnable render) {
         GL11.glBegin(mode);
@@ -1114,12 +1097,12 @@ public final class RenderUtils extends MinecraftInstance {
     }
 
     public static int SkyRainbow(int var2, float st, float bright) {
-        double v1 = Math.ceil(System.currentTimeMillis() + (long) (var2 * 109L)) / 5;
+        double v1 = Math.ceil(System.currentTimeMillis() + (var2 * 109L)) / 5;
         return Color.getHSBColor( ((float) ((v1 %= 360.0) / 360.0)) < 0.5 ? -((float) (v1 / 360.0)) : (float) (v1 / 360.0), st, bright).getRGB();
     }
 
     public static Color skyRainbow(int var2, float st, float bright) {
-        double v1 = Math.ceil(System.currentTimeMillis() + (long) (var2 * 109L)) / 5;
+        double v1 = Math.ceil(System.currentTimeMillis() + (var2 * 109L)) / 5;
         return Color.getHSBColor( ((float) ((v1 %= 360.0) / 360.0)) < 0.5 ? -((float) (v1 / 360.0)) : (float) (v1 / 360.0), st, bright);
     }
 
@@ -2032,6 +2015,17 @@ public final class RenderUtils extends MinecraftInstance {
         glEnd();
     }
 
+    public static void quickDrawRect(final double x, final double y, final double x2, final double y2) {
+        glBegin(GL_QUADS);
+
+        glVertex2d(x2, y);
+        glVertex2d(x, y);
+        glVertex2d(x, y2);
+        glVertex2d(x2, y2);
+
+        glEnd();
+    }
+
     public static void drawRect(int x, int y, int x2, int y2, int color) {
         drawRect((float)x, (float)y, (float)x2, (float)y2, color);
     }
@@ -2096,6 +2090,10 @@ public final class RenderUtils extends MinecraftInstance {
 
     public static void drawRect(net.ccbluex.liquidbounce.utils.geom.Rectangle rect , int color) {
         drawRect(rect.getX(), rect.getY(), rect.getX() + rect.getWidth(), rect.getY() + rect.getHeight(), color);
+    }
+
+    public static void drawRect(net.ccbluex.liquidbounce.utils.geom.Rectangle rect , Color color) {
+        drawRect(rect.getX(), rect.getY(), rect.getX() + rect.getWidth(), rect.getY() + rect.getHeight(), color.getRGB());
     }
 
     /**
@@ -2369,7 +2367,7 @@ public final class RenderUtils extends MinecraftInstance {
     }
 
     public static int Astolfo(int var2) {
-        double v1 = Math.ceil(System.currentTimeMillis() + (long) (var2 * 109L)) / 5;
+        double v1 = Math.ceil(System.currentTimeMillis() + (var2 * 109L)) / 5;
         return Color.getHSBColor( ((float) ((v1 %= 360.0) / 360.0)) < 0.5 ? -((float) (v1 / 360.0)) : (float) (v1 / 360.0), 0.5F, 1.0F).getRGB();
     }
 
@@ -2632,6 +2630,7 @@ public final class RenderUtils extends MinecraftInstance {
         mc.getTextureManager().bindTexture(image);
         Gui.drawModalRectWithCustomSizedTexture(0, 0, 0, 0, width, height, width, height);
         glTranslatef(-x, -y, -x);
+        glColor4f(1f, 1f, 1f, 1f);
         glDepthMask(true);
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
@@ -2908,6 +2907,12 @@ public final class RenderUtils extends MinecraftInstance {
     }
 
     public static void makeScissorBox(final float x, final float y, final float x2, final float y2) {
+        final ScaledResolution scaledResolution = new ScaledResolution(mc);
+        final int factor = scaledResolution.getScaleFactor();
+        glScissor((int) (x * factor), (int) ((scaledResolution.getScaledHeight() - y2) * factor), (int) ((x2 - x) * factor), (int) ((y2 - y) * factor));
+    }
+
+    public static void makeScissorBox(final double x, final double y, final double x2, final double y2) {
         final ScaledResolution scaledResolution = new ScaledResolution(mc);
         final int factor = scaledResolution.getScaleFactor();
         glScissor((int) (x * factor), (int) ((scaledResolution.getScaledHeight() - y2) * factor), (int) ((x2 - x) * factor), (int) ((y2 - y) * factor));
@@ -3244,10 +3249,10 @@ public final class RenderUtils extends MinecraftInstance {
         ColorUtils.setColour(-1);
     }
     public static void renderParticles(java.util.List<AttackParticle> particles,Color color) {
-        GL11.glEnable((int)3042);
-        GL11.glDisable((int)3553);
-        GL11.glEnable((int)2848);
-        GL11.glBlendFunc((int)770, (int)771);
+        GL11.glEnable(3042);
+        GL11.glDisable(3553);
+        GL11.glEnable(2848);
+        GL11.glBlendFunc(770, 771);
         long currentMillis = System.currentTimeMillis();
         int i = 0;
         try {
@@ -3274,13 +3279,13 @@ public final class RenderUtils extends MinecraftInstance {
                 }
                 if (!draw) continue;
                 GL11.glPushMatrix();
-                GL11.glTranslated((double)x, (double)y, (double)z);
+                GL11.glTranslated(x, y, z);
                 float scale = 0.04f;
-                GL11.glScalef((float)-0.04f, (float)-0.04f, (float)-0.04f);
+                GL11.glScalef(-0.04f, -0.04f, -0.04f);
                 mc.getRenderManager();
-                GL11.glRotated((double)(-mc.getRenderManager().playerViewY), (double)0.0, (double)1.0, (double)0.0);
+                GL11.glRotated(-mc.getRenderManager().playerViewY, 0.0, 1.0, 0.0);
                 mc.getRenderManager();
-                GL11.glRotated((double)mc.getRenderManager().playerViewX, (double)(mc.gameSettings.thirdPersonView == 2 ? -1.0 : 1.0), (double)0.0, (double)0.0);
+                GL11.glRotated(mc.getRenderManager().playerViewX, mc.gameSettings.thirdPersonView == 2 ? -1.0 : 1.0, 0.0, 0.0);
                 Color c = color;
                 glDrawTriangle(0.0, -1.5, -1.0, 0.0, 1.0, 0.0, c.hashCode());
                 if (distanceFromPlayer < 4.0) {
@@ -3289,50 +3294,50 @@ public final class RenderUtils extends MinecraftInstance {
                 if (distanceFromPlayer < 20.0) {
                     glDrawTriangle(0.0, -1.5, -1.0, 0.0, 1.0, 0.0, new Color(c.getRed(), c.getGreen(), c.getBlue(), 30).hashCode());
                 }
-                GL11.glScalef((float)0.8f, (float)0.8f, (float)0.8f);
+                GL11.glScalef(0.8f, 0.8f, 0.8f);
                 GL11.glPopMatrix();
             }
         }
         catch (ConcurrentModificationException concurrentModificationException) {
             // empty catch block
         }
-        GL11.glDisable((int)2848);
-        GL11.glEnable((int)3553);
-        GL11.glDisable((int)3042);
-        GL11.glColor3d((double)255.0, (double)255.0, (double)255.0);
+        GL11.glDisable(2848);
+        GL11.glEnable(3553);
+        GL11.glDisable(3042);
+        GL11.glColor3d(255.0, 255.0, 255.0);
     }
     public static void glDrawTriangle(double x, double y, double x1, double y1, double x2, double y2, int colour) {
-        GL11.glDisable((int)3553);
+        GL11.glDisable(3553);
         boolean restore = glEnableBlend();
-        GL11.glEnable((int)2881);
-        GL11.glHint((int)3155, (int)4354);
+        GL11.glEnable(2881);
+        GL11.glHint(3155, 4354);
         glColour(colour);
-        GL11.glBegin((int)4);
-        GL11.glVertex2d((double)x, (double)y);
-        GL11.glVertex2d((double)x1, (double)y1);
-        GL11.glVertex2d((double)x2, (double)y2);
+        GL11.glBegin(4);
+        GL11.glVertex2d(x, y);
+        GL11.glVertex2d(x1, y1);
+        GL11.glVertex2d(x2, y2);
         GL11.glEnd();
-        GL11.glEnable((int)3553);
+        GL11.glEnable(3553);
         glRestoreBlend(restore);
-        GL11.glDisable((int)2881);
-        GL11.glHint((int)3155, (int)4352);
+        GL11.glDisable(2881);
+        GL11.glHint(3155, 4352);
     }
     public static boolean glEnableBlend() {
-        boolean wasEnabled = GL11.glIsEnabled((int)3042);
+        boolean wasEnabled = GL11.glIsEnabled(3042);
         if (!wasEnabled) {
-            GL11.glEnable((int)3042);
-            GL14.glBlendFuncSeparate((int)770, (int)771, (int)1, (int)0);
+            GL11.glEnable(3042);
+            GL14.glBlendFuncSeparate(770, 771, 1, 0);
         }
         return wasEnabled;
     }
 
     public static void glColour(int color) {
-        GL11.glColor4ub((byte)((byte)(color >> 16 & 0xFF)), (byte)((byte)(color >> 8 & 0xFF)), (byte)((byte)(color & 0xFF)), (byte)((byte)(color >> 24 & 0xFF)));
+        GL11.glColor4ub((byte)(color >> 16 & 0xFF), (byte)(color >> 8 & 0xFF), (byte)(color & 0xFF), (byte)(color >> 24 & 0xFF));
     }
 
     public static void glRestoreBlend(boolean wasEnabled) {
         if (!wasEnabled) {
-            GL11.glDisable((int)3042);
+            GL11.glDisable(3042);
         }
     }
     public static boolean isBBInFrustum(AxisAlignedBB aabb) {

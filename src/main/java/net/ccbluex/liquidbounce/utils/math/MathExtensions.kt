@@ -2,6 +2,7 @@
 
 package net.ccbluex.liquidbounce.utils.math
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import net.minecraft.util.Vec3
 import java.math.RoundingMode
 import kotlin.math.PI
@@ -95,3 +96,6 @@ fun Int.toRoman(): String {
 
     return s
 }
+
+val Boolean.sign
+    get() = if (this) 1 else -1

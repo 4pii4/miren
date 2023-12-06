@@ -3,6 +3,7 @@ package net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.buttons.value
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.BACKGROUND_VALUE
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoConstants.FONT
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.drawHeightCenteredString
+import net.ccbluex.liquidbounce.utils.MouseButtons
 import net.ccbluex.liquidbounce.utils.geom.Rectangle
 import net.ccbluex.liquidbounce.utils.render.RenderUtils.drawRect
 import net.ccbluex.liquidbounce.value.NoteValue
@@ -18,7 +19,11 @@ class NoteValueButton(x: Float, y: Float, width: Float, height: Float, var setti
         return background
     }
 
-    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int) {
-        if (click && baseRect.contains(mouseX, mouseY)) setting.open = !setting.open
+    override fun mouseAction(mouseX: Int, mouseY: Int, click: Boolean, button: Int): Boolean {
+        if (click && baseRect.contains(mouseX, mouseY) && button == MouseButtons.LEFT.ordinal) {
+            setting.open = !setting.open
+            return true
+        }
+        return false
     }
 }

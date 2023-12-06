@@ -5,13 +5,15 @@
  */
 package net.ccbluex.liquidbounce.file.configs;
 
-import net.ccbluex.liquidbounce.LiquidBounce;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI;
 import net.ccbluex.liquidbounce.file.FileConfig;
-import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui;
+import net.ccbluex.liquidbounce.file.FileManager;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class ClickGuiConfig extends FileConfig {
 
@@ -29,8 +31,13 @@ public class ClickGuiConfig extends FileConfig {
      */
     @Override
     protected void loadConfig() throws IOException {
-        AstolfoClickGui.Companion.getInstance().loadConfig();
-        LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig);
+        final JsonElement jsonElement = new JsonParser().parse(new BufferedReader(new FileReader(getFile())));
+
+        if(jsonElement instanceof JsonNull)
+            return;
+
+        final JsonObject jsonObject = (JsonObject) jsonElement;
+        ClickGUI.INSTANCE.loadConfig(jsonObject);
     }
 
     /**
@@ -40,7 +47,8 @@ public class ClickGuiConfig extends FileConfig {
      */
     @Override
     protected void saveConfig() throws IOException {
-        AstolfoClickGui.Companion.getInstance().saveConfig();
-        LiquidBounce.fileManager.saveConfig(LiquidBounce.fileManager.valuesConfig);
+        final PrintWriter printWriter = new PrintWriter(new FileWriter(getFile()));
+        printWriter.println(FileManager.PRETTY_GSON.toJson(ClickGUI.INSTANCE.dumpConfig()));
+        printWriter.close();
     }
 }

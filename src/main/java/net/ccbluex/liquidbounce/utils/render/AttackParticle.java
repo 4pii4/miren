@@ -12,7 +12,7 @@ import net.minecraft.util.Vec3;
 public class AttackParticle {
     private final TimerUtils removeTimer = new TimerUtils();
     public final Vec3 position;
-    private Vec3 delta;
+    private final Vec3 delta;
 
     public AttackParticle(Vec3 position) {
         this.position = position;
@@ -28,8 +28,8 @@ public class AttackParticle {
             delta.zCoord *= -0.8;
         }
         if (!((block2 = getBlock(position.xCoord, position.yCoord + delta.yCoord, position.zCoord)) instanceof BlockAir || block2 instanceof BlockBush || block2 instanceof BlockLiquid)) {
-            delta.xCoord *= (double)0.99f;
-            delta.zCoord *= (double)0.99f;
+            delta.xCoord *= 0.99f;
+            delta.zCoord *= 0.99f;
             delta.yCoord *= -0.5;
         }
         if (!((block3 = getBlock(position.xCoord + delta.xCoord, position.yCoord, position.zCoord)) instanceof BlockAir || block3 instanceof BlockBush || block3 instanceof BlockLiquid)) {
@@ -42,9 +42,9 @@ public class AttackParticle {
         position.xCoord += delta.xCoord;
         position.yCoord += delta.yCoord;
         position.zCoord += delta.zCoord;
-        delta.xCoord *= (double)0.998f;
+        delta.xCoord *= 0.998f;
         delta.yCoord -= 3.1E-5;
-        delta.zCoord *= (double)0.998f;
+        delta.zCoord *= 0.998f;
     }
 
     public static Block getBlock(double offsetX, double offsetY, double offsetZ) {

@@ -2,7 +2,7 @@ package net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.element
 
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.ColorManager
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.IconManager
-import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.InfClickGui
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.element.module.ModuleElement
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.extensions.animSmooth
 import net.ccbluex.liquidbounce.ui.font.Fonts
@@ -75,8 +75,8 @@ class SearchElement(var xPos: Float, var yPos: Float, var width: Float, val heig
 
 
 //        Fonts.fontLarge.drawString("Search", x + 10F, y + 10F, -1)
-        Fonts.fontSmall.drawString("Search", NewUi.getInstance().windowXStart + 20f, y - 12F, -1)
-        RenderUtils.drawImage2(IconManager.back, NewUi.getInstance().windowXStart + 4f, y - 15F, 10, 10)
+        Fonts.fontSmall.drawString("Search", InfClickGui.getInstance().windowXStart + 20f, y - 12F, -1)
+        RenderUtils.drawImage2(IconManager.back, InfClickGui.getInstance().windowXStart + 4f, y - 15F, 10, 10)
 
         var startY = y + startYY
         if (mouseY < y + startYY || mouseY >= y + h)

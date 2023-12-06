@@ -1,17 +1,24 @@
 package net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.ClickGuiStyle
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.element.CategoryElement
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.element.SearchElement
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.AnimationUtils
+import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.MouseUtils.mouseWithinBounds
 import net.ccbluex.liquidbounce.utils.extensions.setAlpha
 import net.ccbluex.liquidbounce.utils.geom.Rectangle
+import net.ccbluex.liquidbounce.utils.render.EaseUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.render.ShaderUtils
+import net.ccbluex.liquidbounce.utils.render.animations.Direction
+import net.ccbluex.liquidbounce.utils.render.animations.impl.CustomAnimation
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.MathHelper
@@ -27,7 +34,7 @@ import kotlin.math.abs
  * @author inf (original java code)
  * @author pie (refactored)
  */
-class NewUi private constructor() : GuiScreen() {
+class InfClickGui private constructor() : ClickGuiStyle("Inf") {
     private val categoryElements: MutableList<CategoryElement> = ArrayList()
     private var startYAnim = height / 2f
     private var endYAnim = height / 2f
@@ -36,7 +43,6 @@ class NewUi private constructor() : GuiScreen() {
 
     private val backgroundColor = Color(16, 16, 16, 255)
     private val backgroundColor2 = Color(40, 40, 40, 255)
-    // 30
 
     var windowXStart = 30f
     var windowYStart = 30f
@@ -77,6 +83,8 @@ class NewUi private constructor() : GuiScreen() {
     private var y2 = 0f
     private var xHoldOffset = 0f
     private var yHoldOffset = 0f
+
+    private val anim = CustomAnimation(200, 1.0, Direction.FORWARDS) { EaseUtils.easeInCubic(it) }
 //    private var xAnimDelta = 0f
 //    private var yAnimDelta = 0f
 //    private var lastMouseX = 0f
@@ -229,6 +237,27 @@ class NewUi private constructor() : GuiScreen() {
         splitDragging = false
         Keyboard.enableRepeatEvents(false)
         LiquidBounce.fileManager.saveConfigs(LiquidBounce.fileManager.valuesConfig)
+    }
+
+    override fun dumpConfig(): JsonElement {
+        val jsonObject = JsonObject()
+        jsonObject.addProperty("WindowXStart", windowXStart)
+        jsonObject.addProperty("WindowYStart", windowYStart)
+        jsonObject.addProperty("WindowXEnd", windowXEnd)
+        jsonObject.addProperty("WindowYEnd", windowYEnd)
+
+        return jsonObject
+    }
+
+    override fun loadConfig(json: JsonObject) {
+        runCatching {
+            windowXStart = json.get("WindowXStart").asFloat
+            windowYStart = json.get("WindowYStart").asFloat
+            windowXEnd = json.get("WindowXEnd").asFloat
+            windowYEnd = json.get("WindowYEnd").asFloat
+        }.onFailure {
+            ClientUtils.logger.warn("Failed to load config")
+        }
     }
 
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
@@ -403,13 +432,13 @@ class NewUi private constructor() : GuiScreen() {
     }
 
     companion object {
-        private var instance: NewUi? = null
-        fun getInstance(): NewUi {
-            return if (instance == null) NewUi().also { instance = it } else instance!!
+        private var instance: InfClickGui? = null
+        fun getInstance(): InfClickGui {
+            return if (instance == null) InfClickGui().also { instance = it } else instance!!
         }
 
         fun resetInstance() {
-            instance = NewUi()
+            instance = InfClickGui()
         }
     }
 }

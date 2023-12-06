@@ -196,7 +196,7 @@ class JumpCircle : Module() {
                 )
 
                 "Sky" -> RenderUtils.skyRainbow(index, saturationValue, brightnessValue)
-                "LiquidSlowly" -> LiquidSlowly(System.nanoTime(), index, saturationValue, brightnessValue)!!
+                "LiquidSlowly" -> LiquidSlowly(System.nanoTime(), index, saturationValue, brightnessValue)
                 "Mixer" -> ColorMixer.getMixedColor(index, mixerSecondsValue)
                 else -> fade(Color(colorRedValue, colorGreenValue, colorBlueValue), index, 100)
             }

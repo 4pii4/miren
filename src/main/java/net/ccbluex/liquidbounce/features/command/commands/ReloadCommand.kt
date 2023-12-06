@@ -10,7 +10,7 @@ import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.features.command.CommandManager
 import net.ccbluex.liquidbounce.features.module.modules.misc.AntiStaff
 import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui
-import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.NewUi
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.InfClickGui
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.misc.sound.TipSoundManager
 
@@ -55,7 +55,7 @@ class ReloadCommand : Command("reload", arrayOf("configreload")) {
             LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.hudConfig)
             LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
             chat("Reloading ClickGui...")
-            NewUi.resetInstance()
+            InfClickGui.resetInstance()
             AstolfoClickGui.resetInstance()
             LiquidBounce.isStarting = false
             chat("Reloading staff list")

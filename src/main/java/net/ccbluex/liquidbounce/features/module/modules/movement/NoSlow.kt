@@ -34,7 +34,7 @@ import kotlin.math.sqrt
 @ModuleInfo(name = "NoSlow", spacedName = "No Slow", category = ModuleCategory.MOVEMENT, description = "Prevent you from getting slowed down by items (swords, foods, etc.) and liquids.")
 class NoSlow : Module() {
     private val msTimer = MSTimer()
-    private val modeValue = ListValue("PacketMode", arrayOf("Vanilla", "Blink", "Intave", "NCP", "AAC", "AAC5", "Custom","OldIntave","Watchdog", "Vulcan", "Matrix", "SwitchItem"), "Vanilla")
+    private val modeValue = ListValue("PacketMode", arrayOf("Vanilla", "Blink", "Intave", "NCP", "UNCP", "AAC", "AAC5", "Custom","OldIntave","Watchdog", "Vulcan", "Matrix", "SwitchItem"), "Vanilla")
     private val blockForwardMultiplier = FloatValue("BlockForwardMultiplier", 1.0F, 0.2F, 1.0F, "x")
     private val blockStrafeMultiplier = FloatValue("BlockStrafeMultiplier", 1.0F, 0.2F, 1.0F, "x")
     private val consumeForwardMultiplier = FloatValue("ConsumeForwardMultiplier", 1.0F, 0.2F, 1.0F, "x")
@@ -422,6 +422,11 @@ class NoSlow : Module() {
                         mc.playerController.syncCurrentPlayItem()
                         PacketUtils.sendPacketNoEvent(C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()))
                     }
+                }
+            }
+
+            "uncp" -> {
+                    if (event.eventState == EventState.POST)  { PacketUtils.sendPacketNoEvent(C08PacketPlayerBlockPlacement(BlockPos.ORIGIN, 5, heldItem, 0f, 0f, 0f))
                 }
             }
             else -> {

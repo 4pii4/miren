@@ -17,6 +17,7 @@ import net.ccbluex.liquidbounce.ui.client.hud.element.Side.Horizontal
 import net.ccbluex.liquidbounce.ui.client.hud.element.Side.Vertical
 import net.ccbluex.liquidbounce.ui.font.AWTFontRenderer
 import net.ccbluex.liquidbounce.ui.font.Fonts
+import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.render.*
 import net.ccbluex.liquidbounce.value.*
 import net.minecraft.client.renderer.GlStateManager
@@ -34,66 +35,50 @@ import kotlin.math.min
 @ElementInfo(name = "Arraylist", single = true)
 class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                 side: Side = Side(Horizontal.RIGHT, Vertical.UP)) : Element(x, y, scale, side) {
-    val colorModeValue = ListValue(
-        "Color",
-        arrayOf("Custom", "Random", "Sky", "CRainbow", "LiquidSlowly", "Fade", "Nostalgia", "Mixer"),
-        "Custom"
-    )
+    val colorModeValue = ListValue("Color", arrayOf("Custom", "Random", "Sky", "CRainbow", "LiquidSlowly", "Fade", "Nostalgia", "Mixer"), "Sky")
     private val blurValue = BoolValue("Blur", false)
     private val blurStrength = FloatValue("Blur-Strength", 0F, 0F, 30F) { blurValue.get() }
     private val shadowShaderValue = BoolValue("Shadow", false)
     private val shadowNoCutValue = BoolValue("Shadow-NoCut", false) { shadowShaderValue.get() }
     private val shadowStrength = IntegerValue("Shadow-Strength", 1, 1, 30) { shadowShaderValue.get() }
-    private val shadowColorMode =
-        ListValue("Shadow-Color", arrayOf("Background", "Text", "Custom"), "Background") { shadowShaderValue.get() }
-    private val shadowColorRedValue = IntegerValue("Shadow-Red", 0, 0, 255) {
-        shadowShaderValue.get() && shadowColorMode.get().equals("custom", true)
-    }
-    private val shadowColorGreenValue = IntegerValue("Shadow-Green", 111, 0, 255) {
-        shadowShaderValue.get() && shadowColorMode.get().equals("custom", true)
-    }
-    private val shadowColorBlueValue = IntegerValue("Shadow-Blue", 255, 0, 255) {
-        shadowShaderValue.get() && shadowColorMode.get().equals("custom", true)
-    }
+    private val shadowColorMode = ListValue("Shadow-Color", arrayOf("Background", "Text", "Custom"), "Background") { shadowShaderValue.get() }
+    private val shadowColorRedValue = IntegerValue("Shadow-Red", 0, 0, 255) { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) }
+    private val shadowColorGreenValue = IntegerValue("Shadow-Green", 111, 0, 255) { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) }
+    private val shadowColorBlueValue = IntegerValue("Shadow-Blue", 255, 0, 255) { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) }
     private val colorRedValue = IntegerValue("Red", 0, 0, 255)
     private val colorGreenValue = IntegerValue("Green", 111, 0, 255)
     private val colorBlueValue = IntegerValue("Blue", 255, 0, 255)
     private val colorAlphaValue = IntegerValue("Alpha", 255, 0, 255)
-    val saturationValue = FloatValue("Saturation", 0.9f, 0f, 1f)
+    val saturationValue = FloatValue("Saturation", 0.44f, 0f, 1f)
     private val brightnessValue = FloatValue("Brightness", 1f, 0f, 1f)
     private val skyDistanceValue = IntegerValue("Sky-Distance", 2, -4, 4) { colorModeValue.get().equals("sky", true) }
-    private val cRainbowSecValue =
-        IntegerValue("CRainbow-Seconds", 2, 1, 10) { colorModeValue.get().equals("crainbow", true) }
-    private val cRainbowDistValue =
-        IntegerValue("CRainbow-Distance", 2, 1, 6) { colorModeValue.get().equals("scrainbowky", true) }
+    private val cRainbowSecValue = IntegerValue("CRainbow-Seconds", 2, 1, 10) { colorModeValue.get().equals("crainbow", true) }
+    private val cRainbowDistValue = IntegerValue("CRainbow-Distance", 2, 1, 6) { colorModeValue.get().equals("scrainbowky", true) }
     private val mixerSecValue = IntegerValue("Mixer-Seconds", 2, 1, 10) { colorModeValue.get().equals("mixer", true) }
     private val mixerDistValue = IntegerValue("Mixer-Distance", 2, 0, 10) { colorModeValue.get().equals("mixer", true) }
-    private val liquidSlowlyDistanceValue =
-        IntegerValue("LiquidSlowly-Distance", 90, 1, 90) { colorModeValue.get().equals("liquidslowly", true) }
-    private val fadeDistanceValue =
-        IntegerValue("Fade-Distance", 50, 1, 100) { colorModeValue.get().equals("fade", true) }
-    val hAnimation = ListValue("HorizontalAnimation", arrayOf("Default", "None", "Slide", "Astolfo"), "Default")
-    val vAnimation = ListValue("VerticalAnimation", arrayOf("None", "LiquidSense", "Slide", "Rise", "Astolfo"), "None")
-    val animationSpeed = FloatValue("Animation-Speed", 0.25F, 0.01F, 1F)
+    private val liquidSlowlyDistanceValue = IntegerValue("LiquidSlowly-Distance", 90, 1, 90) { colorModeValue.get().equals("liquidslowly", true) }
+    private val fadeDistanceValue = IntegerValue("Fade-Distance", 50, 1, 100) { colorModeValue.get().equals("fade", true) }
+    val hAnimation = ListValue("HorizontalAnimation", arrayOf("Default", "None", "Slide", "Astolfo"), "Slide")
+    val vAnimation = ListValue("VerticalAnimation", arrayOf("None", "LiquidSense", "Slide", "Rise", "Astolfo"), "Slide")
+    val animationSpeed = FloatValue("Animation-Speed", 0.55F, 0.01F, 1F)
     private val nameBreak = BoolValue("NameBreak", true)
     private val abcOrder = BoolValue("Alphabetical-Order", false)
     private val tags = BoolValue("Tags", true)
-    private val tagsStyleValue =
-        ListValue("TagsStyle", arrayOf("-", "|", "()", "[]", "<>", "Default"), "-") { tags.get() }
+    private val tagsStyleValue = ListValue("TagsStyle", arrayOf("-", "|", "()", "[]", "<>", "Default"), "Default") { tags.get() }
     private val shadow = BoolValue("ShadowText", true)
     private val backgroundColorRedValue = IntegerValue("Background-R", 0, 0, 255)
     private val backgroundColorGreenValue = IntegerValue("Background-G", 0, 0, 255)
     private val backgroundColorBlueValue = IntegerValue("Background-B", 0, 0, 255)
     private val backgroundColorAlphaValue = IntegerValue("Background-Alpha", 0, 0, 255)
     private val backgroundExpand = IntegerValue("Background-Expand", 0, 0, 10)
-    private val rectRightValue = ListValue("Rect-Right", arrayOf("None", "Left", "Right", "Outline", "Special", "Top"), "None")
+    private val rectRightValue = ListValue("Rect-Right", arrayOf("None", "Left", "Right", "Outline", "Special", "Top"), "Outline")
     private val rectLeftValue = ListValue("Rect-Left", arrayOf("None", "Left", "Right"), "None")
-    private val caseValue = ListValue("Case", arrayOf("None", "Lower", "Upper"), "None")
+    private val caseValue = ListValue("Case", arrayOf("None", "Lower", "Upper"), "Lower")
     private val spaceValue = FloatValue("Space", 0F, 0F, 5F)
     private val textHeightValue = FloatValue("TextHeight", 11F, 1F, 20F)
     private val textYValue = FloatValue("TextY", 1F, 0F, 20F)
     private val tagsArrayColor = BoolValue("TagsArrayColor", false)
-    private val fontValue = FontValue("Font", Fonts.font40)
+    private val fontValue = FontValue("Font", Fonts.minecraftNativeFont)
 
     private var x2 = 0
     private var y2 = 0F
@@ -110,8 +95,8 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
         // Slide animation - update every render
         val delta = RenderUtils.deltaTime
 
-        val renderX = renderX * scale
-        val renderY = renderY * scale
+        val renderXScaled = renderX * scale
+        val renderYScaled = renderY * scale
 
         // Draw arraylist
         val colorMode = colorModeValue.get()
@@ -230,18 +215,19 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
         when (side.horizontal) {
             Horizontal.RIGHT, Horizontal.MIDDLE -> {
                 if (shadowShaderValue.get()) {
-                    GL11.glTranslated(-renderX, -renderY, 0.0)
+                    GL11.glScalef(1F, 1F, 1F)
+                    GL11.glPopMatrix()
                     GL11.glPushMatrix()
                     ShadowUtils.shadow(shadowStrength.get().toFloat(), {
                         GL11.glPushMatrix()
-                        GL11.glTranslated(renderX, renderY, 0.0)
+                        GL11.glTranslated(renderXScaled, renderYScaled, 0.0)
                         modules.forEachIndexed { index, module ->
                             val xPos = -module.slide - 2
                             RenderUtils.newDrawRect(
-                                    xPos - if (rectRightValue.get().equals("right", true)) 3 else 2,
-                                    module.arrayY,
-                                    if (rectRightValue.get().equals("right", true)) -1F else 0F,
-                                    module.arrayY + textHeight,
+                                (xPos - if (rectRightValue.get().equals("right", true)) 3 else 2) * scale,
+                                module.arrayY * scale,
+                                (if (rectRightValue.get().equals("right", true)) -1F else 0F) * scale,
+                                (module.arrayY + textHeight) * scale,
                                 when (shadowColorMode.get().lowercase(Locale.getDefault())) {
                                         "background" -> Color(backgroundColorRedValue.get(), backgroundColorGreenValue.get(), backgroundColorBlueValue.get()).rgb
                                         "text" -> {
@@ -266,7 +252,7 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                                                     colorAlphaValue.get()
                                                 ), index * fadeDistanceValue.get(), 100
                                             ).rgb
-                                            val nostalgiaColor = module.category.getColor()
+                                            val nostalgiaColor = module.category.color
                                             counter[0] = counter[0] - 1
 
                                             val liquidslowlyColor = ColorUtils.LiquidSlowly(
@@ -274,7 +260,7 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                                                 index * liquidSlowlyDistanceValue.get(),
                                                 saturationValue.get(),
                                                 brightnessValue.get()
-                                            )?.rgb!!
+                                            ).rgb
 
                                             val mixerColor = ColorMixer.getMixedColor(-index * mixerDistValue.get() * 10, mixerSecValue.get()).rgb
 
@@ -296,7 +282,7 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                         GL11.glPopMatrix()
                         counter[0] = 0
                     }, {
-                        if (!shadowNoCutValue.get()) {
+                        if (!shadowNoCutValue.get()) { // maybe here too
                             GL11.glPushMatrix()
                             GL11.glTranslated(renderX, renderY, 0.0)
                             modules.forEachIndexed { _, module ->
@@ -312,14 +298,17 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                         }
                     })
                     GL11.glPopMatrix()
+                    GL11.glPushMatrix()
+                    GL11.glScalef(scale, scale, scale)
                     GL11.glTranslated(renderX, renderY, 0.0)
                 }
 
                 if (blurValue.get()) {
-                    GL11.glTranslated(-renderX, -renderY, 0.0)
+                    GL11.glScalef(1F, 1F, 1F)
+                    GL11.glPopMatrix()
                     GL11.glPushMatrix()
-                    val floatX = renderX.toFloat()
-                    val floatY = renderY.toFloat()
+                    val floatX = renderXScaled.toFloat()
+                    val floatY = renderYScaled.toFloat()
                     var yP = 0F
                     var xP = 0F
                     modules.forEachIndexed { index, module ->
@@ -331,18 +320,20 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                         xP = min(xP, -wid)
                     }
 
-                    BlurUtils.blur(floatX, floatY, floatX + xP, floatY + yP, blurStrength.get(), false) {
+                    BlurUtils.blur(floatX, floatY, floatX + xP * scale, floatY + yP * scale, blurStrength.get(), true) {
                         modules.forEachIndexed { _, module ->
                             val xPos = -module.slide - 2
                             RenderUtils.quickDrawRect(
-                                    floatX + xPos - if (rectRightValue.get().equals("right", true)) 3 else 2,
-                                    floatY + module.arrayY,
-                                    floatX + if (rectRightValue.get().equals("right", true)) -1F else 0F,
-                                    floatY + module.arrayY + textHeight
+                                floatX + (xPos - if (rectRightValue.get().equals("right", true)) 3 else 2) * scale,
+                                floatY + (module.arrayY) * scale,
+                                floatX + (if (rectRightValue.get().equals("right", true)) -1F else 0F) * scale,
+                                floatY + (module.arrayY + textHeight) * scale
                             )
                         }
                     }
                     GL11.glPopMatrix()
+                    GL11.glPushMatrix()
+                    GL11.glScalef(scale, scale, scale)
                     GL11.glTranslated(renderX, renderY, 0.0)
                 }
 
@@ -375,9 +366,9 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                     ).rgb
                     counter[0] = counter[0] - 1
 
-                    val nostalgiaColor = module.category.getColor()
+                    val nostalgiaColor = module.category.color
 
-                    val test = ColorUtils.LiquidSlowly(System.nanoTime(), index * liquidSlowlyDistanceValue.get(), saturationValue.get(), brightnessValue.get())?.rgb
+                    val test = ColorUtils.LiquidSlowly(System.nanoTime(), index * liquidSlowlyDistanceValue.get(), saturationValue.get(), brightnessValue.get()).rgb
                     val liquidslowlyColor: Int = test!!
 
                     val mixerColor = ColorMixer.getMixedColor(-index * mixerDistValue.get() * 10, mixerSecValue.get()).rgb
@@ -497,9 +488,9 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                                             ).rgb
                                             counter[0] = counter[0] - 1
 
-                                            val nostalgiaColor = module.category.getColor()
+                                            val nostalgiaColor = module.category.color
 
-                                            val test = ColorUtils.LiquidSlowly(System.nanoTime(), index * liquidSlowlyDistanceValue.get(), saturationValue.get(), brightnessValue.get())?.rgb
+                                            val test = ColorUtils.LiquidSlowly(System.nanoTime(), index * liquidSlowlyDistanceValue.get(), saturationValue.get(), brightnessValue.get()).rgb
                                             val liquidslowlyColor: Int = test!!
 
                                             val mixerColor = ColorMixer.getMixedColor(-index * mixerDistValue.get() * 10, mixerSecValue.get()).rgb
@@ -544,10 +535,11 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                 }
 
                 if (blurValue.get()) {
-                    GL11.glTranslated(-renderX, -renderY, 0.0)
+                    GL11.glScalef(1F, 1F, 1F)
+                    GL11.glPopMatrix()
                     GL11.glPushMatrix()
-                    val floatX = renderX.toFloat()
-                    val floatY = renderY.toFloat()
+                    val floatX = renderXScaled.toFloat()
+                    val floatY = renderYScaled.toFloat()
                     var yP = 0F
                     var xP = 0F
                     modules.forEachIndexed { index, module ->
@@ -559,7 +551,7 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                         xP = max(xP, wid)
                     }
 
-                    BlurUtils.blur(floatX, floatY, floatX + xP, floatY + yP, blurStrength.get(), false) {
+                    BlurUtils.blur(floatX, floatY, floatX + xP * scale, floatY + yP * scale, blurStrength.get(), false) {
                         modules.forEachIndexed { _, module ->
                             val displayString = getModName(module)
                             val width = fontRenderer.getStringWidth(displayString)
@@ -567,13 +559,15 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
 
                             RenderUtils.quickDrawRect(
                                     floatX,
-                                    floatY + module.arrayY,
-                                    floatX + xPos + width + if (rectLeftValue.get().equals("right", true)) 3 else 2,
-                                    floatY + module.arrayY + textHeight
+                                    floatY + module.arrayY * scale,
+                                    floatX + (xPos + width + if (rectLeftValue.get().equals("right", true)) 3 else 2) * scale,
+                                    floatY + (module.arrayY + textHeight) * scale
                             )
                         }
                     }
                     GL11.glPopMatrix()
+                    GL11.glPushMatrix()
+                    GL11.glScalef(scale, scale, scale)
                     GL11.glTranslated(renderX, renderY, 0.0)
                 }
 
@@ -605,9 +599,9 @@ class Arraylist(x: Double = 1.0, y: Double = 2.0, scale: Float = 1F,
                         ), index * fadeDistanceValue.get(), 100
                     ).rgb
                     counter[0] = counter[0] - 1
-                    val test = ColorUtils.LiquidSlowly(System.nanoTime(), index * liquidSlowlyDistanceValue.get(), saturationValue.get(), brightnessValue.get())?.rgb
+                    val test = ColorUtils.LiquidSlowly(System.nanoTime(), index * liquidSlowlyDistanceValue.get(), saturationValue.get(), brightnessValue.get()).rgb
                     val liquidslowlyColor: Int = test!!
-                    val nostalgiaColor = module.category.getColor()
+                    val nostalgiaColor = module.category.color
                     val mixerColor = ColorMixer.getMixedColor(-index * mixerDistValue.get() * 10, mixerSecValue.get()).rgb
 
                     RenderUtils.drawRect(
