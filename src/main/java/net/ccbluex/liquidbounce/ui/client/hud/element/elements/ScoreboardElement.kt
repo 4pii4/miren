@@ -41,27 +41,27 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
                         side: Side = Side(Side.Horizontal.RIGHT, Side.Vertical.UP)) : Element(x, y, scale, side) {
 
     private val useVanillaBackground = BoolValue("UseVanillaBackground", false)
-    private val backgroundColorRedValue = IntegerValue("Background-R", 0, 0, 255, { !useVanillaBackground.get() })
-    private val backgroundColorGreenValue = IntegerValue("Background-G", 0, 0, 255, { !useVanillaBackground.get() })
-    private val backgroundColorBlueValue = IntegerValue("Background-B", 0, 0, 255, { !useVanillaBackground.get() })
-    private val backgroundColorAlphaValue = IntegerValue("Background-Alpha", 95, 0, 255, { !useVanillaBackground.get() })
+    private val backgroundColorRedValue = IntegerValue("Background-R", 0, 0, 255) { !useVanillaBackground.get() }
+    private val backgroundColorGreenValue = IntegerValue("Background-G", 0, 0, 255) { !useVanillaBackground.get() }
+    private val backgroundColorBlueValue = IntegerValue("Background-B", 0, 0, 255) { !useVanillaBackground.get() }
+    private val backgroundColorAlphaValue = IntegerValue("Background-Alpha", 95, 0, 255) { !useVanillaBackground.get() }
 
     private val rectValue = BoolValue("Rect", false)
-    private val rectHeight = IntegerValue("Rect-Height", 1, 1, 10, { rectValue.get() })
+    private val rectHeight = IntegerValue("Rect-Height", 1, 1, 10) { rectValue.get() }
 
     private val blurValue = BoolValue("Blur", false)
-    private val blurStrength = FloatValue("Blur-Strength", 0F, 0F, 30F, { blurValue.get() })
+    private val blurStrength = FloatValue("Blur-Strength", 0F, 0F, 30F) { blurValue.get() }
 
     private val shadowShaderValue = BoolValue("Shadow", false)
-    private val shadowStrength = FloatValue("Shadow-Strength", 0F, 0F, 30F, { shadowShaderValue.get() })
-    private val shadowColorMode = ListValue("Shadow-Color", arrayOf("Background", "Custom"), "Background", { shadowShaderValue.get() })
+    private val shadowStrength = FloatValue("Shadow-Strength", 0F, 0F, 30F) { shadowShaderValue.get() }
+    private val shadowColorMode = ListValue("Shadow-Color", arrayOf("Background", "Custom"), "Background") { shadowShaderValue.get() }
 
-    private val shadowColorRedValue = IntegerValue("Shadow-Red", 0, 0, 255, { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) })
-    private val shadowColorGreenValue = IntegerValue("Shadow-Green", 111, 0, 255, { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) })
-    private val shadowColorBlueValue = IntegerValue("Shadow-Blue", 255, 0, 255, { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) })
+    private val shadowColorRedValue = IntegerValue("Shadow-Red", 0, 0, 255) { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) }
+    private val shadowColorGreenValue = IntegerValue("Shadow-Green", 111, 0, 255) { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) }
+    private val shadowColorBlueValue = IntegerValue("Shadow-Blue", 255, 0, 255) { shadowShaderValue.get() && shadowColorMode.get().equals("custom", true) }
 
     private val bgRoundedValue = BoolValue("Rounded", false)
-    private val roundStrength = FloatValue("Rounded-Strength", 5F, 0F, 30F, { bgRoundedValue.get() })
+    private val roundStrength = FloatValue("Rounded-Strength", 5F, 0F, 30F) { bgRoundedValue.get() }
 
     private val rectColorModeValue = ListValue("Color", arrayOf("Custom", "Rainbow", "LiquidSlowly", "Fade", "Sky", "Mixer"), "Custom")
     
@@ -146,7 +146,7 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
         for (score in scoreCollection) {
             val scorePlayerTeam = scoreboard.getPlayersTeam(score.playerName)
             var name = ScorePlayerTeam.formatPlayerName(scorePlayerTeam, score.playerName)
-            var stripped = StringUtils.fixString(ColorUtils.stripColor(name)!!)
+            var stripped = StringUtils.fixString(ColorUtils.stripColor(name)!!)!!
             if (changeDomain.get()) {
                 if (cachedDomains.contains(stripped)) {
                     name = hud.domainValue.get()
@@ -171,7 +171,7 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
 
         var FadeColor : Int = ColorUtils.fade(Color(rectColorRedValue.get(), rectColorGreenValue.get(), rectColorBlueValue.get(), rectColorBlueAlpha.get()), 0, 100).rgb
         val LiquidSlowly = ColorUtils.LiquidSlowly(System.nanoTime(), 0, saturationValue.get(), brightnessValue.get()).rgb
-        var liquidSlowli : Int = LiquidSlowly!!
+        var liquidSlowli : Int = LiquidSlowly
 
         val mixerColor = ColorMixer.getMixedColor(0, cRainbowSecValue.get()).rgb
 
@@ -333,7 +333,7 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
                 changed = true
             }
 
-            if (antiSnipeMatch.get() && hypickleRegex.containsMatchIn(stripped))
+            if (antiSnipeMatch.get() && hypickleRegex.containsMatchIn(stripped!!))
                 name = ""
             
             if (changed) {
@@ -361,31 +361,31 @@ class ScoreboardElement(x: Double = 5.0, y: Double = 0.0, scale: Float = 1F,
                         }
                     if (side.horizontal == Side.Horizontal.LEFT) {
                         when (domainShadowValue.get().lowercase(Locale.getDefault())) {
-                            "none" -> domainFontValue.get().drawString(name.get(z).toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get(), typeColor, false)
-                            "default" -> domainFontValue.get().drawStringWithShadow(name.get(z).toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get(), typeColor)
+                            "none" -> domainFontValue.get().drawString(name[z].toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get(), typeColor, false)
+                            "default" -> domainFontValue.get().drawStringWithShadow(name[z].toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get(), typeColor)
                             "outline" -> {
-                                domainFontValue.get().drawString(name.get(z).toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat() - outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat() + outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get() - outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get() + outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get(), typeColor, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat() - outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat() + outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get() - outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get() + outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), -3F + domainFontValue.get().getStringWidth(stringZ).toFloat(), height.toFloat() + domainFontYValue.get(), typeColor, shadowValue.get())
                             }
                         }
                     } else {
                         when (domainShadowValue.get().lowercase(Locale.getDefault())) {
-                            "none" -> domainFontValue.get().drawString(name.get(z).toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get(), typeColor, false)
-                            "default" -> domainFontValue.get().drawStringWithShadow(name.get(z).toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get(), typeColor)
+                            "none" -> domainFontValue.get().drawString(name[z].toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get(), typeColor, false)
+                            "default" -> domainFontValue.get().drawStringWithShadow(name[z].toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get(), typeColor)
                             "outline" -> {
-                                domainFontValue.get().drawString(name.get(z).toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ) - outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ) + outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get() - outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get() + outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
-                                domainFontValue.get().drawString(name.get(z).toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get(), typeColor, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ) - outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ) + outlineWidthValue.get(), height.toFloat() + domainFontYValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get() - outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get() + outlineWidthValue.get(), Color.black.rgb, shadowValue.get())
+                                domainFontValue.get().drawString(name[z].toString(), l1.toFloat() + domainFontValue.get().getStringWidth(stringZ), height.toFloat() + domainFontYValue.get(), typeColor, shadowValue.get())
                             }
                         }
                     }
 
-                    stringZ += name.get(z).toString()
+                    stringZ += name[z].toString()
                 }
             } else if (side.horizontal == Side.Horizontal.LEFT) 
                 fontRenderer.drawString(name, -3F, height.toFloat(), -1, shadowValue.get())

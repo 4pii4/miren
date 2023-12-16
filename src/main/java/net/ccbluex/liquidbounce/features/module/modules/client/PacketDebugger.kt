@@ -19,7 +19,7 @@ import net.minecraft.network.status.server.*
 @ModuleInfo(
     name = "PacketDebugger",
     description = "Displays selected packets and their fields in the chat.",
-    category = ModuleCategory.MISC
+    category = ModuleCategory.CLIENT
 )
 object PacketDebugger : Module() {
 

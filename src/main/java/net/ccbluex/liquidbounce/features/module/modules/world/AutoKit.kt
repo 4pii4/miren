@@ -28,7 +28,7 @@ import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraft.network.play.server.S2FPacketSetSlot
-import java.util.*
+import java.util.Timer
 import kotlin.concurrent.schedule
 
 @ModuleInfo(name = "AutoKit", spacedName = "Auto Kit", description = "Automatically selects kits for you in BlocksMC Skywars.", category = ModuleCategory.WORLD)

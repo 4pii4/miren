@@ -111,13 +111,7 @@ open class Module : MinecraftInstance(), Listenable {
     // Tag
     open val tag: String?
         get() = null
-/*
-    val tagName: String
-        get() = "$name${if (tag == null) "" else "§7 - $tag"}"
 
-    val colorlessTagName: String
-        get() = "$name${if (tag == null) "" else " - " + stripColor(tag)}"
-*/
     /**
      * Toggle module
      */
@@ -160,15 +154,6 @@ open class Module : MinecraftInstance(), Listenable {
      */
     open fun getValue(valueName: String) =
         values.find { it.name.equals(valueName, ignoreCase = true) && it !is NoteValue }
-
-    val numberValues: List<Value<*>>
-        get() = values.filter { it is IntegerValue || it is FloatValue }
-
-    val booleanValues: List<BoolValue>
-        get() = values.filterIsInstance<BoolValue>()
-
-    val listValues: List<ListValue>
-        get() = values.filterIsInstance<ListValue>()
 
     /**
      * Get all values of module

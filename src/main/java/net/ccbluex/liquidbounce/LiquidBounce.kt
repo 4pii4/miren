@@ -32,7 +32,7 @@ object LiquidBounce {
     // Client information
     const val CLIENT_NAME = "Miren"
     val CLIENT_NAME_COLORED = "${darkGray("[")}${red(CLIENT_NAME)}${darkGray("]")}"
-    const val CLIENT_VERSION = "b28112023"
+    const val CLIENT_VERSION = "b17122023"
     const val CLIENT_CREATOR = "CCBlueX, inf and pie"
     const val CLIENT_CLOUD = "https://mirenclient.github.io/cloud"
     const val CLIENT_REPO = "mirenclient/Miren"

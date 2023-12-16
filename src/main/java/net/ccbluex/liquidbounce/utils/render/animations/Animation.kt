@@ -13,13 +13,13 @@ import kotlin.math.min
  * @since 7/29/2021
  * @param duration Time in milliseconds of how long you want the animation to take.
  * @param endPoint The desired distance for the animated object to go.
- * @param direction Direction in which the graph is going. If backwards, will start from endPoint and go to 0.
+ * @param internalDirection Direction in which the graph is going. If backwards, will start from endPoint and go to 0.
  */
-abstract class Animation(var duration: Int, var endPoint: Double, var direction: Direction = Direction.FORWARDS) {
+abstract class Animation(var duration: Int, var endPoint: Double, var internalDirection: Direction = Direction.FORWARDS) {
     var timerUtil = TimerUtil()
 
     fun finished(direction: Direction): Boolean {
-        return isDone && this.direction == direction
+        return isDone && this.internalDirection == direction
     }
 
     val linearOutput: Double
@@ -33,12 +33,12 @@ abstract class Animation(var duration: Int, var endPoint: Double, var direction:
         get() = timerUtil.hasTimeElapsed(duration.toLong())
 
     fun changeDirection() {
-        setDirection(direction.opposite())
+        setDirection(internalDirection.opposite())
     }
 
     open fun setDirection(direction: Direction): Animation {
-        if (this.direction != direction) {
-            this.direction = direction
+        if (this.internalDirection != direction) {
+            this.internalDirection = direction
             timerUtil.time = System.currentTimeMillis() - (duration - min(duration, timerUtil.time.toInt()))
         }
         return this
@@ -52,7 +52,7 @@ abstract class Animation(var duration: Int, var endPoint: Double, var direction:
 
     val output: Double
         get() {
-            if (direction.forwards()) {
+            if (internalDirection.forwards()) {
                 return if (isDone)
                     endPoint
                 else

@@ -17,7 +17,7 @@ import net.minecraft.client.gui.GuiSlot
 import org.apache.commons.io.IOUtils
 import org.lwjgl.input.Keyboard
 import java.awt.Color
-import java.awt.Desktop
+import net.ccbluex.liquidbounce.utils.DesktopUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
@@ -129,23 +129,23 @@ class GuiScripts(private val prevGui: GuiScreen) : GuiScreen() {
                 LiquidBounce.isStarting = false
                 LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig)
                 LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
-                ClickGUI.reload()
+                ClickGUI.resetClickGUIs()
             } catch (t: Throwable) {
                 ClientUtils.logger.error("Something went wrong while reloading all scripts.", t)
                 MiscUtils.showErrorPopup(t.javaClass.name, t.message)
             }
             4 -> try {
-                Desktop.getDesktop().open(LiquidBounce.scriptManager.scriptsFolder)
+                DesktopUtils.open(LiquidBounce.scriptManager.scriptsFolder)
             } catch (t: Throwable) {
                 ClientUtils.logger.error("Something went wrong while trying to open your scripts folder.", t)
                 MiscUtils.showErrorPopup(t.javaClass.name, t.message)
             }
             5 -> try {
-                Desktop.getDesktop().browse(URL("https://liquidbounce.net/docs/ScriptAPI/Getting%20Started").toURI())
+                DesktopUtils.browse(URL("https://liquidbounce.net/docs/ScriptAPI/Getting%20Started").toURI())
             } catch (ignored: Exception) { }
 
             6 -> try {
-                Desktop.getDesktop().browse(URL("https://forum.ccbluex.net/viewforum.php?id=16").toURI())
+                DesktopUtils.browse(URL("https://forum.liquidbounce.net/category/9/scripts").toURI())
             } catch (ignored: Exception) { }
         }
     }

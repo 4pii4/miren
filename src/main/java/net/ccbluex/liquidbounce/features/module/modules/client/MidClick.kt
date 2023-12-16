@@ -35,14 +35,16 @@ class MidClick : Module() {
                 if (friendsConfig.isFriend(playerName)) {
                     friendsConfig.removeFriend(playerName)
                     LiquidBounce.fileManager.saveConfig(friendsConfig)
-                    ClientUtils.displayChatMessage("§a§l$playerName§c was removed from your friends.")
+                    chat("§a§l$playerName§r was removed from your friends.")
                 } else {
                     friendsConfig.addFriend(playerName)
                     LiquidBounce.fileManager.saveConfig(friendsConfig)
-                    ClientUtils.displayChatMessage("§a§l$playerName§c was added to your friends.")
+                    chat("§a§l$playerName§r was added to your friends.")
                 }
             } else
-                ClientUtils.displayChatMessage("§c§lError: §aYou need to select a player.")
+                chat("§c§lError: §aYou need to select a player.")
         }
+
+        wasDown = Mouse.isButtonDown(2)
     }
 }

@@ -193,7 +193,7 @@ class LongJump : Module() {
 
                 mc.thePlayer.motionY += 0.025
                 bmcSpeed *= bmcMultiplier.get()
-                MovementUtils.strafe(bmcSpeed)
+                MovementUtils.strafe(bmcSpeed.coerceAtLeast(3.7f))
                 mc.timer.timerSpeed = 0.5f
             }
 

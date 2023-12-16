@@ -36,7 +36,7 @@ class LiquidBounceStyle : GuiScreen() {
         Fonts.font35.drawString("§f" + panel.name, (panel.x - (textWidth - 100.0f) / 2f).toInt(), panel.y + 7, -16777216)
         if (panel.scrollbar && panel.fade > 0) {
             RenderUtils.drawRect(panel.x - 1.5f, panel.y + 21f, panel.x - 0.5f, panel.y + 16f + panel.fade, Int.MAX_VALUE)
-            RenderUtils.drawRect(panel.x - 2f, panel.y + 30f + (panel.fade - 24f) / (panel.elements.size - ClickGUI.maxElements) * panel.dragged - 10.0f, panel.x.toFloat(), panel.y + 40f + (panel.fade - 24.0f) / (panel.elements.size - ClickGUI.maxElements) * panel.dragged, Int.MIN_VALUE)
+            RenderUtils.drawRect(panel.x - 2f, panel.y + 30f + (panel.fade - 24f) / (panel.elements.size - ClickGUI.lbMaxElement) * panel.dragged - 10.0f, panel.x.toFloat(), panel.y + 40f + (panel.fade - 24.0f) / (panel.elements.size - ClickGUI.lbMaxElement) * panel.dragged, Int.MIN_VALUE)
         }
     }
 

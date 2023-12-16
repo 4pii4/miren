@@ -9,6 +9,7 @@ package net.ccbluex.liquidbounce.utils.render;
 import net.ccbluex.liquidbounce.LiquidBounce;
 import net.ccbluex.liquidbounce.features.module.modules.render.TargetMark;
 import net.ccbluex.liquidbounce.ui.font.Fonts;
+import net.ccbluex.liquidbounce.utils.ClientUtils;
 import net.ccbluex.liquidbounce.utils.MinecraftInstance;
 import net.ccbluex.liquidbounce.utils.block.BlockUtils;
 import net.ccbluex.liquidbounce.utils.render.shader.Shader;
@@ -62,6 +63,13 @@ public final class RenderUtils extends MinecraftInstance {
         glScalef(scale, scale, 1);
         glTranslatef(-x, -y, 0);
     }
+
+    public static void scaleStart(float x, float y, float scaleX, float scaleY) {
+        glTranslatef(x, y, 0);
+        glScalef(scaleX, scaleY, 1);
+        glTranslatef(-x, -y, 0);
+    }
+
     private static final int[] DISPLAY_LISTS_2D = new int[4];
 
     static {
@@ -2498,6 +2506,32 @@ public final class RenderUtils extends MinecraftInstance {
 
         GlStateManager.color(0, 0, 0);
 
+        glEnd();
+
+        glPopAttrib();
+    }
+
+    public static void drawCustomFan(float centerX, float centerY, float startDeg, float endDeg, float radius, float step, Color color) {
+        glPushAttrib(GL_ENABLE_BIT);
+
+        glEnable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_LINE_SMOOTH);
+        glBegin(GL_TRIANGLE_FAN);
+
+        glVertex2f(centerX, centerY);
+
+        float x, y;
+        for (float deg = startDeg; deg <= endDeg; deg += step) {
+            float correctedDeg = -deg + 90;
+            x = (float) (radius * Math.sin(Math.toRadians(correctedDeg)));
+            y = (float) (radius * Math.cos(Math.toRadians(correctedDeg)));
+            glColor4f(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F, color.getAlpha() / 255F);
+            glVertex2f(centerX + x, centerY + y);
+        }
+
+        GlStateManager.resetColor();
         glEnd();
 
         glPopAttrib();
