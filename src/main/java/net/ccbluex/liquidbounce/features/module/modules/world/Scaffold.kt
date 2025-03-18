@@ -1175,6 +1175,11 @@ class Scaffold : Module() {
             val block = (itemStack.item as ItemBlock).getBlock()
             if (InventoryUtils.BLOCK_BLACKLIST.contains(block) || !block.isFullCube || itemStack.stackSize <= 0) return
         }
+
+        if(!overBlock(RotationUtils.targetRotation ?: return, targetPlace!!.enumFacing, targetPlace!!.blockPos, true)){
+            return
+        }
+
         if (mc.playerController.onPlayerRightClick(
                 mc.thePlayer,
                 mc.theWorld,
