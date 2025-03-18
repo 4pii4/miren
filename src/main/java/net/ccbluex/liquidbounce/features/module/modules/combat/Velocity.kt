@@ -75,6 +75,7 @@ class Velocity : Module() {
             "GrimReduce",
             "AllAC",
             "Intave",
+            "IntaveReduce",
             "JumpReset",
             "Smart"
         ), "Cancel"
@@ -129,6 +130,9 @@ class Velocity : Module() {
     // Legit
     private var pos: BlockPos? = null
 
+    //IntaveReduce
+    private var lastAttackTime = 0L
+
     // SmoothReverse
     private var reverseHurt = false
 
@@ -155,6 +159,20 @@ class Velocity : Module() {
         grimPacket = false
         transactionQueue.clear()
         attack = false
+    }
+
+    @EventTarget
+    fun onAttack(event: AttackEvent){
+        val player = mc.thePlayer ?: return
+
+        if (modeValue.get() != "IntaveReduce") return
+
+        if (player.hurtTime > 0 && System.currentTimeMillis() - lastAttackTime <= 8000) {
+            player.motionX *= 0.6
+            player.motionZ *= 0.6
+        }
+
+        lastAttackTime = System.currentTimeMillis()
     }
 
     @EventTarget
