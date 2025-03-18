@@ -76,7 +76,6 @@ object LiquidBounce {
         fileManager = FileManager()
 
         DictUtils.init()
-        ChangelogUtils.update()
 
         // Crate event manager
         eventManager = EventManager()

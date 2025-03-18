@@ -3,7 +3,6 @@ package net.ccbluex.liquidbounce.ui.client
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.ui.client.altmanager.GuiAltManager
 import net.ccbluex.liquidbounce.ui.font.Fonts
-import net.ccbluex.liquidbounce.utils.ChangelogUtils
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.minecraft.client.gui.*
@@ -36,17 +35,6 @@ class GuiMainMenu : GuiScreen(), GuiYesNoCallback {
         val name = "${LiquidBounce.CLIENT_NAME} ${LiquidBounce.CLIENT_VERSION}"
         fontLarge.drawCenteredString(name, this.width / 2f, this.height / 3f, -1)
 
-        val font = Fonts.minecraftNativeFont
-        val maxLength = font.getStringWidth(ChangelogUtils.changes.map { it }.maxByOrNull { font.getStringWidth(it) })
-        val fontHeight = font.FONT_HEIGHT
-
-        if (maxLength <= width * 0.45f) {
-            font.drawStringWithShadow(ChangelogUtils.buildMsg, 5f, 5f, Color(255, 255, 255, 220).rgb)
-            for (i in ChangelogUtils.changes.indices) {
-                val change = ChangelogUtils.changes[i]
-                font.drawStringWithShadow(change, 9f, 17f + i * fontHeight, -1)
-            }
-        }
 
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
