@@ -9,6 +9,7 @@ import net.ccbluex.liquidbounce.ui.client.clickgui.styles.ClickGuiStyle
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner
 import net.ccbluex.liquidbounce.ui.font.AWTFontRenderer.Companion.assumeNonVolatile
 import net.ccbluex.liquidbounce.utils.ClientUtils
+import net.ccbluex.liquidbounce.utils.render.ColorUtils
 import net.ccbluex.liquidbounce.utils.render.EaseUtils.easeOutBack
 import net.ccbluex.liquidbounce.utils.render.EaseUtils.easeOutQuart
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
@@ -103,9 +104,9 @@ class LiquidBounceClickGui : ClickGuiStyle("LiquidBounce") {
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         var mouseX = mouseX
         var mouseY = mouseY
-        if (progress < 1) progress = ((System.currentTimeMillis() - lastMS).toFloat() / (500f / ClickGUI.lbAnimSpeed)).toDouble() // fully fps async
+        if (progress < 1) progress = ((System.currentTimeMillis() - lastMS).toFloat() / (500f / ClickGUI.animSpeed)).toDouble() // fully fps async
         else progress = 1.0
-        when (ClickGUI.lbAnimation.lowercase()) {
+        when (ClickGUI.animationValue.lowercase()) {
             "slidebounce", "zoombounce" -> slide = easeOutBack(progress)
             "slide", "zoom", "azura" -> slide = easeOutQuart(progress)
             "none" -> slide = 1.0
@@ -119,11 +120,20 @@ class LiquidBounceClickGui : ClickGuiStyle("LiquidBounce") {
         mouseY = (mouseY / scale).toInt()
         this.mouseX = mouseX
         this.mouseY = mouseY
-        ClickGUI.drawBackground(this)
+        when (ClickGUI.backgroundValue.get().lowercase()) {
+            "Default" -> drawDefaultBackground()
+            "Gradient" -> drawGradientRect(
+                0, 0, width, height,
+                ColorUtils.reAlpha(ClickGUI.accentColor, ClickGUI.gradStartValue.get()).rgb,
+                ColorUtils.reAlpha(ClickGUI.accentColor,ClickGUI.gradEndValue.get()).rgb
+            )
+
+            else -> {}
+        }
         GlStateManager.disableAlpha()
         RenderUtils.drawImage(hudIcon, 9, height - 41, 32, 32)
         GlStateManager.enableAlpha()
-        when (ClickGUI.lbAnimation.lowercase()) {
+        when (ClickGUI.animationValue.lowercase()) {
             "azura" -> {
                 GlStateManager.translate(0.0, (1.0 - slide) * height * 2.0, 0.0)
                 GlStateManager.scale(scale, scale + (1.0 - slide) * 2.0, scale)
@@ -160,7 +170,7 @@ class LiquidBounceClickGui : ClickGuiStyle("LiquidBounce") {
         }
         GlStateManager.disableLighting()
         RenderHelper.disableStandardItemLighting()
-        when (ClickGUI.lbAnimation.lowercase()) {
+        when (ClickGUI.animationValue.lowercase()) {
             "azura" -> GlStateManager.translate(0.0, (1.0 - slide) * height * -2.0, 0.0)
             "slide", "slidebounce" -> GlStateManager.translate(0.0, (1.0 - slide) * height * -2.0, 0.0)
             "zoom" -> GlStateManager.translate(-1 * (1.0 - slide) * (width / 2.0), -1 * (1.0 - slide) * (height / 2.0), -1 * (1.0 - slide) * (width / 2.0))
@@ -245,7 +255,18 @@ class LiquidBounceClickGui : ClickGuiStyle("LiquidBounce") {
         LiquidBounce.fileManager.saveConfig(LiquidBounce.fileManager.clickGuiConfig)
     }
 
-    override fun getNewInstance(): LiquidBounceClickGui {
-        return LiquidBounceClickGui()
+    override fun doesGuiPauseGame(): Boolean {
+        return false
+    }
+
+    companion object {
+        private var instance: LiquidBounceClickGui? = null
+        fun getInstance(): LiquidBounceClickGui {
+            return if (instance == null) LiquidBounceClickGui().also { instance = it } else instance!!
+        }
+
+        fun resetInstance() {
+            instance = LiquidBounceClickGui()
+        }
     }
 }

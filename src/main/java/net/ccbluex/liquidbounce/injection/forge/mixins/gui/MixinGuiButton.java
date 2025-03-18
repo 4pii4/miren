@@ -12,9 +12,10 @@ import net.ccbluex.liquidbounce.ui.font.Fonts;
 import net.ccbluex.liquidbounce.ui.font.GameFontRenderer;
 import net.ccbluex.liquidbounce.utils.AnimationUtils;
 import net.ccbluex.liquidbounce.utils.ClientUtils;
-import net.ccbluex.liquidbounce.utils.render.*;
-import net.ccbluex.liquidbounce.utils.render.animations.Direction;
-import net.ccbluex.liquidbounce.utils.render.animations.impl.CustomAnimation;
+import net.ccbluex.liquidbounce.utils.render.ColorUtils;
+import net.ccbluex.liquidbounce.utils.render.Colors;
+import net.ccbluex.liquidbounce.utils.render.RenderUtils;
+import net.ccbluex.liquidbounce.utils.render.ShaderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -22,7 +23,10 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.awt.*;
 import java.util.Objects;
@@ -53,27 +57,25 @@ public abstract class MixinGuiButton extends Gui {
    public boolean enabled;
 
    @Shadow
-   public abstract void mouseDragged(Minecraft mc, int mouseX, int mouseY);
+   protected abstract void mouseDragged(Minecraft mc, int mouseX, int mouseY);
 
    @Shadow
-   public abstract int getHoverState(boolean mouseOver);
+   protected abstract int getHoverState(boolean mouseOver);
 
    @Shadow
    public String displayString;
 
    @Shadow
    @Final
-   public static ResourceLocation buttonTextures;
+   protected static ResourceLocation buttonTextures;
 
-   @Unique
+   private final float bright = 0F;
    private float moveX = 0F;
-   @Unique
    private float cut;
-   @Unique
    private float alpha;
-   @Unique
-   private final CustomAnimation anim = new CustomAnimation(200, 1.0, Direction.FORWARDS, (x) -> 1 - ((x - 1) * (x - 1)));
+   private float anim = 0f;
 
+   public int cs;
 
    /**
     * @author CCBlueX
@@ -94,7 +96,6 @@ public abstract class MixinGuiButton extends Gui {
 
          if (hud == null) return;
 
-         anim.setDirection(this.hovered ? Direction.FORWARDS : Direction.BACKWARDS);
          if (enabled && hovered) {
             // LiquidBounce
             cut += 0.05F * delta;
@@ -104,6 +105,9 @@ public abstract class MixinGuiButton extends Gui {
 
             // LiquidBounce+
             moveX = AnimationUtils.animate(this.width - 2.4F, moveX, speedDelta);
+
+            // Miren
+            anim = AnimationUtils.animate(1f, anim, speedDelta / 2f);
          } else {
             // LiquidBounce
             cut -= 0.05F * delta;
@@ -113,6 +117,9 @@ public abstract class MixinGuiButton extends Gui {
 
             // LiquidBounce+
             moveX = AnimationUtils.animate(0F, moveX, speedDelta);
+
+            // Miren
+            anim = AnimationUtils.animate(0f, anim, speedDelta / 2f);
          }
 
          float roundCorner = Math.max(0F, 2.4F + moveX - (this.width - 2.4F));
@@ -125,8 +132,8 @@ public abstract class MixinGuiButton extends Gui {
                Color black = new Color(30, 30, 30, 255);
                Color white = new Color(255, 255, 255, 255);
                if (this.enabled) {
-                     backgroundColor = ColorUtils.interpolateColorC(white, black, anim.getOutputFloat());
-                     textColor = ColorUtils.interpolateColorC(black, white, anim.getOutputFloat());
+                     backgroundColor = ColorUtils.interpolateColorC(white, black, anim);
+                     textColor = ColorUtils.interpolateColorC(black, white, anim);
                } else {
                   backgroundColor = new Color(180, 180, 180, 255);
                   textColor = new Color(40, 40, 40, 255);

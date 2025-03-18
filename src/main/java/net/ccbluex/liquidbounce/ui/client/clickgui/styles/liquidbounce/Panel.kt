@@ -8,6 +8,7 @@ import net.ccbluex.liquidbounce.utils.render.animations.impl.CustomAnimation
 import net.minecraft.client.audio.PositionedSoundRecord
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.StringUtils
+import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -34,7 +35,7 @@ abstract class Panel(val name: String, var x: Int, var y: Int, val width: Int, v
     abstract fun setupItems()
     fun drawScreen(mouseX: Int, mouseY: Int, button: Float) {
         if (!isVisible) return
-        val maxElements: Int = ClickGUI.lbMaxElement
+        val maxElements: Int = ClickGUI.maxElements
 
         // Drag
         if (drag) {
@@ -90,7 +91,7 @@ abstract class Panel(val name: String, var x: Int, var y: Int, val width: Int, v
     }
 
     fun handleScroll(mouseX: Int, mouseY: Int, wheel: Int): Boolean {
-        val maxElements: Int = ClickGUI.lbMaxElement
+        val maxElements: Int = ClickGUI.maxElements
         if (mouseX >= x && mouseX <= x + 100 && mouseY >= y && mouseY <= y + 19 + elementsHeight) {
             if (wheel < 0 && scroll < elements.size - maxElements) {
                 ++scroll
@@ -110,7 +111,7 @@ abstract class Panel(val name: String, var x: Int, var y: Int, val width: Int, v
     }
 
     fun updateFade(delta: Int) {
-        fade = if (ClickGUI.lbAnimation.equals("none", true)) {
+        fade = if (ClickGUI.animationValue.equals("none", true)) {
             if (open) elementsHeight else 0f
         } else {
             anim.setDirection(if (open) Direction.FORWARDS else Direction.BACKWARDS)
@@ -122,7 +123,7 @@ abstract class Panel(val name: String, var x: Int, var y: Int, val width: Int, v
         var height = 0
         var count = 0
         for (element in elements) {
-            if (count >= ClickGUI.lbMaxElement) continue
+            if (count >= ClickGUI.maxElements) continue
             height += element.height + 1
             ++count
         }

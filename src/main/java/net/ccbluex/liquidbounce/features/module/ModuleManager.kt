@@ -17,7 +17,6 @@ import net.ccbluex.liquidbounce.features.module.modules.movement.*
 import net.ccbluex.liquidbounce.features.module.modules.player.*
 import net.ccbluex.liquidbounce.features.module.modules.render.*
 import net.ccbluex.liquidbounce.features.module.modules.world.*
-import net.ccbluex.liquidbounce.features.module.modules.world.Timer
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import java.util.*
 
@@ -66,6 +65,7 @@ class ModuleManager : Listenable {
             NoRotate::class.java,
             ChestStealer::class.java,
             Scaffold::class.java,
+            JumpCircle::class.java,
             PlayerEdit::class.java,
             FastBreak::class.java,
             FastPlace::class.java,
@@ -93,7 +93,7 @@ class ModuleManager : Listenable {
             NameProtect::class.java,
             MidClick::class.java,
             XRay::class.java,
-            Timer::class.java,
+            GameSpeed::class.java,
             FreeCam::class.java,
             HitBox::class.java,
             Plugins::class.java,
@@ -206,6 +206,7 @@ class ModuleManager : Listenable {
             SuperheroFX::class.java,
             ResetVL::class.java,
             SpeedMine::class.java,
+            FreeLook::class.java,
             ViaVersionFix::class.java,
             AntiBot::class.java,
             AntiStaff::class.java,
@@ -214,7 +215,6 @@ class ModuleManager : Listenable {
             Targets::class.java,
             BedInstantLeave::class.java,
             OnDamage::class.java,
-            TestRender::class.java,
         )
 
         registerModule(Breaker)

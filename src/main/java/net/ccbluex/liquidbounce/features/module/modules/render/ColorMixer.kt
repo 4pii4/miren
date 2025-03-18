@@ -63,13 +63,13 @@ object ColorMixer : Module() {
     val col10BlueValue: ColorElement = ColorElement(10, ColorElement.Material.BLUE, blendAmount)
 
     private var lastFraction = floatArrayOf()
-    var lastColors = mutableListOf<Color>()
+    var lastColors = arrayOf<Color?>()
 
     @JvmStatic
     fun getMixedColor(index: Int, seconds: Int): Color {
         val colMixer = LiquidBounce.moduleManager.getModule(ColorMixer::class.java) ?: return Color.white
         if (lastColors.isEmpty() || lastFraction.size <= 0) regenerateColors(true) // just to make sure it won't go white
-        return BlendUtils.blendColors(lastFraction, lastColors.toTypedArray(), (System.currentTimeMillis() + index) % (seconds * 1000) / (seconds * 1000).toFloat())
+        return BlendUtils.blendColors(lastFraction, lastColors, (System.currentTimeMillis() + index) % (seconds * 1000) / (seconds * 1000).toFloat())
     }
 
     fun regenerateColors(forceValue: Boolean) {
@@ -100,8 +100,7 @@ object ColorMixer : Module() {
                 generator[h] = generator[z]
                 h++
             }
-            lastColors.clear()
-            lastColors.addAll(generator.filterIsInstance<Color>())
+            lastColors = generator
         }
 
         // cache thingy

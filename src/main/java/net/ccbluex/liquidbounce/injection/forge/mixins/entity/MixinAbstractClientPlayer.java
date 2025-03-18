@@ -11,13 +11,10 @@ import net.ccbluex.liquidbounce.features.module.modules.client.NameProtect;
 import net.ccbluex.liquidbounce.features.module.modules.render.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.init.Items;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -27,8 +24,6 @@ import java.util.Objects;
 @Mixin(AbstractClientPlayer.class)
 public abstract class MixinAbstractClientPlayer extends MixinEntityPlayer {
 
-    @Shadow
-    protected abstract NetworkPlayerInfo getPlayerInfo();
     //private CapeInfo capeInfo;
 
     @Inject(method = "getLocationCape", at = @At("HEAD"), cancellable = true)
@@ -62,25 +57,6 @@ public abstract class MixinAbstractClientPlayer extends MixinEntityPlayer {
             newFOV *= 1.0f - f1 * 0.15f;
             callbackInfoReturnable.setReturnValue(newFOV);
         }
-    }
-
-    /**
-     * @author pie
-     * @reason slim skin
-     */
-    @Overwrite
-    public String getSkinType()
-    {
-        NetworkPlayerInfo networkplayerinfo = this.getPlayerInfo();
-        NameProtect nameProtect = LiquidBounce.moduleManager.getModule(NameProtect.class);
-
-        if (this.getUniqueID() == Minecraft.getMinecraft().thePlayer.getUniqueID() && nameProtect.getState() && nameProtect.getCustomSkinValue().get()) {
-            if (nameProtect.getSlimSkin().get())
-                return "slim";
-            else
-                return "default";
-        }
-        return networkplayerinfo == null ? DefaultPlayerSkin.getSkinType(this.getUniqueID()) : networkplayerinfo.getSkinType();
     }
 
     @Inject(method = "getLocationSkin()Lnet/minecraft/util/ResourceLocation;", at = @At("HEAD"), cancellable = true)

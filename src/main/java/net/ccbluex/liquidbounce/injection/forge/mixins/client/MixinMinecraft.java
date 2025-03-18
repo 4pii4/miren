@@ -12,6 +12,7 @@ import net.ccbluex.liquidbounce.event.*;
 import net.ccbluex.liquidbounce.features.module.modules.combat.AutoClicker;
 import net.ccbluex.liquidbounce.features.module.modules.exploit.AbortBreaking;
 import net.ccbluex.liquidbounce.features.module.modules.exploit.MultiActions;
+import net.ccbluex.liquidbounce.features.module.modules.render.FreeLook;
 import net.ccbluex.liquidbounce.features.module.modules.world.FastPlace;
 import net.ccbluex.liquidbounce.injection.forge.mixins.accessors.MinecraftForgeClientAccessor;
 import net.ccbluex.liquidbounce.ui.client.GuiMainMenu;
@@ -33,6 +34,7 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.stream.IStream;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Timer;
@@ -52,6 +54,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.nio.ByteBuffer;
 
 import static net.ccbluex.liquidbounce.utils.MinecraftInstance.mc;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 @Mixin(Minecraft.class)
 public abstract class MixinMinecraft {
@@ -130,7 +133,7 @@ public abstract class MixinMinecraft {
 
     @Inject(method = "createDisplay", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;setTitle(Ljava/lang/String;)V", shift = At.Shift.AFTER))
     private void createDisplay(CallbackInfo callbackInfo) {
-        Display.setTitle(String.format("%s %s", LiquidBounce.CLIENT_NAME, LiquidBounce.CLIENT_VERSION));
+        Display.setTitle(LiquidBounce.CLIENT_NAME);
     }
 
     @Inject(method = "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V", at = @At("HEAD"))
@@ -363,5 +366,22 @@ public abstract class MixinMinecraft {
                 this.playerController.resetBlockRemoving();
             }
         }
+    }
+
+    @Redirect(method = "runTick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;thirdPersonView:I", opcode = PUTFIELD))
+    public void setThirdPersonView(GameSettings gameSettings, int value) {
+        if (FreeLook.perspectiveToggled) {
+            FreeLook.resetPerspective();
+        } else {
+            gameSettings.thirdPersonView = value;
+        }
+    }
+
+    /**
+     * @author CCBlueX
+     */
+    @ModifyConstant(method = "getLimitFramerate", constant = @Constant(intValue = 30))
+    public int getLimitFramerate(int constant) {
+        return 60;
     }
 }

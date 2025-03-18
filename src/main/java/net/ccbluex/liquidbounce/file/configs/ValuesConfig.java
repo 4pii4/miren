@@ -54,6 +54,20 @@ public class ValuesConfig extends FileConfig {
         while(iterator.hasNext()) {
             final Map.Entry<String, JsonElement> entry = iterator.next();
 
+            if (entry.getKey().equalsIgnoreCase("NewGui")) {
+                JsonObject positions = entry.getValue().getAsJsonObject();
+                if (positions.has("StartX"))
+                    InfClickGui.Companion.getInstance().setWindowXStart(positions.get("StartX").getAsFloat());
+                if (positions.has("StartY"))
+                    InfClickGui.Companion.getInstance().setWindowYStart(positions.get("StartY").getAsFloat());
+                if (positions.has("EndX"))
+                    InfClickGui.Companion.getInstance().setWindowXEnd(positions.get("EndX").getAsFloat());
+                if (positions.has("EndY"))
+                    InfClickGui.Companion.getInstance().setWindowYEnd(positions.get("EndY").getAsFloat());
+                if (positions.has("SideWidth"))
+                    InfClickGui.Companion.getInstance().setSideWidth(positions.get("SideWidth").getAsFloat());
+            }
+
             if (entry.getKey().equalsIgnoreCase("CommandPrefix")) {
                 LiquidBounce.commandManager.setPrefix(entry.getValue().getAsCharacter());
             } else if (entry.getKey().equalsIgnoreCase("ShowRichPresence")) {
@@ -140,6 +154,14 @@ public class ValuesConfig extends FileConfig {
         jsonObject.addProperty("CommandPrefix", LiquidBounce.commandManager.getPrefix());
         jsonObject.addProperty("ShowRichPresence", LiquidBounce.clientRichPresence.getShowRichPresenceValue());
         jsonObject.addProperty("SemiRandomFormat", GuiAltManager.Companion.getGenerateCracked().getText());
+
+        final JsonObject jsonNewGui = new JsonObject();
+        jsonNewGui.addProperty("StartX", InfClickGui.Companion.getInstance().getWindowXStart());
+        jsonNewGui.addProperty("StartY", InfClickGui.Companion.getInstance().getWindowYStart());
+        jsonNewGui.addProperty("EndX", InfClickGui.Companion.getInstance().getWindowXEnd());
+        jsonNewGui.addProperty("EndY", InfClickGui.Companion.getInstance().getWindowYEnd());
+        jsonNewGui.addProperty("SideWidth", InfClickGui.Companion.getInstance().getSideWidth());
+        jsonObject.add("NewGui", jsonNewGui);
 
         final JsonObject jsonTargets = new JsonObject();
         jsonTargets.addProperty("TargetPlayer", EntityUtils.targetPlayer);

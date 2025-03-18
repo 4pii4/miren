@@ -8,8 +8,9 @@ package net.ccbluex.liquidbounce.features.command.commands
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.features.command.CommandManager
-import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
 import net.ccbluex.liquidbounce.features.module.modules.misc.AntiStaff
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo.AstolfoClickGui
+import net.ccbluex.liquidbounce.ui.client.clickgui.styles.newVer.InfClickGui
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.misc.sound.TipSoundManager
 
@@ -54,7 +55,8 @@ class ReloadCommand : Command("reload", arrayOf("configreload")) {
             LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.hudConfig)
             LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
             chat("Reloading ClickGui...")
-            ClickGUI.resetClickGUIs()
+            InfClickGui.resetInstance()
+            AstolfoClickGui.resetInstance()
             LiquidBounce.isStarting = false
             chat("Reloading staff list")
             LiquidBounce.moduleManager.getModule(AntiStaff::class.java)!!.init()

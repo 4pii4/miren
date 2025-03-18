@@ -26,9 +26,6 @@ compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    compilerOptions {
-        freeCompilerArgs.add("-Xno-param-assertions")
-    }
 }
 
 minecraft {

@@ -18,8 +18,8 @@ class CategoryElement(val category: ModuleCategory): MinecraftInstance() {
     val name = category.displayName
     var focused = false
 
-    var scrollHeight = 0F
-    var animScrollHeight = 0F
+    private var scrollHeight = 0F
+    private var animScrollHeight = 0F
     private var lastHeight = 0F
 
     private val startYY = 5f

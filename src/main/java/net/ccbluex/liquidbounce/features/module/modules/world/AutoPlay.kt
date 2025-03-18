@@ -27,7 +27,6 @@ import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraft.network.play.server.S2FPacketSetSlot
 import net.minecraft.util.IChatComponent
 import java.util.*
-import java.util.Timer
 import kotlin.concurrent.schedule
 
 @ModuleInfo(name = "AutoPlay", spacedName = "Auto Play", description = "Automatically move you to another game after finishing it.", category = ModuleCategory.WORLD)

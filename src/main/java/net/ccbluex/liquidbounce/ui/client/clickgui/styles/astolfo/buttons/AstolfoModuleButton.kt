@@ -15,7 +15,6 @@ import net.ccbluex.liquidbounce.utils.render.ColorUtils
 import net.ccbluex.liquidbounce.utils.render.EaseUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils.drawRect
-import net.ccbluex.liquidbounce.utils.render.RenderUtils.scaleStart
 import net.ccbluex.liquidbounce.utils.render.animations.Direction
 import net.ccbluex.liquidbounce.utils.render.animations.impl.CustomAnimation
 import net.ccbluex.liquidbounce.value.*
@@ -53,19 +52,6 @@ class AstolfoModuleButton(x: Float, y: Float, width: Float, height: Float, var m
 
     fun calcHeight() = this.height + if (open) valueButtons.map { it.calcExpectedHeight() }.sum()*openAnim.outputFloat else 0f
 
-    fun drawDescription(mouseXIn: Int, mouseYIn: Int) {
-        val mouseX = mouseXIn + 7
-        val mouseY = mouseYIn - 3
-        if (module.description.isEmpty())
-            return
-        val desc = module.description
-        val textWidth = FONT.getStringWidth(desc)
-        val textHeight = FONT.FONT_HEIGHT
-        drawRect(mouseX, mouseY, mouseX + textWidth + 4, mouseY + textHeight + 4, module.category.color)
-        drawRect(mouseX + 1, mouseY + 1, mouseX + textWidth + 3, mouseY + textHeight + 3, BACKGROUND_VALUE)
-        FONT.drawHeightCenteredString(desc, mouseX + 3f, mouseY + 5.5f, -0x1)
-    }
-
     override fun drawPanel(mouseX: Int, mouseY: Int): Rectangle {
         openAnim.setDirection(if (open) Direction.FORWARDS else Direction.BACKWARDS)
         stateAnim.setDirection(if (module.state) Direction.FORWARDS else Direction.BACKWARDS)
@@ -85,10 +71,11 @@ class AstolfoModuleButton(x: Float, y: Float, width: Float, height: Float, var m
             FONT.drawHeightCenteredString(if (open) "-" else "+", x + 6, y + height / 2, Int.MAX_VALUE)
 
         if (openAnim.output > 0) {
+            RenderUtils.makeScissorBox(x, y + height, x + width, y + height + animHeight + 1)
+            GL11.glEnable(GL11.GL_SCISSOR_TEST)
+
             drawRect(x, y + height, x + width, y + height + animHeight, BACKGROUND_VALUE)
             val startY = y + height + 2
-            GL11.glPushMatrix()
-            scaleStart(x, startY, 1f, animHeight/expectedHeight)
             for (valueButton in valueButtons) {
                 if (!valueButton.canDisplay()) {
                     valueButton.show = false
@@ -97,10 +84,10 @@ class AstolfoModuleButton(x: Float, y: Float, width: Float, height: Float, var m
 
                 valueButton.x = x
                 valueButton.y = startY + used
-
                 used += valueButton.drawPanel(mouseX, mouseY).height
             }
-            GL11.glPopMatrix()
+
+            GL11.glDisable(GL11.GL_SCISSOR_TEST)
         }
 
         return Rectangle(x, y, width, height + animHeight)
@@ -115,6 +102,19 @@ class AstolfoModuleButton(x: Float, y: Float, width: Float, height: Float, var m
             return true
         }
         return false
+
+//        if (isHovered(mouseX, mouseY)) {
+//            val desc = module.description
+//            if (desc.isEmpty()) return
+//            val offset = 3
+//            val box = Rectangle(mouseX.toFloat(), mouseY.toFloat(), FONT.getStringWidth(desc) + 2f * offset, FONT.FONT_HEIGHT + 2f * offset)
+//            val boxColor = Color(BACKGROUND_VALUE)
+//            boxColor.setAlpha(190)
+//            val textColor = Color(255, 255, 255, 190)
+//
+//            drawRect(box, boxColor.rgb)
+//            FONT.drawString(desc, (box.x + offset).toInt(), (box.y + offset).toInt(), textColor.rgb)
+//        }
     }
 
     override fun onClosed() {}

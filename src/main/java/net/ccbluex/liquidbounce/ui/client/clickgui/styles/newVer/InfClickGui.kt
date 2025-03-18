@@ -14,8 +14,12 @@ import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.MouseUtils.mouseWithinBounds
 import net.ccbluex.liquidbounce.utils.extensions.setAlpha
 import net.ccbluex.liquidbounce.utils.geom.Rectangle
+import net.ccbluex.liquidbounce.utils.render.EaseUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.render.ShaderUtils
+import net.ccbluex.liquidbounce.utils.render.animations.Direction
+import net.ccbluex.liquidbounce.utils.render.animations.impl.CustomAnimation
+import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.MathHelper
 import org.apache.commons.lang3.tuple.MutablePair
@@ -30,7 +34,7 @@ import kotlin.math.abs
  * @author inf (original java code)
  * @author pie (refactored)
  */
-class InfClickGui: ClickGuiStyle("Inf") {
+class InfClickGui private constructor() : ClickGuiStyle("Inf") {
     private val categoryElements: MutableList<CategoryElement> = ArrayList()
     private var startYAnim = height / 2f
     private var endYAnim = height / 2f
@@ -40,10 +44,10 @@ class InfClickGui: ClickGuiStyle("Inf") {
     private val backgroundColor = Color(16, 16, 16, 255)
     private val backgroundColor2 = Color(40, 40, 40, 255)
 
-    private var windowXStart = 30f
-    private var windowYStart = 30f
-    private var windowXEnd = 500f
-    private var windowYEnd = 400f
+    var windowXStart = 30f
+    var windowYStart = 30f
+    var windowXEnd = 500f
+    var windowYEnd = 400f
     private val windowWidth
         get() = abs(windowXEnd - windowXStart)
     private val windowHeight
@@ -54,7 +58,7 @@ class InfClickGui: ClickGuiStyle("Inf") {
     private val searchXOffset = 10f
     private val searchYOffset = 30f
 
-    private var sideWidth = 120f
+    var sideWidth = 120f
     private val categoryXOffset
         get() = sideWidth
     private val searchWidth
@@ -80,6 +84,7 @@ class InfClickGui: ClickGuiStyle("Inf") {
     private var xHoldOffset = 0f
     private var yHoldOffset = 0f
 
+    private val anim = CustomAnimation(200, 1.0, Direction.FORWARDS) { EaseUtils.easeInCubic(it) }
 //    private var xAnimDelta = 0f
 //    private var yAnimDelta = 0f
 //    private var lastMouseX = 0f
@@ -92,14 +97,14 @@ class InfClickGui: ClickGuiStyle("Inf") {
 
 
     init {
-        ModuleCategory.entries.forEach { categoryElements.add(CategoryElement(it)) }
+        ModuleCategory.values().forEach { categoryElements.add(CategoryElement(it)) }
         searchElement = SearchElement(windowXStart + searchXOffset, windowYStart + searchYOffset, searchWidth, searchHeight)
         categoryElements[0].focused = true
     }
 
     private fun reload() {
         categoryElements.clear()
-        ModuleCategory.entries.forEach { categoryElements.add(CategoryElement(it)) }
+        ModuleCategory.values().forEach { categoryElements.add(CategoryElement(it)) }
         categoryElements[0].focused = true
     }
 
@@ -107,19 +112,19 @@ class InfClickGui: ClickGuiStyle("Inf") {
     private fun determineQuadrant(mouseX: Int, mouseY: Int): Pair<Int, Int> {
         val result = MutablePair(0, 0)
         val offset2 = 0f
-        if (mouseX.toFloat() in windowXStart - resizeArea..windowXStart - offset2) {
+        if (mouseX.toFloat() in windowXStart-resizeArea..windowXStart-offset2) {
             result.left = -1
             xHoldOffset = mouseX - windowXStart
         }
-        if (mouseX.toFloat() in windowXEnd + offset2..windowXEnd + resizeArea) {
+        if (mouseX.toFloat() in windowXEnd+offset2..windowXEnd+resizeArea) {
             result.left = 1
             xHoldOffset = mouseX - windowXEnd
         }
-        if (mouseY.toFloat() in windowYStart - resizeArea..windowYStart - offset2) {
+        if (mouseY.toFloat() in windowYStart-resizeArea..windowYStart-offset2) {
             result.right = 1
             yHoldOffset = mouseY - windowYStart
         }
-        if (mouseY.toFloat() in windowYEnd + offset2..windowYEnd + resizeArea) {
+        if (mouseY.toFloat() in windowYEnd+offset2..windowYEnd+resizeArea) {
             result.right = -1
             yHoldOffset = mouseY - windowYEnd
         }
@@ -141,7 +146,7 @@ class InfClickGui: ClickGuiStyle("Inf") {
 //        xAnimDelta = AnimationHelper.animation(xAnimDelta, lastMouseX, 0.01f)
 //        yAnimDelta = AnimationHelper.animation(yAnimDelta, lastMouseY, 0.01f)
     }
-
+    
 //    private fun handlingPreRotationAnimation(): Boolean {
 //        if (!isDoneRotatingAnimation()) {
 //            GlStateManager.pushMatrix()
@@ -170,7 +175,6 @@ class InfClickGui: ClickGuiStyle("Inf") {
                     windowYStart = mouseY.coerceAtMost(windowYEnd - minWindowHeight)
                     RenderUtils.drawSquareTriangle(windowXEnd + resizeArea, windowYStart - resizeArea, -resizeArea, resizeArea, triangleColor, true)
                 }
-
                 -1 to -1 -> {
                     windowXStart = mouseX.coerceAtMost(windowXEnd - minWindowWidth)
                     windowYEnd = mouseY.coerceAtLeast(windowYStart + minWindowHeight)
@@ -182,7 +186,6 @@ class InfClickGui: ClickGuiStyle("Inf") {
                     windowYStart = mouseY.coerceAtMost(windowYEnd - minWindowHeight)
                     RenderUtils.drawSquareTriangle(windowXStart - resizeArea, windowYStart - resizeArea, resizeArea, resizeArea, triangleColor, true)
                 }
-
                 1 to -1 -> {
                     windowXEnd = mouseX.coerceAtLeast(windowXStart + minWindowWidth)
                     windowYEnd = mouseY.coerceAtLeast(windowYStart + minWindowHeight)
@@ -203,7 +206,7 @@ class InfClickGui: ClickGuiStyle("Inf") {
 
     private fun handleSplit(mouseX: Int) {
         if (splitDragging) {
-            sideWidth = (mouseX - windowXStart).coerceIn(80f, windowWidth / 2)
+            sideWidth = (mouseX - windowXStart).coerceIn(80f, windowWidth/2)
         }
     }
 
@@ -233,7 +236,7 @@ class InfClickGui: ClickGuiStyle("Inf") {
         resizeDragging = false
         splitDragging = false
         Keyboard.enableRepeatEvents(false)
-        LiquidBounce.fileManager.saveConfigs(LiquidBounce.fileManager.clickGuiConfig)
+        LiquidBounce.fileManager.saveConfigs(LiquidBounce.fileManager.valuesConfig)
     }
 
     override fun dumpConfig(): JsonElement {
@@ -242,15 +245,6 @@ class InfClickGui: ClickGuiStyle("Inf") {
         jsonObject.addProperty("WindowYStart", windowYStart)
         jsonObject.addProperty("WindowXEnd", windowXEnd)
         jsonObject.addProperty("WindowYEnd", windowYEnd)
-        val categoriesObject = JsonObject()
-        categoryElements.map {
-            val categoryObject = JsonObject()
-            categoryObject.addProperty("Focused", it.focused)
-            categoryObject.addProperty("Scroll", it.scrollHeight)
-            categoryObject.addProperty("AnimScroll", it.animScrollHeight)
-            categoriesObject.add(it.name, categoryObject)
-        }
-        jsonObject.add("Categories", categoriesObject)
 
         return jsonObject
     }
@@ -261,21 +255,6 @@ class InfClickGui: ClickGuiStyle("Inf") {
             windowYStart = json.get("WindowYStart").asFloat
             windowXEnd = json.get("WindowXEnd").asFloat
             windowYEnd = json.get("WindowYEnd").asFloat
-            if (json.has("Categories")) {
-                val categoriesObject = json.get("Categories").asJsonObject
-                categoriesObject.keySet().forEach { name ->
-                    val categoryObject = categoriesObject.get(name).asJsonObject
-                    val focused = categoryObject.get("Focused").asBoolean
-                    val scroll = categoryObject.get("Scroll").asFloat
-                    val animScroll = categoryObject.get("AnimScroll").asFloat
-                    runCatching {
-                        val category = categoryElements.first { it.name == name }
-                        category.focused = focused
-                        category.scrollHeight = scroll
-                        category.animScrollHeight = animScroll
-                    }.onFailure {  }
-                }
-            }
         }.onFailure {
             ClientUtils.logger.warn("Failed to load config")
         }
@@ -291,7 +270,6 @@ class InfClickGui: ClickGuiStyle("Inf") {
 //            drawFullSized(mouseX, mouseY, partialTicks, NewGUI.accentColor, -mouseX.toFloat(), -mouseY.toFloat())
 //        else
 //            drawFullSized(mouseX, mouseY, partialTicks, NewGUI.accentColor)
-        ClickGUI.drawBackground(this)
         drawFullSized(mouseX, mouseY, partialTicks, ClickGUI.accentColor)
 //        handlingPostRotationAnimation()
     }
@@ -324,7 +302,7 @@ class InfClickGui: ClickGuiStyle("Inf") {
         searchElement!!.searchBox.yPosition = ((windowYStart + yOffset) + searchYOffset + 2).toInt()
 
         if (searchElement!!.drawBox(mouseX, mouseY, accentColor)) {
-            searchElement!!.drawPanel(windowXStart, mouseX, mouseY, (windowXStart + xOffset) + categoryXOffset, (windowYStart + yOffset) + categoriesTopMargin, windowWidth - categoryXOffset, windowHeight - categoriesBottommargin, Mouse.getDWheel(), categoryElements, accentColor)
+            searchElement!!.drawPanel(mouseX, mouseY, (windowXStart + xOffset) + categoryXOffset, (windowYStart + yOffset) + categoriesTopMargin, windowWidth - categoryXOffset, windowHeight - categoriesBottommargin, Mouse.getDWheel(), categoryElements, accentColor)
             return
         }
 
@@ -339,20 +317,19 @@ class InfClickGui: ClickGuiStyle("Inf") {
                 lastFastYEnd = startY + elementHeight - 6f
                 startYAnim = if (ClickGUI.fastRenderValue.get())
                     startY + 6f
-                else
-                    AnimationUtils.animate(
-                        startY + 6f,
-                        startYAnim,
-                        (if (startYAnim - (startY + 5f) > 0) 0.65f else 0.55f) * RenderUtils.deltaTime * 0.025f
-                    )
-                endYAnim = if (ClickGUI.fastRenderValue.get())
-                    startY + elementHeight - 6f
-                else
-                    AnimationUtils.animate(
-                        startY + elementHeight - 6f,
-                        endYAnim,
-                        (if (endYAnim - (startY + elementHeight - 5f) < 0) 0.65f else 0.55f) * RenderUtils.deltaTime * 0.025f
-                    )
+                             else
+                                 AnimationUtils.animate(startY + 6f,
+                                    startYAnim,
+                                    (if (startYAnim - (startY + 5f) > 0) 0.65f else 0.55f) * RenderUtils.deltaTime * 0.025f
+                                )
+                endYAnim =  if (ClickGUI.fastRenderValue.get())
+                                startY + elementHeight - 6f
+                            else
+                                AnimationUtils.animate(
+                                    startY + elementHeight - 6f,
+                                    endYAnim,
+                                    (if (endYAnim - (startY + elementHeight - 5f) < 0) 0.65f else 0.55f) * RenderUtils.deltaTime * 0.025f
+                                )
                 ce.drawPanel(mouseX, mouseY, (windowXStart + xOffset) + categoryXOffset, (windowYStart + yOffset) + categoriesTopMargin, windowWidth - categoryXOffset, windowHeight - categoriesBottommargin, Mouse.getDWheel(), accentColor)
                 Fonts.font40.drawString(ce.name, (windowXStart + xOffset) + 7, (windowYStart + yOffset) + 7, -1)
             }
@@ -450,7 +427,18 @@ class InfClickGui: ClickGuiStyle("Inf") {
         super.keyTyped(typedChar, keyCode)
     }
 
-    override fun getNewInstance(): InfClickGui {
-        return InfClickGui()
+    override fun doesGuiPauseGame(): Boolean {
+        return false
+    }
+
+    companion object {
+        private var instance: InfClickGui? = null
+        fun getInstance(): InfClickGui {
+            return if (instance == null) InfClickGui().also { instance = it } else instance!!
+        }
+
+        fun resetInstance() {
+            instance = InfClickGui()
+        }
     }
 }

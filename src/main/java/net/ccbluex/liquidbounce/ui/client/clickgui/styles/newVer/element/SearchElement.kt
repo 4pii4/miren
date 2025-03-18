@@ -58,7 +58,7 @@ class SearchElement(var xPos: Float, var yPos: Float, var width: Float, val heig
         return modules
     }
 
-    fun drawPanel(windowXStart: Float, mX: Int, mY: Int, x: Float, y: Float, w: Float, h: Float, wheel: Int, ces: List<CategoryElement>, accentColor: Color) {
+    fun drawPanel(mX: Int, mY: Int, x: Float, y: Float, w: Float, h: Float, wheel: Int, ces: List<CategoryElement>, accentColor: Color) {
         var mouseX = mX
         var mouseY = mY
         lastHeight = 0F
@@ -75,8 +75,8 @@ class SearchElement(var xPos: Float, var yPos: Float, var width: Float, val heig
 
 
 //        Fonts.fontLarge.drawString("Search", x + 10F, y + 10F, -1)
-        Fonts.fontSmall.drawString("Search", windowXStart + 20f, y - 12F, -1)
-        RenderUtils.drawImage2(IconManager.back, windowXStart + 4f, y - 15F, 10, 10)
+        Fonts.fontSmall.drawString("Search", InfClickGui.getInstance().windowXStart + 20f, y - 12F, -1)
+        RenderUtils.drawImage2(IconManager.back, InfClickGui.getInstance().windowXStart + 4f, y - 15F, 10, 10)
 
         var startY = y + startYY
         if (mouseY < y + startYY || mouseY >= y + h)

@@ -38,7 +38,6 @@ class NameProtect : Module() {
     private val tagValue = BoolValue("Tag", false)
     val skinProtectValue = BoolValue("SkinProtect", false)
     val customSkinValue = BoolValue("CustomSkin", false) { skinProtectValue.get() }
-    val slimSkin = BoolValue("SlimSkin", false) { skinProtectValue.get() && customSkinValue.get() }
     var skinImage: ResourceLocation? = null
 
     override fun onEnable() {
@@ -57,7 +56,6 @@ class NameProtect : Module() {
 
     @EventTarget
     fun onText(event: TextEvent) {
-        event.text ?: return
         if (mc.thePlayer == null
             || event.text!!.contains("§8[§9§l" + LiquidBounce.CLIENT_NAME + "§8] §3")
             || event.text!!.startsWith("/") ||
@@ -66,9 +64,9 @@ class NameProtect : Module() {
             return
 
         for (friend in LiquidBounce.fileManager.friendsConfig.friends)
-            event.text = StringUtils.replace(event.text!!, friend.playerName, translateAlternateColorCodes(friend.alias) + "§f")
+            event.text = StringUtils.replace(event.text, friend.playerName, translateAlternateColorCodes(friend.alias) + "§f")
         event.text = StringUtils.replace(
-            event.text!!,
+            event.text,
             mc.thePlayer.name,
             if (selfValue.get()) (if (tagValue.get()) StringUtils.injectAirString(mc.thePlayer.name)
                     + " §7(§r"
@@ -76,7 +74,7 @@ class NameProtect : Module() {
             ) else translateAlternateColorCodes(fakeNameValue.get()) + "§r") else mc.thePlayer.name
         )
         if (allPlayersValue.get()) for (playerInfo in mc.netHandler.playerInfoMap) event.text = StringUtils.replace(
-            event.text!!,
+            event.text,
             playerInfo.gameProfile.name,
             translateAlternateColorCodes(allFakeNameValue.get()) + "§f"
         )

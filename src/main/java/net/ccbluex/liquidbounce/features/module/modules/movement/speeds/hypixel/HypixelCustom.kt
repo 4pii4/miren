@@ -6,11 +6,12 @@ import net.ccbluex.liquidbounce.event.MotionEvent
 import net.ccbluex.liquidbounce.event.MoveEvent
 import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
 import net.ccbluex.liquidbounce.features.module.modules.movement.speeds.SpeedMode
-import net.ccbluex.liquidbounce.features.module.modules.world.Timer
+import net.ccbluex.liquidbounce.features.module.modules.world.GameSpeed
 import net.ccbluex.liquidbounce.features.module.modules.world.Scaffold
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.MovementUtils.getBaseMoveSpeed
 import net.ccbluex.liquidbounce.utils.MovementUtils.getJumpBoostModifier
+import net.ccbluex.liquidbounce.utils.MovementUtils.getSpeed
 import net.ccbluex.liquidbounce.utils.MovementUtils.isMoving
 import net.ccbluex.liquidbounce.utils.MovementUtils.setMotion
 import net.ccbluex.liquidbounce.utils.MovementUtils.speedEffect
@@ -33,7 +34,7 @@ class HypixelCustom: SpeedMode("HypixelCustom") {
 
         val speedModule = LiquidBounce.moduleManager.getModule(Speed::class.java)!!
         val scaffoldModule = LiquidBounce.moduleManager.getModule(Scaffold::class.java)
-        val timer = LiquidBounce.moduleManager.getModule(Timer::class.java)
+        val timer = LiquidBounce.moduleManager.getModule(GameSpeed::class.java)
 
         if (isMoving) {
             when {

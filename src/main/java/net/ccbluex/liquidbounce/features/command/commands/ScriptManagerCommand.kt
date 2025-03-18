@@ -12,7 +12,7 @@ import net.ccbluex.liquidbounce.features.module.modules.client.ClickGUI
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.misc.MiscUtils
 import org.apache.commons.io.IOUtils
-import net.ccbluex.liquidbounce.utils.DesktopUtils
+import java.awt.Desktop
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
@@ -121,7 +121,7 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
                         LiquidBounce.isStarting = false
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.valuesConfig)
                         LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
-                        ClickGUI.resetClickGUIs()
+                        ClickGUI.reload()
                         chat("Successfully reloaded all scripts.")
                     } catch (t: Throwable) {
                         ClientUtils.logger.error("Something went wrong while reloading all scripts.", t)
@@ -131,7 +131,7 @@ class ScriptManagerCommand : Command("scriptmanager", arrayOf("scripts")) {
 
                 args[1].equals("folder", true) -> {
                     try {
-                        DesktopUtils.open(LiquidBounce.scriptManager.scriptsFolder)
+                        Desktop.getDesktop().open(LiquidBounce.scriptManager.scriptsFolder)
                         chat("Successfully opened scripts folder.")
                     } catch (t: Throwable) {
                         ClientUtils.logger.error("Something went wrong while trying to open your scripts folder.", t)
