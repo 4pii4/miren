@@ -168,8 +168,8 @@ class Velocity : Module() {
         if (modeValue.get() != "IntaveReduce") return
 
         if (player.hurtTime > 0 && System.currentTimeMillis() - lastAttackTime <= 8000) {
-            player.motionX *= 0.6
-            player.motionZ *= 0.6
+            player.motionX *= horizontalValue.get()
+            player.motionZ *= horizontalValue.get()
         }
 
         lastAttackTime = System.currentTimeMillis()

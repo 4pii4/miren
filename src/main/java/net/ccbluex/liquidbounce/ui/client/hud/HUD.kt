@@ -38,7 +38,6 @@ open class HUD : MinecraftInstance() {
             PlayerList::class.java,
             Radar::class.java,
             ScoreboardElement::class.java,
-            SessionInfo::class.java,
             SpeedGraph::class.java,
             TabGUI::class.java,
             Target::class.java,

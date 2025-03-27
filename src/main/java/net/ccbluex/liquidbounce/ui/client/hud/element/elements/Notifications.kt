@@ -109,12 +109,12 @@ class Notifications(
 }
 
 class Notification(message: String, type: Type, displayLength: Long, title: String = "") {
-    private val notifyDir = "liquidbounce+/notification/"
+    private val notifyDir = "liquidbounce+/notification"
 
-    private val fullSuccess = ResourceLocation("${notifyDir}full/checkmark.png")
-    private val fullError = ResourceLocation("${notifyDir}full/error.png")
-    private val fullWarning = ResourceLocation("${notifyDir}full/warning.png")
-    private val fullInfo = ResourceLocation("${notifyDir}full/info.png")
+    private val fullSuccess = ResourceLocation("${notifyDir}/full/checkmark.png")
+    private val fullError = ResourceLocation("${notifyDir}/full/error.png")
+    private val fullWarning = ResourceLocation("${notifyDir}/full/warning.png")
+    private val fullInfo = ResourceLocation("${notifyDir}/full/info.png")
 
     private val materialSuccess = ResourceLocation("${notifyDir}/material/checkmark.png")
     private val materialError = ResourceLocation("${notifyDir}/material/error.png")

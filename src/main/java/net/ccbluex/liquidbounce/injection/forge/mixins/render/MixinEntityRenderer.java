@@ -360,7 +360,7 @@ public abstract class MixinEntityRenderer {
         final TargetMark targetMark = LiquidBounce.moduleManager.getModule(TargetMark.class);
         final KillAura aura = LiquidBounce.moduleManager.getModule(KillAura.class);
 
-        if ((targetMark != null && aura != null && targetMark.modeValue.get().equalsIgnoreCase("tracers") && !aura.getTargetMode().equalsIgnoreCase("multi") && aura.getTarget() != null) || Objects.requireNonNull(LiquidBounce.moduleManager.getModule(Tracers.class)).getState())
+        if ((targetMark != null && aura != null && targetMark.modeValue.get().equalsIgnoreCase("tracers") && !aura.getTargetModeValue().get().equalsIgnoreCase("multi") && aura.getTarget() != null) || Objects.requireNonNull(LiquidBounce.moduleManager.getModule(Tracers.class)).getState())
             GL11.glPushMatrix();
     }
 
@@ -369,7 +369,7 @@ public abstract class MixinEntityRenderer {
         final TargetMark targetMark = LiquidBounce.moduleManager.getModule(TargetMark.class);
         final KillAura aura = LiquidBounce.moduleManager.getModule(KillAura.class);
 
-        if ((targetMark != null && aura != null && targetMark.modeValue.get().equalsIgnoreCase("tracers") && !aura.getTargetMode().equalsIgnoreCase("multi") && aura.getTarget() != null) || Objects.requireNonNull(LiquidBounce.moduleManager.getModule(Tracers.class)).getState())
+        if ((targetMark != null && aura != null && targetMark.modeValue.get().equalsIgnoreCase("tracers") && !aura.getTargetModeValue().get().equalsIgnoreCase("multi") && aura.getTarget() != null) || Objects.requireNonNull(LiquidBounce.moduleManager.getModule(Tracers.class)).getState())
             GL11.glPopMatrix();
     }
 

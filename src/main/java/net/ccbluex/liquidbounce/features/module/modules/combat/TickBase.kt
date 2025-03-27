@@ -79,9 +79,9 @@ class TickBase : Module() {
                 }
 
                 "PredictTest" -> {
-                    if (predictDistance.get() + killAura?.attackRange!! <= mc.thePlayer.getDistanceToEntityBox(entity!!).toFloat()) {
+                    if (predictDistance.get() + killAura!!.rangeValue.get() <= mc.thePlayer.getDistanceToEntityBox(entity!!).toFloat()) {
                         mc.timer.timerSpeed = predictTimer.get()
-                    }else if (killAura.attackRange <= mc.thePlayer.getDistanceToEntityBox(entity).toFloat()) {
+                    }else if (killAura!!.rangeValue.get() <= mc.thePlayer.getDistanceToEntityBox(entity).toFloat()) {
                         mc.timer.timerSpeed = predictTimer2.get()
                     }
                 }

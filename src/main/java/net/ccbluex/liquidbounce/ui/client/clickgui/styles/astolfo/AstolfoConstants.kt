@@ -1,3 +1,4 @@
+
 package net.ccbluex.liquidbounce.ui.client.clickgui.styles.astolfo
 
 import net.ccbluex.liquidbounce.ui.font.Fonts
@@ -17,10 +18,9 @@ object AstolfoConstants {
 
     const val SLIDER_OFFSET = 0.02f
 
-    val SELECTED_FORMAT = "$BOLD$ITALIC$UNDERLINE"
+    val SELECTED_FORMAT = "$BOLD$UNDERLINE"
 
     val BACKGROUND_CATEGORY = Color(26, 26, 26).rgb
     val BACKGROUND_MODULE = Color(37, 37, 37).rgb
     val BACKGROUND_VALUE = Color(21, 21, 21).rgb
 }
-

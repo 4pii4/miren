@@ -40,14 +40,13 @@ class AstolfoClickGui : ClickGuiStyle("Astolfo") {
         pressed["RIGHT"] = Keyboard.isKeyDown(Keyboard.KEY_RIGHT)
     }
 
-    override fun initGui() {
+    init {
         var xPos = 4f
         for (cat in ModuleCategory.entries) {
             panels.add(AstolfoCategoryPanel(xPos, 4f, cat, Color(cat.color), panels))
             xPos += AstolfoConstants.PANEL_WIDTH.toInt() + 10
         }
 
-        LiquidBounce.fileManager.loadConfig(LiquidBounce.fileManager.clickGuiConfig)
     }
 
     private fun handleScrolling() {
@@ -75,6 +74,7 @@ class AstolfoClickGui : ClickGuiStyle("Astolfo") {
         val mouseX = (mouseXIn / scale).roundToInt()
         val mouseY = (mouseYIn / scale).roundToInt()
 
+//        ClickGUI.drawBackground(this)
         GL11.glPushMatrix()
         GL11.glScalef(scale, scale, scale)
 
@@ -85,7 +85,7 @@ class AstolfoClickGui : ClickGuiStyle("Astolfo") {
         if (Keyboard.isKeyDown(Keyboard.KEY_LEFT) && !pressed["LEFT"]!!) panels.map { it.x -= scrollAmount }
         if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && !pressed["RIGHT"]!!) panels.map { it.x += scrollAmount }
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_F10)) panels.mapIndexed { index, panel -> panel.x = 10 + (10 + AstolfoConstants.PANEL_WIDTH)*index; panel.y = 10f }
+        if (Keyboard.isKeyDown(Keyboard.KEY_F10)) panels.mapIndexed { index, panel -> panel.x = 10 + (10 + AstolfoConstants.PANEL_WIDTH) * index; panel.y = 10f }
 
         for (catPanel in panels.sortedBy { it.zLayer }) {
             catPanel.drawPanel(mouseX, mouseY)
@@ -96,18 +96,31 @@ class AstolfoClickGui : ClickGuiStyle("Astolfo") {
         handleScrolling()
     }
 
-    private fun mouseAction(mouseXIn: Int, mouseYIn: Int, mouseButton: Int, state: Boolean) {
+    private fun mouseAction(mouseXIn: Int, mouseYIn: Int, mouseButton: Int, click: Boolean) {
+        fun incz(panel: AstolfoCategoryPanel) {
+            if (click)
+                panel.increaseZLayer()
+        }
         val mouseX = (mouseXIn / scale).roundToInt()
         val mouseY = (mouseYIn / scale).roundToInt()
 
         loop@ for (panel in panels.sortedBy { -it.zLayer }) {
-            if (panel.mouseAction(mouseX, mouseY, state, mouseButton)) break@loop
+            if (panel.mouseAction(mouseX, mouseY, click, mouseButton)) {
+                incz(panel)
+                break@loop
+            }
             if (panel.open) {
                 for (moduleButton in panel.moduleButtons) {
-                    if (moduleButton.mouseAction(mouseX, mouseY, state, mouseButton)) break@loop
+                    if (moduleButton.mouseAction(mouseX, mouseY, click, mouseButton)) {
+                        incz(panel)
+                        break@loop
+                    }
                     if (moduleButton.open) {
                         for (pan in moduleButton.valueButtons) {
-                            if (pan.mouseAction(mouseX, mouseY, state, mouseButton)) break@loop
+                            if (pan.mouseAction(mouseX, mouseY, click, mouseButton)) {
+                                incz(panel)
+                                break@loop
+                            }
                         }
                     }
                 }
@@ -121,10 +134,6 @@ class AstolfoClickGui : ClickGuiStyle("Astolfo") {
 
     override fun mouseReleased(mouseXIn: Int, mouseYIn: Int, mouseButton: Int) {
         mouseAction(mouseXIn, mouseYIn, mouseButton, false)
-    }
-
-    override fun doesGuiPauseGame(): Boolean {
-        return false
     }
 
     override fun loadConfig(json: JsonObject) {

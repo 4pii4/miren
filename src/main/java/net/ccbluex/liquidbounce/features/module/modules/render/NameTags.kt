@@ -93,7 +93,7 @@ class NameTags : Module() {
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-        for (entity in RenderConfig.entities()) {
+        for (entity in RenderConfig.entities().sortedBy { -it.getDistanceToEntity(mc.thePlayer) }) {
             if (!EntityUtils.isSelected(entity, false) && (!localValue.get() || entity != mc.thePlayer || (nfpValue.get() && mc.gameSettings.thirdPersonView == 0)))
                 continue
 
@@ -129,7 +129,7 @@ class NameTags : Module() {
         val bot = AntiBot.isBot(entity)
         val ping = if (entity is EntityPlayer) EntityUtils.getPing(entity) else 0
 
-        val distanceText = if (distanceValue.get()) " §a${mc.thePlayer.getDistanceToEntity(entity).roundToInt()} " else ""
+        val distanceText = if (distanceValue.get()) " §d${mc.thePlayer.getDistanceToEntity(entity).roundToInt()} " else ""
         val pingText = if (pingValue.get() && entity is EntityPlayer) " §7[" + (if (ping > 200) "§c" else if (ping > 100) "§e" else "§a") + ping + "ms§7]" else ""
         val healthText = if (healthValue.get()) " §a" + entity.health.toInt() + " " else ""
         val botText = if (bot) " §7[§6§lBot§7] " else ""

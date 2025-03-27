@@ -19,6 +19,7 @@ import net.minecraft.util.*
 import java.util.*
 import kotlin.math.*
 
+
 class RotationUtils : MinecraftInstance(), Listenable {
     /**
      * Handle minecraft tick
@@ -119,6 +120,88 @@ class RotationUtils : MinecraftInstance(), Listenable {
                     Math.toDegrees(atan2(diffZ, diffX)).toFloat() - 90f
                 ), MathHelper.wrapAngleTo180_float((-Math.toDegrees(atan2(diffY, sqrt(diffX * diffX + diffZ * diffZ)))).toFloat())
             )
+        }
+
+        fun toDownRotation(vec: Vec3, predict: Boolean): Rotation {
+            val eyesPos = Vec3(mc.thePlayer.posX, 90.0, mc.thePlayer.posZ)
+
+            if (predict) eyesPos.addVector(mc.thePlayer.motionX, mc.thePlayer.motionY, mc.thePlayer.motionZ)
+
+            val diffX = vec.xCoord - eyesPos.xCoord
+            val diffY = vec.yCoord - eyesPos.yCoord
+            val diffZ = vec.zCoord - eyesPos.zCoord
+
+            return Rotation(
+                MathHelper.wrapAngleTo180_float(
+                    Math.toDegrees(atan2(diffZ, diffX)).toFloat() - 90f
+                ), MathHelper.wrapAngleTo180_float(
+                    (-Math.toDegrees(atan2(diffY, sqrt(diffX * diffX + diffZ * diffZ)))).toFloat()
+                )
+            )
+        }
+
+        fun downRot(
+            bb: AxisAlignedBB, outborder: Boolean, random: Boolean,
+            predict: Boolean, throughWalls: Boolean, distance: Float, randomMultiply: Float, newRandom: Boolean
+        ): VecRotation? {
+            if (outborder) {
+                val vec3 = Vec3(
+                    bb.minX + (bb.maxX - bb.minX) * (x * 0.3 + 1.0),
+                    bb.minY + (bb.maxY - bb.minY) * (y * 0.3 + 1.0),
+                    bb.minZ + (bb.maxZ - bb.minZ) * (z * 0.3 + 1.0)
+                )
+                return VecRotation(vec3, toRotation(vec3, predict))
+            }
+
+            val randomVec = Vec3(
+                bb.minX + (bb.maxX - bb.minX) * x * randomMultiply * (if (newRandom) Math.random() else 1.0),
+                bb.minY + (bb.maxY - bb.minY) * y * randomMultiply * (if (newRandom) Math.random() else 1.0),
+                bb.minZ + (bb.maxZ - bb.minZ) * z * randomMultiply * (if (newRandom) Math.random() else 1.0)
+            )
+            val randomRotation = toRotation(randomVec, predict)
+
+            val eyes = mc.thePlayer.getPositionEyes(1f)
+
+            var vecRotation: VecRotation? = null
+
+            var xSearch = 0.15
+            while (xSearch < 0.85) {
+                var ySearch = 0.15
+                while (ySearch < 1.0) {
+                    var zSearch = 0.15
+                    while (zSearch < 0.85) {
+                        val vec3 = Vec3(
+                            bb.minX + (bb.maxX - bb.minX) * xSearch,
+                            bb.minY + (bb.maxY - bb.minY) * ySearch, bb.minZ + (bb.maxZ - bb.minZ) * zSearch
+                        )
+                        val rotation: Rotation = toDownRotation(vec3, predict)
+                        val vecDist = eyes.distanceTo(vec3)
+
+                        if (vecDist > distance) {
+                            zSearch += 0.1
+                            continue
+                        }
+
+                        if (throughWalls || isVisible(vec3)) {
+                            val currentVec = VecRotation(vec3, rotation)
+
+                            if (vecRotation == null || (if (random) getRotationDifference(
+                                    currentVec.rotation,
+                                    randomRotation
+                                ) < getRotationDifference(
+                                    vecRotation.rotation,
+                                    randomRotation
+                                ) else getRotationDifference(currentVec.rotation) < getRotationDifference(vecRotation.rotation))
+                            ) vecRotation = currentVec
+                        }
+                        zSearch += 0.1
+                    }
+                    ySearch += 0.1
+                }
+                xSearch += 0.1
+            }
+
+            return vecRotation
         }
 
         /**

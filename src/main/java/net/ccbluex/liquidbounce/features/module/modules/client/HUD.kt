@@ -32,7 +32,7 @@ class HUD : Module() {
     val chatAnimationValue = BoolValue("ChatAnimation", true)
     val chatAnimationSpeedValue = FloatValue("Chat-AnimationSpeed", 0.1F, 0.01F, 0.1F)
 
-    private val toggleMessageValue = BoolValue("DisplayToggleMessage", false)
+    private val toggleNotificationValue = BoolValue("ToggleNotification", true)
     private val toggleSoundValue = ListValue("ToggleSound", arrayOf("None", "Default", "Custom"), "Default")
     private val toggleVolumeValue = IntegerValue("ToggleVolume", 100, 0, 100) { toggleSoundValue.get().equals("custom", true) }
     val guiButtonStyle = ListValue("Button-Style", arrayOf("Minecraft", "LiquidBounce", "Rounded", "LiquidBounce+","Line", "Miren"), "Miren")
@@ -53,8 +53,8 @@ class HUD : Module() {
 
     @EventTarget(ignoreCondition = true)
     fun onTick(event: TickEvent) {
-        if (LiquidBounce.moduleManager.shouldNotify != toggleMessageValue.get())
-            LiquidBounce.moduleManager.shouldNotify = toggleMessageValue.get()
+        if (LiquidBounce.moduleManager.shouldNotify != toggleNotificationValue.get())
+            LiquidBounce.moduleManager.shouldNotify = toggleNotificationValue.get()
 
         if (LiquidBounce.moduleManager.toggleSoundMode != toggleSoundValue.values.indexOf(toggleSoundValue.get()))
             LiquidBounce.moduleManager.toggleSoundMode = toggleSoundValue.values.indexOf(toggleSoundValue.get())
